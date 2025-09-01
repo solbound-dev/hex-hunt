@@ -1,0 +1,13 @@
+version: "3.1"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: hex-hunt-db
+    restart: on-failure
+    environment:
+      POSTGRES_DB: hex-hunt-db
+      POSTGRES_USER: dumpovac
+      POSTGRES_PASSWORD: dump1234
+    ports:
+      - 3001:5432
