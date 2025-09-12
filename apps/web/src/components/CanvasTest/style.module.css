@@ -1,0 +1,21 @@
+.astronautScore {
+  margin-bottom: 5px;
+  background: rgba(0, 0, 255, 0.7);
+  padding: 20px;
+  border-radius: 6px;
+}
+.alienScore {
+  margin-bottom: 5px;
+  background: rgba(255, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 6px;
+}
+.normalText {
+  font-size: 30px;
+}
+.gameInfoContainer {
+  background-color: rgba(200, 200, 200, 0.6);
+  padding: 20px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+}

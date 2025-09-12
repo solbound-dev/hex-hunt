@@ -28,6 +28,7 @@ export function drawPlayer(
   hex: Hex,
   isAstronaut: boolean,
   size: number,
+  image: HTMLImageElement,
 ) {
   const center = hexToPixel(hex);
   const x = center.x;
@@ -43,62 +44,98 @@ export function drawPlayer(
     else ctx.lineTo(vx, vy);
   }
   ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.fill();
-  ctx.strokeStyle = 'black';
+
+  ctx.save();
+  ctx.clip();
+
+  if (image.complete) {
+    ctx.drawImage(
+      image,
+      x - image.width,
+      y - image.height,
+      image.width * 2,
+      image.height * 2,
+    );
+  }
+  ctx.restore();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
   ctx.stroke();
 }
 
 export function drawLastSeenPlayer(
   ctx: CanvasRenderingContext2D,
   hex: Hex,
-  isAstronaut: boolean,
   size: number,
+  image: HTMLImageElement,
 ) {
   const center = hexToPixel(hex);
   const x = center.x;
   const y = center.y;
-  const color = isAstronaut ? '0, 0, 255' : '255, 0, 0';
 
+  ctx.save();
+
+  // Build hex path
   ctx.beginPath();
   for (let i = 0; i < 6; i++) {
-    const angle = ((2 * PI) / 6) * i + PI / 6;
+    const angle = ((2 * Math.PI) / 6) * i + Math.PI / 6;
     const vx = x + size * Math.cos(angle);
     const vy = y + size * Math.sin(angle);
     if (i === 0) ctx.moveTo(vx, vy);
     else ctx.lineTo(vx, vy);
   }
   ctx.closePath();
-  ctx.fillStyle = `rgba(${color}, 0.2)`;
-  ctx.fill();
-  ctx.strokeStyle = 'black';
-  ctx.stroke();
+  ctx.clip();
+
+  // Set transparency
+  ctx.globalAlpha = 0.5;
+
+  // Draw image clipped inside hex
+  if (image.complete) {
+    ctx.drawImage(
+      image,
+      x - image.width,
+      y - image.height,
+      image.width * 2,
+      image.height * 2,
+    );
+  }
+
+  ctx.restore();
 }
 
-export function drawCard(ctx: CanvasRenderingContext2D, cardPos: Hex | null) {
+export function drawCard(
+  ctx: CanvasRenderingContext2D,
+  cardPos: Hex | null,
+  image: HTMLImageElement,
+) {
   if (cardPos) {
     const center = hexToPixel(cardPos);
 
     const cardWidth = HEX_SIZE * 0.9;
     const cardHeight = HEX_SIZE * 0.6;
 
-    ctx.fillStyle = 'green';
-    ctx.fillRect(
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(
       center.x - cardWidth / 2,
       center.y - cardHeight / 2,
       cardWidth,
       cardHeight,
     );
+    ctx.closePath();
+    ctx.clip();
 
-    // optional: give it a border
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(
-      center.x - cardWidth / 2,
-      center.y - cardHeight / 2,
-      cardWidth,
-      cardHeight,
-    );
+    if (image.complete) {
+      ctx.drawImage(
+        image,
+        center.x - image.width,
+        center.y - image.height,
+        image.width * 2,
+        image.height * 2,
+      );
+    }
+    ctx.restore();
   }
 }
 
