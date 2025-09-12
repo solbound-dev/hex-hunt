@@ -2,6 +2,30 @@ export const CANVAS_SIZE = 800;
 export const HEX_SIZE = 50; // radius of hexagon
 export const PI = 3.14159;
 
+export type GameData = {
+  astronautId: string | null;
+  alienId: string | null;
+  lastSeenAstronautPos: Hex | null;
+  lastSeenAlienPos: Hex | null;
+  grid: Hex[];
+  disappearedHexes: Hex[];
+  warningHexes: Hex[];
+  moves: number;
+  cardPos: Hex | null;
+  astronautCards: number;
+  alienCards: number;
+  astronautPendingMove: Hex | null;
+  alienPendingMove: Hex | null;
+  isAstronautDead: boolean;
+  isAlienDead: boolean;
+  currentRadius: number;
+  //this should not get sent to both players:
+  astronautPos: Hex | null;
+  alienPos: Hex | null;
+  isAstronautShooting: boolean | null;
+  isAlienShooting: boolean | null;
+};
+
 export class Hex {
   q: number;
   r: number;
@@ -72,7 +96,6 @@ function roundHex(frac: Hex) {
 }
 
 export function pixelToHex(x: number, y: number) {
-  console.log(x);
   x = (x - CANVAS_SIZE / 2) / HEX_SIZE;
   y = (y - CANVAS_SIZE / 2) / HEX_SIZE;
   const q = (Math.sqrt(3) / 3) * x - (1 / 3) * y;

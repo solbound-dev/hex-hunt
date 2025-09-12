@@ -183,7 +183,6 @@ export function drawZoneContractionWarning(
   currentRadius: number,
   size: number,
 ) {
-  console.log('current radius', currentRadius);
   if (grid.length) {
     grid.forEach((hex) => {
       const newHex = new Hex(hex.q, hex.r);
