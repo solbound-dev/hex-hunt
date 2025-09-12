@@ -6,7 +6,6 @@ import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { ChatModule } from './chat/chat.module';
 import { GameModule } from './game/game.module';
 
 @Module({
@@ -21,7 +20,6 @@ import { GameModule } from './game/game.module';
     PrismaModule,
     AuthModule,
     UserModule,
-    ChatModule,
     GameModule,
   ],
   controllers: [AppController],
