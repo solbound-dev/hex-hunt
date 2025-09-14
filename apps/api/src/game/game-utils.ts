@@ -1,4 +1,5 @@
 import { Hex } from './Hex';
+import { DefaultEventsMap, Server } from 'socket.io';
 
 export type GameData = {
   astronautId: string | null;
@@ -145,4 +146,46 @@ export function contractZone(currentRadius: number, grid: Hex[]) {
     (h) => h.distanceTo(new Hex(0, 0)) > currentRadius,
   );
   return newDisappeared;
+}
+
+export function updateAndEmitGameState(
+  gameId: string,
+  game: GameData,
+  websocketServer: Server<
+    DefaultEventsMap,
+    DefaultEventsMap,
+    DefaultEventsMap,
+    any
+  >,
+) {
+  game.moves++;
+  if (game.moves % 8 === 0 && game.currentRadius > 1) {
+    game.currentRadius--;
+    game.disappearedHexes = contractZone(game.currentRadius, game.grid);
+    //spawn card if zone "ate" it
+    if (game.disappearedHexes.some((hex) => hex.equals(game.cardPos!))) {
+      game.cardPos = spawnCard(game);
+    }
+  }
+
+  if (
+    game.disappearedHexes.some(
+      (hex) => hex.q === game.astronautPos?.q && hex.r === game.astronautPos.r,
+    )
+  ) {
+    game.isAstronautDead = true;
+  }
+  if (
+    game.disappearedHexes.some(
+      (hex) => hex.q === game.alienPos?.q && hex.r === game.alienPos.r,
+    )
+  ) {
+    console.log('alien died');
+    game.isAlienDead = true;
+  }
+  websocketServer.to(gameId).emit('gameState', game);
+  game.astronautPendingMove = null;
+  game.alienPendingMove = null;
+  game.isAstronautShooting = null;
+  game.isAlienShooting = null;
 }

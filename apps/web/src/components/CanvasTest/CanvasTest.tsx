@@ -92,22 +92,25 @@ const CanvasTest = () => {
 
     const move = pixelToHex(x, y);
 
-    if (
-      (gameState?.astronautId === socketRef.current?.id &&
-        !isNeighbor(move, gameState!.astronautPos)) ||
-      !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
-      isSameMove(move, gameState!.astronautPos)
-    )
-      return;
+    console.log(!isNeighbor(move, gameState!.astronautPos));
 
     if (
-      (gameState?.alienId === socketRef.current?.id &&
-        !isNeighbor(move, gameState!.alienPos)) ||
-      !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
-      isSameMove(move, gameState!.alienPos)
-    )
+      gameState?.astronautId === socketRef.current?.id &&
+      (!isNeighbor(move, gameState!.astronautPos) ||
+        !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
+        isSameMove(move, gameState!.astronautPos))
+    ) {
       return;
+    }
 
+    if (
+      gameState?.alienId === socketRef.current?.id &&
+      (!isNeighbor(move, gameState!.alienPos) ||
+        !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
+        isSameMove(move, gameState!.alienPos))
+    ) {
+      return;
+    }
     socketRef.current?.emit('updateGame', {
       gameId,
       move: pixelToHex(x, y),
