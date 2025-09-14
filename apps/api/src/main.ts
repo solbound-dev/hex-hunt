@@ -6,18 +6,22 @@ import { Server } from 'http';
 
 let server: Server;
 
+async function bootstrapServer() {
+  const app = await NestFactory.create(AppModule);
+  await app.init();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return app.getHttpAdapter().getInstance();
+}
+
 /**
- * Vercel handler for serverless functions
+ * Vercel serverless handler
  */
 export default async function handler(req: any, res: any) {
   if (!server) {
-    const app = await NestFactory.create(AppModule);
-    await app.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    server = app.getHttpAdapter().getInstance();
+    server = await bootstrapServer();
   }
-
-  return server.emit('request', req, res);
+  server.emit('request', req, res);
 }
 
 const setupFilter = (app: INestApplication) => {
