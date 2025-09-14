@@ -11,8 +11,9 @@ function App() {
   return (
     <>
       <Switch>
-        <Route path={'/'} component={HomePage} />
-        <Route path={'/canvas-test'} component={() => <CanvasTest />} />
+        {/* <Route path={'/'} component={HomePage} /> */}
+        {/* <Route path={'/canvas-test'} component={() => <CanvasTest />} /> */}
+        <Route path={'/'} component={() => <CanvasTest />} />
       </Switch>
       <Toaster />
     </>
