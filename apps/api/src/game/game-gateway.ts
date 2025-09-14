@@ -188,29 +188,29 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (game.isAstronautShooting) {
         game.lastSeenAstronautPos = game.astronautPos;
         if (didAlienGetShot(game)) {
-          console.log('Alien got shot');
           game.isAlienDead = true;
         }
       }
       if (game.isAlienShooting) {
         game.lastSeenAlienPos = game.alienPos;
         if (didAstronautGetShot(game)) {
-          console.log('Astronaut got shot');
           game.isAstronautDead = true;
         }
       }
 
       //not shooting
       if (didCollide(game)) {
-        console.log('collision');
         game.lastSeenAstronautPos = game.astronautPendingMove;
         game.lastSeenAlienPos = game.alienPendingMove;
         game.astronautPendingMove = null;
         game.alienPendingMove = null;
         this.server.to(data.gameId).emit('gameState', game);
+
+        //new
         return;
       }
 
+      //NE
       if (!game.isAstronautShooting) {
         game.astronautPos = game.astronautPendingMove;
       }
@@ -219,6 +219,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       //reset and emit
+      //DA
       this.moves++;
       game.moves++;
       if (game.moves % 8 === 0 && game.currentRadius > 1) {
@@ -230,13 +231,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
 
+      //NEBITNO
       if (didAstronautCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAstronautPos = game.cardPos;
         game.cardPos = nextCardPos;
         game.astronautCards++;
       }
-
       if (didAlienCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAlienPos = game.cardPos;
@@ -244,6 +245,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.alienCards++;
       }
 
+      //DA
       if (
         game.disappearedHexes.some(
           (hex) =>

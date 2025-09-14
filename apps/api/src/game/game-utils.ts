@@ -87,10 +87,22 @@ export function spawnCard(game: GameData) {
 }
 
 export function didCollide(game: GameData) {
-  console.log('shooting', game.isAstronautShooting, game.isAlienShooting);
+  if (game.isAstronautShooting && game.isAlienShooting) {
+    return false;
+  }
+  if (game.isAstronautShooting) {
+    return (
+      game.astronautPos!.q === game.alienPendingMove!.q &&
+      game.astronautPos!.r === game.alienPendingMove!.r
+    );
+  }
+  if (game.isAlienShooting) {
+    return (
+      game.alienPos!.q === game.astronautPendingMove!.q &&
+      game.alienPos!.r === game.astronautPendingMove!.r
+    );
+  }
   return (
-    !game.isAstronautShooting &&
-    !game.isAlienShooting &&
     game.astronautPendingMove!.q === game.alienPendingMove!.q &&
     game.astronautPendingMove!.r === game.alienPendingMove!.r
   );
