@@ -3,19 +3,17 @@ import c from './style.module.css';
 import {
   generateGrid,
   GRID_RADIUS,
+  isInGrid,
+  isSameMove,
   pixelToHex,
   type GameData,
 } from './calculation-utils';
-import {
-  drawGrid,
-  paintCanvasOnGameStart,
-  repaintCanvasOnGameStateChange,
-  repaintCanvasOnIsShootingChange,
-} from './draw-utils';
+import { drawGrid, repaintCanvas } from './draw-utils';
 import { io, type Socket } from 'socket.io-client';
 
 import {
   getPlayerType,
+  isNeighbor,
   setAlienImage,
   setAstronautImage,
   setCanvasRef,
@@ -35,6 +33,7 @@ const CanvasTest = () => {
   const [gameId, setGameId] = useState('');
   const [gameState, setGameState] = useState<GameData>();
   const [isShooting, setIsShooting] = useState(false);
+  const [madeMove, setMadeMove] = useState(false);
 
   useEffect(() => {
     setAstronautImage(astronautImgRef);
@@ -56,14 +55,6 @@ const CanvasTest = () => {
 
     socketRef.current.on('gameStart', (data) => {
       console.log('Game started! Data:', socketRef.current?.id, data);
-      paintCanvasOnGameStart(
-        contextRef,
-        astronautImgRef,
-        alienImgRef,
-        cardImgRef,
-        data,
-      );
-
       setGameState(data);
     });
 
@@ -72,22 +63,13 @@ const CanvasTest = () => {
     );
     socketRef.current.on('gameState', (data) => {
       setGameState(data);
-      repaintCanvasOnGameStateChange(
-        contextRef,
-        canvasRef,
-        socketRef,
-        astronautImgRef,
-        alienImgRef,
-        cardImgRef,
-        skullImgRef,
-        data,
-      );
       setIsShooting(false);
+      setMadeMove(false);
     });
   }, []);
 
   useEffect(() => {
-    repaintCanvasOnIsShootingChange(
+    repaintCanvas(
       isShooting,
       contextRef,
       canvasRef,
@@ -98,25 +80,50 @@ const CanvasTest = () => {
       skullImgRef,
       gameState,
     );
-  }, [isShooting]);
+  }, [isShooting, gameState]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (madeMove) return;
+
     const rect = event.currentTarget.getBoundingClientRect();
 
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
+
+    const move = pixelToHex(x, y);
+
+    if (
+      (gameState?.astronautId === socketRef.current?.id &&
+        !isNeighbor(move, gameState!.astronautPos)) ||
+      !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
+      isSameMove(move, gameState!.astronautPos)
+    )
+      return;
+
+    if (
+      (gameState?.alienId === socketRef.current?.id &&
+        !isNeighbor(move, gameState!.alienPos)) ||
+      !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
+      isSameMove(move, gameState!.alienPos)
+    )
+      return;
 
     socketRef.current?.emit('updateGame', {
       gameId,
       move: pixelToHex(x, y),
       isShooting: isShooting,
     });
+
+    setMadeMove(true);
   };
 
   return (
     <div>
       <div>
         <div className={c.gameInfoContainer}>
+          <div
+            className={c.madeMoveIndicator}
+            style={{ backgroundColor: madeMove ? 'lightgreen' : 'grey' }}></div>
           <h3>my id: {socketRef.current?.id}</h3>
           <h3>Game: {gameId}</h3>
           <h1>
@@ -170,14 +177,11 @@ const CanvasTest = () => {
       <div>
         <button
           onClick={() => {
-            setIsShooting((prev) => !prev);
+            if (!madeMove) setIsShooting((prev) => !prev);
           }}>
           {isShooting ? 'Cancel Shooting' : 'Shoot'}
         </button>
       </div>
-      {/* <div className={c.gameEndPopup}>
-        <h1>Astro won</h1>
-      </div> */}
     </div>
   );
 };

@@ -110,6 +110,16 @@ export function hexToPixel(hex: Hex) {
   return { x: x + CANVAS_SIZE / 2, y: y + CANVAS_SIZE / 2 };
 }
 
-export function isInGrid(hex: Hex, grid: Hex[]) {
-  return grid.some((h) => h.q === hex.q && h.r === hex.r);
+export function isInGrid(hex: Hex, grid: Hex[], disappearedHexes: Hex[]) {
+  return (
+    grid.some((h) => h.q === hex.q && h.r === hex.r) &&
+    !disappearedHexes.some((h) => h.q === hex.q && h.r === hex.r)
+  );
+}
+
+export function isSameMove(move: Hex, pos: Hex | null) {
+  if (move.q === pos?.q && move.r === pos?.r) {
+    return true;
+  }
+  return false;
 }

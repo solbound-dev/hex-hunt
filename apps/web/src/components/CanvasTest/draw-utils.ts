@@ -154,10 +154,11 @@ export function drawShootHighlight(
   ctx: CanvasRenderingContext2D,
   pos: Hex,
   grid: Hex[],
+  disappearedHexes: Hex[],
   size: number,
 ) {
   pos.neighbors().forEach((n) => {
-    if (isInGrid(n, grid)) {
+    if (isInGrid(n, grid, disappearedHexes)) {
       const center = hexToPixel(n);
       const x = center.x;
       const y = center.y;
@@ -290,7 +291,11 @@ function repaint(
     HEX_SIZE,
   );
 
-  if ((gameState.moves + 2) % 4 === 0) {
+  if (
+    gameState.moves &&
+    (gameState.moves % 8 === 6 || gameState.moves % 8 === 7) &&
+    gameState.currentRadius > 1
+  ) {
     drawZoneContractionWarning(
       contextRef.current!,
       gameState.grid,
@@ -351,29 +356,7 @@ function repaint(
   }
 }
 
-export function repaintCanvasOnGameStateChange(
-  contextRef: React.RefObject<CanvasRenderingContext2D | null>,
-  canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
-  astronautImgRef: React.RefObject<HTMLImageElement | null>,
-  alienImgRef: React.RefObject<HTMLImageElement | null>,
-  cardImgRef: React.RefObject<HTMLImageElement | null>,
-  skullImgRef: React.RefObject<HTMLImageElement | null>,
-  gameState: GameData,
-) {
-  repaint(
-    contextRef,
-    canvasRef,
-    socketRef,
-    astronautImgRef,
-    alienImgRef,
-    cardImgRef,
-    skullImgRef,
-    gameState,
-  );
-}
-
-export function repaintCanvasOnIsShootingChange(
+export function repaintCanvas(
   isShooting: boolean,
   contextRef: React.RefObject<CanvasRenderingContext2D | null>,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -390,7 +373,13 @@ export function repaintCanvasOnIsShootingChange(
         ? new Hex(gameState!.astronautPos!.q, gameState!.astronautPos!.r)
         : new Hex(gameState!.alienPos!.q, gameState!.alienPos!.r);
 
-    drawShootHighlight(contextRef.current!, pos, gameState!.grid, HEX_SIZE);
+    drawShootHighlight(
+      contextRef.current!,
+      pos,
+      gameState!.grid,
+      gameState!.disappearedHexes,
+      HEX_SIZE,
+    );
   } else if (
     gameState?.astronautId &&
     gameState?.alienId &&

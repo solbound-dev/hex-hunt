@@ -3,7 +3,7 @@ import alienSrc from '../../assets/alien.png';
 import cardSrc from '../../assets/card.png';
 import skullSrc from '../../assets/skull.png';
 
-import { CANVAS_SIZE } from './calculation-utils';
+import { CANVAS_SIZE, Hex } from './calculation-utils';
 
 export function getPlayerType(
   socketId: string | null | undefined,
@@ -83,4 +83,13 @@ export function setContextRef(
   context!.strokeStyle = 'white';
   context!.lineWidth = 1;
   contextRef.current = context;
+}
+
+export function isNeighbor(clickedHex: Hex, currentPos: Hex | null) {
+  if (!(currentPos instanceof Hex)) {
+    currentPos = new Hex(currentPos!.q, currentPos!.r);
+  }
+  return currentPos?.neighbors().some((n) => n.equals(clickedHex))
+    ? true
+    : false;
 }
