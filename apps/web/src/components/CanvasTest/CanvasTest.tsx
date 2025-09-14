@@ -1,94 +1,51 @@
 import { useEffect, useRef, useState } from 'react';
 import c from './style.module.css';
 import {
-  CANVAS_SIZE,
   generateGrid,
-  Hex,
-  HEX_SIZE,
+  GRID_RADIUS,
   pixelToHex,
   type GameData,
 } from './calculation-utils';
 import {
-  drawCard,
-  drawDeadPlayer,
-  drawDisappearedHexes,
   drawGrid,
-  drawLastSeenPlayer,
-  drawPlayer,
-  drawShootHighlight,
-  drawZoneContractionWarning,
+  paintCanvasOnGameStart,
+  repaintCanvasOnGameStateChange,
+  repaintCanvasOnIsShootingChange,
 } from './draw-utils';
 import { io, type Socket } from 'socket.io-client';
 
-import astronautSrc from '../../assets/astronaut.png';
-import alienSrc from '../../assets/alien.png';
-import cardSrc from '../../assets/card.png';
-
-function getPlayerType(
-  socketId: string | null | undefined,
-  astronautId: string | null | undefined,
-  alienId: string | null | undefined,
-) {
-  if (!socketId || !astronautId || !alienId) return '';
-  if (socketId === astronautId) return 'Astronaut';
-  else if (socketId === alienId) return 'Alien';
-  else return '';
-}
+import {
+  getPlayerType,
+  setAlienImage,
+  setAstronautImage,
+  setCanvasRef,
+  setCardImage,
+  setContextRef,
+  setSkullImage,
+} from './utils';
 
 const CanvasTest = () => {
   const astronautImgRef = useRef<HTMLImageElement | null>(null);
   const alienImgRef = useRef<HTMLImageElement | null>(null);
   const cardImgRef = useRef<HTMLImageElement | null>(null);
-
+  const skullImgRef = useRef<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D>(null);
-
   const socketRef = useRef<Socket | null>(null);
   const [gameId, setGameId] = useState('');
   const [gameState, setGameState] = useState<GameData>();
   const [isShooting, setIsShooting] = useState(false);
 
-  const currentRadius = 3;
-
   useEffect(() => {
-    const astronaut = new Image();
-    astronaut.src = astronautSrc;
-    astronaut.width = 160;
-    astronaut.height = 160;
-    astronaut.onload = () => {
-      astronautImgRef.current = astronaut;
-    };
+    setAstronautImage(astronautImgRef);
+    setAlienImage(alienImgRef);
+    setCardImage(cardImgRef);
+    setSkullImage(skullImgRef);
 
-    const alien = new Image();
-    alien.src = alienSrc;
-    alien.width = 50;
-    alien.height = 50;
-    alien.onload = () => {
-      alienImgRef.current = alien;
-    };
-
-    const card = new Image();
-    card.src = cardSrc;
-    card.width = 80;
-    card.height = 80;
-    card.onload = () => {
-      cardImgRef.current = card;
-    };
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    canvas!.width = CANVAS_SIZE * 2;
-    canvas!.height = CANVAS_SIZE * 2;
-    canvas!.style.width = `${CANVAS_SIZE}px`;
-    canvas!.style.height = `${CANVAS_SIZE}px`;
+    const canvas = setCanvasRef(canvasRef);
     const context = canvas!.getContext('2d');
-    context!.scale(2, 2);
-    context!.strokeStyle = 'white';
-    context!.lineWidth = 1;
-    contextRef.current = context;
-
-    drawGrid(contextRef.current!, generateGrid(currentRadius));
+    setContextRef(context, contextRef);
+    drawGrid(contextRef.current!, generateGrid(GRID_RADIUS));
   }, []);
 
   useEffect(() => {
@@ -99,21 +56,13 @@ const CanvasTest = () => {
 
     socketRef.current.on('gameStart', (data) => {
       console.log('Game started! Data:', socketRef.current?.id, data);
-      drawPlayer(
-        contextRef.current!,
-        data.astronautPos,
-        true,
-        HEX_SIZE,
-        astronautImgRef.current!,
+      paintCanvasOnGameStart(
+        contextRef,
+        astronautImgRef,
+        alienImgRef,
+        cardImgRef,
+        data,
       );
-      drawPlayer(
-        contextRef.current!,
-        data.alienPos,
-        false,
-        HEX_SIZE,
-        alienImgRef.current!,
-      );
-      drawCard(contextRef.current!, data.cardPos, cardImgRef.current!);
 
       setGameState(data);
     });
@@ -123,151 +72,32 @@ const CanvasTest = () => {
     );
     socketRef.current.on('gameState', (data) => {
       setGameState(data);
-
-      contextRef.current!.clearRect(
-        0,
-        0,
-        canvasRef.current!.width,
-        canvasRef.current!.height,
+      repaintCanvasOnGameStateChange(
+        contextRef,
+        canvasRef,
+        socketRef,
+        astronautImgRef,
+        alienImgRef,
+        cardImgRef,
+        skullImgRef,
+        data,
       );
-      drawGrid(contextRef.current!, generateGrid(currentRadius));
-
-      if (socketRef.current?.id === data.astronautId) {
-        drawPlayer(
-          contextRef.current!,
-          data.astronautPos,
-          true,
-          HEX_SIZE,
-          astronautImgRef.current!,
-        );
-      } else if (socketRef.current?.id === data.alienId) {
-        drawPlayer(
-          contextRef.current!,
-          data.alienPos,
-          false,
-          HEX_SIZE,
-          alienImgRef.current!,
-        );
-      }
-      if (socketRef.current?.id === data.alienId) {
-        drawLastSeenPlayer(
-          contextRef.current!,
-          data.lastSeenAstronautPos,
-          HEX_SIZE,
-          astronautImgRef.current!,
-        );
-      } else if (socketRef.current?.id === data.astronautId) {
-        drawLastSeenPlayer(
-          contextRef.current!,
-          data.lastSeenAlienPos,
-          HEX_SIZE,
-          alienImgRef.current!,
-        );
-      }
-
-      drawCard(contextRef.current!, data.cardPos, cardImgRef.current!);
-      drawDisappearedHexes(
-        contextRef.current!,
-        data.disappearedHexes,
-        HEX_SIZE,
-      );
-
-      if ((data.moves + 2) % 4 === 0) {
-        drawZoneContractionWarning(
-          contextRef.current!,
-          data.grid,
-          data.currentRadius,
-          HEX_SIZE,
-        );
-      }
-
-      if (data.isAstronautDead) {
-        drawDeadPlayer(contextRef.current!, data.astronautPos, HEX_SIZE);
-      }
-      if (data.isAlienDead) {
-        drawDeadPlayer(contextRef.current!, data.alienPos, HEX_SIZE);
-      }
-
       setIsShooting(false);
     });
   }, []);
 
   useEffect(() => {
-    if (isShooting) {
-      const pos =
-        socketRef.current?.id === gameState?.astronautId
-          ? new Hex(gameState!.astronautPos!.q, gameState!.astronautPos!.r)
-          : new Hex(gameState!.alienPos!.q, gameState!.alienPos!.r);
-
-      drawShootHighlight(contextRef.current!, pos, gameState!.grid, HEX_SIZE);
-    } else if (
-      gameState?.astronautId &&
-      gameState?.alienId &&
-      gameState?.cardPos
-    ) {
-      contextRef.current!.clearRect(
-        0,
-        0,
-        canvasRef.current!.width,
-        canvasRef.current!.height,
-      );
-      drawGrid(contextRef.current!, generateGrid(currentRadius));
-
-      if (socketRef.current?.id === gameState.astronautId) {
-        drawPlayer(
-          contextRef.current!,
-          gameState.astronautPos!,
-          true,
-          HEX_SIZE,
-          astronautImgRef.current!,
-        );
-      } else if (socketRef.current?.id === gameState.alienId) {
-        drawPlayer(
-          contextRef.current!,
-          gameState.alienPos!,
-          false,
-          HEX_SIZE,
-          alienImgRef.current!,
-        );
-      }
-      if (socketRef.current?.id === gameState.alienId) {
-        drawLastSeenPlayer(
-          contextRef.current!,
-          gameState.lastSeenAstronautPos!,
-          HEX_SIZE,
-          astronautImgRef.current!,
-        );
-      } else if (socketRef.current?.id === gameState.astronautId) {
-        drawLastSeenPlayer(
-          contextRef.current!,
-          gameState.lastSeenAlienPos!,
-          HEX_SIZE,
-          alienImgRef.current!,
-        );
-      }
-      drawCard(contextRef.current!, gameState.cardPos, cardImgRef.current!);
-      drawDisappearedHexes(
-        contextRef.current!,
-        gameState.disappearedHexes,
-        HEX_SIZE,
-      );
-
-      if ((gameState.moves + 2) % 4 === 0) {
-        drawZoneContractionWarning(
-          contextRef.current!,
-          gameState.grid,
-          gameState.currentRadius,
-          HEX_SIZE,
-        );
-      }
-
-      if (gameState.isAstronautDead) {
-        drawDeadPlayer(contextRef.current!, gameState.astronautPos!, HEX_SIZE);
-      }
-      if (gameState.isAlienDead) {
-        drawDeadPlayer(contextRef.current!, gameState.alienPos!, HEX_SIZE);
-      }
-    }
+    repaintCanvasOnIsShootingChange(
+      isShooting,
+      contextRef,
+      canvasRef,
+      socketRef,
+      astronautImgRef,
+      alienImgRef,
+      cardImgRef,
+      skullImgRef,
+      gameState,
+    );
   }, [isShooting]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -345,6 +175,9 @@ const CanvasTest = () => {
           {isShooting ? 'Cancel Shooting' : 'Shoot'}
         </button>
       </div>
+      {/* <div className={c.gameEndPopup}>
+        <h1>Astro won</h1>
+      </div> */}
     </div>
   );
 };

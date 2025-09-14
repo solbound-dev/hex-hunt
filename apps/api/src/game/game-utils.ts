@@ -61,6 +61,8 @@ export function isNeighbor(clickedHex: Hex, currentPos: Hex | null) {
 }
 
 export function spawnCard(game: GameData) {
+  //TODO
+
   if (!game.grid || game.grid.length === 0) return null;
   const possibleHexes = game.grid.filter(
     (h) =>

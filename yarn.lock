@@ -2149,7 +2149,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@socket.io/component-emitter@npm:~3.1.0":
+"@socket.io/component-emitter@npm:^3.1.2, @socket.io/component-emitter@npm:~3.1.0":
   version: 3.1.2
   resolution: "@socket.io/component-emitter@npm:3.1.2"
   checksum: 89888f00699eb34e3070624eb7b8161fa29f064aeb1389a48f02195d55dd7c52a504e52160016859f6d6dffddd54324623cdd47fd34b3d46f9ed96c18c456edc
@@ -9838,6 +9838,7 @@ __metadata:
   dependencies:
     "@eslint/js": ^9.30.1
     "@hex-hunt-app/types": "*"
+    "@socket.io/component-emitter": ^3.1.2
     "@tanstack/react-query": ^5.84.1
     "@types/react": ^19.1.8
     "@types/react-dom": ^19.1.6
