@@ -264,7 +264,7 @@ export function drawZoneContractionWarning(
   }
 }
 
-export function repaintCanvasOnGameStateChange(
+function repaint(
   contextRef: React.RefObject<CanvasRenderingContext2D | null>,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
@@ -272,8 +272,10 @@ export function repaintCanvasOnGameStateChange(
   alienImgRef: React.RefObject<HTMLImageElement | null>,
   cardImgRef: React.RefObject<HTMLImageElement | null>,
   skullImgRef: React.RefObject<HTMLImageElement | null>,
-  data: GameData,
+  gameState: GameData | undefined,
 ) {
+  if (!gameState) return;
+
   contextRef.current!.clearRect(
     0,
     0,
@@ -282,68 +284,93 @@ export function repaintCanvasOnGameStateChange(
   );
   drawGrid(contextRef.current!, generateGrid(GRID_RADIUS));
 
-  drawDisappearedHexes(contextRef.current!, data.disappearedHexes, HEX_SIZE);
+  drawDisappearedHexes(
+    contextRef.current!,
+    gameState.disappearedHexes,
+    HEX_SIZE,
+  );
 
-  if ((data.moves + 2) % 4 === 0) {
+  if ((gameState.moves + 2) % 4 === 0) {
     drawZoneContractionWarning(
       contextRef.current!,
-      data.grid,
-      data.currentRadius,
+      gameState.grid,
+      gameState.currentRadius,
       HEX_SIZE,
     );
   }
 
-  if (socketRef.current?.id === data.astronautId) {
+  if (socketRef.current?.id === gameState.astronautId) {
     drawPlayer(
       contextRef.current!,
-      data.astronautPos!,
+      gameState.astronautPos!,
       true,
       HEX_SIZE,
       astronautImgRef.current!,
     );
-  } else if (socketRef.current?.id === data.alienId) {
+  } else if (socketRef.current?.id === gameState.alienId) {
     drawPlayer(
       contextRef.current!,
-      data.alienPos!,
+      gameState.alienPos!,
       false,
       HEX_SIZE,
       alienImgRef.current!,
     );
   }
-  if (socketRef.current?.id === data.alienId) {
+  if (socketRef.current?.id === gameState.alienId) {
     drawLastSeenPlayer(
       contextRef.current!,
-      data.lastSeenAstronautPos!,
+      gameState.lastSeenAstronautPos!,
       HEX_SIZE,
       astronautImgRef.current!,
     );
-  } else if (socketRef.current?.id === data.astronautId) {
+  } else if (socketRef.current?.id === gameState.astronautId) {
     drawLastSeenPlayer(
       contextRef.current!,
-      data.lastSeenAlienPos!,
+      gameState.lastSeenAlienPos!,
       HEX_SIZE,
       alienImgRef.current!,
     );
   }
+  drawCard(contextRef.current!, gameState.cardPos, cardImgRef.current!);
 
-  drawCard(contextRef.current!, data.cardPos, cardImgRef.current!);
-
-  if (data.isAstronautDead || data.alienCards === 3) {
+  if (gameState.isAstronautDead) {
     drawDeadPlayer(
       contextRef.current!,
-      data.astronautPos!,
+      gameState.astronautPos!,
       HEX_SIZE,
       skullImgRef.current!,
     );
   }
-  if (data.isAlienDead || data.astronautCards === 3) {
+  if (gameState.isAlienDead) {
     drawDeadPlayer(
       contextRef.current!,
-      data.alienPos!,
+      gameState.alienPos!,
       HEX_SIZE,
       skullImgRef.current!,
     );
   }
+}
+
+export function repaintCanvasOnGameStateChange(
+  contextRef: React.RefObject<CanvasRenderingContext2D | null>,
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
+  socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
+  astronautImgRef: React.RefObject<HTMLImageElement | null>,
+  alienImgRef: React.RefObject<HTMLImageElement | null>,
+  cardImgRef: React.RefObject<HTMLImageElement | null>,
+  skullImgRef: React.RefObject<HTMLImageElement | null>,
+  gameState: GameData,
+) {
+  repaint(
+    contextRef,
+    canvasRef,
+    socketRef,
+    astronautImgRef,
+    alienImgRef,
+    cardImgRef,
+    skullImgRef,
+    gameState,
+  );
 }
 
 export function repaintCanvasOnIsShootingChange(
@@ -369,79 +396,16 @@ export function repaintCanvasOnIsShootingChange(
     gameState?.alienId &&
     gameState?.cardPos
   ) {
-    contextRef.current!.clearRect(
-      0,
-      0,
-      canvasRef.current!.width,
-      canvasRef.current!.height,
+    repaint(
+      contextRef,
+      canvasRef,
+      socketRef,
+      astronautImgRef,
+      alienImgRef,
+      cardImgRef,
+      skullImgRef,
+      gameState,
     );
-    drawGrid(contextRef.current!, generateGrid(GRID_RADIUS));
-
-    drawDisappearedHexes(
-      contextRef.current!,
-      gameState.disappearedHexes,
-      HEX_SIZE,
-    );
-
-    if ((gameState.moves + 2) % 4 === 0) {
-      drawZoneContractionWarning(
-        contextRef.current!,
-        gameState.grid,
-        gameState.currentRadius,
-        HEX_SIZE,
-      );
-    }
-
-    if (socketRef.current?.id === gameState.astronautId) {
-      drawPlayer(
-        contextRef.current!,
-        gameState.astronautPos!,
-        true,
-        HEX_SIZE,
-        astronautImgRef.current!,
-      );
-    } else if (socketRef.current?.id === gameState.alienId) {
-      drawPlayer(
-        contextRef.current!,
-        gameState.alienPos!,
-        false,
-        HEX_SIZE,
-        alienImgRef.current!,
-      );
-    }
-    if (socketRef.current?.id === gameState.alienId) {
-      drawLastSeenPlayer(
-        contextRef.current!,
-        gameState.lastSeenAstronautPos!,
-        HEX_SIZE,
-        astronautImgRef.current!,
-      );
-    } else if (socketRef.current?.id === gameState.astronautId) {
-      drawLastSeenPlayer(
-        contextRef.current!,
-        gameState.lastSeenAlienPos!,
-        HEX_SIZE,
-        alienImgRef.current!,
-      );
-    }
-    drawCard(contextRef.current!, gameState.cardPos, cardImgRef.current!);
-
-    if (gameState.isAstronautDead) {
-      drawDeadPlayer(
-        contextRef.current!,
-        gameState.astronautPos!,
-        HEX_SIZE,
-        skullImgRef.current!,
-      );
-    }
-    if (gameState.isAlienDead) {
-      drawDeadPlayer(
-        contextRef.current!,
-        gameState.alienPos!,
-        HEX_SIZE,
-        skullImgRef.current!,
-      );
-    }
   }
 }
 
