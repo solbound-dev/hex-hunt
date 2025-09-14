@@ -218,6 +218,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.alienPos = game.alienPendingMove;
       }
 
+      //reset and emit
+      this.moves++;
+
+      if ((game.moves + 1) % 4 === 0) {
+        game.currentRadius--;
+        game.disappearedHexes = contractZone(game.currentRadius, game.grid);
+      }
+
       if (didAstronautCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAstronautPos = game.cardPos;
@@ -230,14 +238,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.lastSeenAlienPos = game.cardPos;
         game.cardPos = nextCardPos;
         game.alienCards++;
-      }
-
-      //reset and emit
-      this.moves++;
-
-      if ((game.moves + 1) % 4 === 0) {
-        game.currentRadius--;
-        game.disappearedHexes = contractZone(game.currentRadius, game.grid);
       }
 
       if (
@@ -256,6 +256,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log('alien died');
         game.isAlienDead = true;
       }
+
       this.server.to(data.gameId).emit('gameState', game);
       game.moves++;
       game.astronautPendingMove = null;

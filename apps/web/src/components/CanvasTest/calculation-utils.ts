@@ -1,6 +1,7 @@
 export const CANVAS_SIZE = 1000;
 export const HEX_SIZE = 70; // radius of hexagon
 export const PI = 3.14159;
+export const GRID_RADIUS = 3;
 
 export type GameData = {
   astronautId: string | null;
