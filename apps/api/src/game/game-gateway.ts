@@ -9,7 +9,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import {
-  contractZone,
   didAlienCollectCard,
   didAlienGetShot,
   didAstronautCollectCard,
@@ -21,6 +20,7 @@ import {
   isNeighbor,
   isSameMove,
   spawnCard,
+  updateAndEmitGameState,
 } from './game-utils';
 import { Hex } from './Hex';
 
@@ -202,9 +202,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (didCollide(game)) {
         game.lastSeenAstronautPos = game.astronautPendingMove;
         game.lastSeenAlienPos = game.alienPendingMove;
-        game.astronautPendingMove = null;
-        game.alienPendingMove = null;
-        this.server.to(data.gameId).emit('gameState', game);
+
+        updateAndEmitGameState(data.gameId, game, this.server);
+        // this.server.to(data.gameId).emit('gameState', game);
+        // game.astronautPendingMove = null;
+        // game.alienPendingMove = null;
+        // game.isAstronautShooting = null;
+        // game.isAlienShooting = null;
 
         //new
         return;
@@ -216,19 +220,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       if (!game.isAlienShooting) {
         game.alienPos = game.alienPendingMove;
-      }
-
-      //reset and emit
-      //DA
-      this.moves++;
-      game.moves++;
-      if (game.moves % 8 === 0 && game.currentRadius > 1) {
-        game.currentRadius--;
-        game.disappearedHexes = contractZone(game.currentRadius, game.grid);
-        //spawn card if zone "ate" it
-        if (game.disappearedHexes.some((hex) => hex.equals(game.cardPos!))) {
-          game.cardPos = spawnCard(game);
-        }
       }
 
       //NEBITNO
@@ -245,28 +236,42 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.alienCards++;
       }
 
+      //reset and emit
       //DA
-      if (
-        game.disappearedHexes.some(
-          (hex) =>
-            hex.q === game.astronautPos?.q && hex.r === game.astronautPos.r,
-        )
-      ) {
-        game.isAstronautDead = true;
-      }
-      if (
-        game.disappearedHexes.some(
-          (hex) => hex.q === game.alienPos?.q && hex.r === game.alienPos.r,
-        )
-      ) {
-        console.log('alien died');
-        game.isAlienDead = true;
-      }
-      this.server.to(data.gameId).emit('gameState', game);
-      game.astronautPendingMove = null;
-      game.alienPendingMove = null;
-      game.isAstronautShooting = null;
-      game.isAlienShooting = null;
+      this.moves++;
+      updateAndEmitGameState(data.gameId, game, this.server);
+      // game.moves++;
+      // if (game.moves % 8 === 0 && game.currentRadius > 1) {
+      //   game.currentRadius--;
+      //   game.disappearedHexes = contractZone(game.currentRadius, game.grid);
+      //   //spawn card if zone "ate" it
+      //   if (game.disappearedHexes.some((hex) => hex.equals(game.cardPos!))) {
+      //     game.cardPos = spawnCard(game);
+      //   }
+      // }
+
+      // //DA
+      // if (
+      //   game.disappearedHexes.some(
+      //     (hex) =>
+      //       hex.q === game.astronautPos?.q && hex.r === game.astronautPos.r,
+      //   )
+      // ) {
+      //   game.isAstronautDead = true;
+      // }
+      // if (
+      //   game.disappearedHexes.some(
+      //     (hex) => hex.q === game.alienPos?.q && hex.r === game.alienPos.r,
+      //   )
+      // ) {
+      //   console.log('alien died');
+      //   game.isAlienDead = true;
+      // }
+      // this.server.to(data.gameId).emit('gameState', game);
+      // game.astronautPendingMove = null;
+      // game.alienPendingMove = null;
+      // game.isAstronautShooting = null;
+      // game.isAlienShooting = null;
     }
   }
 }
