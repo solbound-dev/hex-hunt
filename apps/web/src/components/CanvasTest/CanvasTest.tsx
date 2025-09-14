@@ -86,13 +86,9 @@ const CanvasTest = () => {
     if (madeMove) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
-
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-
     const move = pixelToHex(x, y);
-
-    console.log(!isNeighbor(move, gameState!.astronautPos));
 
     if (
       gameState?.astronautId === socketRef.current?.id &&
@@ -102,7 +98,6 @@ const CanvasTest = () => {
     ) {
       return;
     }
-
     if (
       gameState?.alienId === socketRef.current?.id &&
       (!isNeighbor(move, gameState!.alienPos) ||
@@ -111,13 +106,14 @@ const CanvasTest = () => {
     ) {
       return;
     }
+
+    setMadeMove(true);
+
     socketRef.current?.emit('updateGame', {
       gameId,
       move: pixelToHex(x, y),
       isShooting: isShooting,
     });
-
-    setMadeMove(true);
   };
 
   return (
