@@ -48,11 +48,11 @@ const CanvasTest = () => {
   }, []);
 
   useEffect(() => {
-    // socketRef.current = io('http://localhost:3005');
-    socketRef.current = io('/', {
-      path: '/api/socket.io',
-      transports: ['polling'],
-    });
+    socketRef.current = io(process.env.PUBLIC_API_URL);
+    // socketRef.current = io('/', {
+    //   path: '/api/socket.io',
+    //   transports: ['polling'],
+    // });
     socketRef.current.on('gameFull', () =>
       console.log('This game is already full!'),
     );
