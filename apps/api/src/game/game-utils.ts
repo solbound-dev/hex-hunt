@@ -18,8 +18,6 @@ export type GameData = {
   isAstronautDead: boolean;
   isAlienDead: boolean;
   currentRadius: number;
-  astronautImmune: boolean;
-  alienImmune: boolean;
   astronautJustPickedCard: boolean;
   alienJustPickedCard: boolean;
   //this should not get sent to both players:
@@ -130,21 +128,31 @@ export function didAlienCollectCard(game: GameData) {
 
 export function didAlienGetShot(game: GameData) {
   return (
-    (!game.isAlienImmune &&
-      game.astronautPendingMove!.q === game.alienPendingMove!.q &&
+    !game.isAlienImmune &&
+    ((game.astronautPendingMove!.q === game.alienPendingMove!.q &&
       game.astronautPendingMove!.r === game.alienPendingMove!.r) ||
-    (game.astronautPendingMove!.q === game.alienPos!.q &&
-      game.astronautPendingMove!.r === game.alienPos!.r)
+      (game.astronautPendingMove!.q === game.alienPos!.q &&
+        game.astronautPendingMove!.r === game.alienPos!.r))
   );
 }
 
 export function didAstronautGetShot(game: GameData) {
-  return (
+  console.log('didAstroGetShotImmune', game.isAstronautImmune);
+  console.log(
+    'didAstroGetShotResult',
     (!game.isAstronautImmune &&
       game.alienPendingMove!.q === game.astronautPendingMove!.q &&
       game.alienPendingMove!.r === game.astronautPendingMove!.r) ||
-    (game.alienPendingMove!.q === game.astronautPos!.q &&
-      game.alienPendingMove!.r === game.astronautPos!.r)
+      (game.alienPendingMove!.q === game.astronautPos!.q &&
+        game.alienPendingMove!.r === game.astronautPos!.r),
+  );
+
+  return (
+    !game.isAstronautImmune &&
+    ((game.alienPendingMove!.q === game.astronautPendingMove!.q &&
+      game.alienPendingMove!.r === game.astronautPendingMove!.r) ||
+      (game.alienPendingMove!.q === game.astronautPos!.q &&
+        game.alienPendingMove!.r === game.astronautPos!.r))
   );
 }
 
@@ -193,6 +201,12 @@ export function updateAndEmitGameState(
     game.isAlienDead = true;
   }
   websocketServer.to(gameId).emit('gameState', game);
+  if (!game.astronautJustPickedCard) {
+    game.isAstronautImmune = false;
+  }
+  if (!game.alienJustPickedCard) {
+    game.isAlienImmune = false;
+  }
   game.astronautPendingMove = null;
   game.alienPendingMove = null;
   game.isAstronautShooting = null;

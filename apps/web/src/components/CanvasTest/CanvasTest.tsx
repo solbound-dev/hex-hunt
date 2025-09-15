@@ -48,13 +48,10 @@ const CanvasTest = () => {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io('hex-hunt.up.railway.app', {
+    console.log(import.meta.env.VITE_API_URL);
+    socketRef.current = io(import.meta.env.VITE_API_URL, {
       transports: ['websocket'],
     });
-    // socketRef.current = io('/', {
-    //   path: '/api/socket.io',
-    //   transports: ['polling'],
-    // });
     socketRef.current.on('gameFull', () =>
       console.log('This game is already full!'),
     );
@@ -68,6 +65,8 @@ const CanvasTest = () => {
       console.log('Player joined:', data),
     );
     socketRef.current.on('gameState', (data) => {
+      console.log('data', data);
+
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
