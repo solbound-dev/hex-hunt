@@ -37,7 +37,7 @@ function getAlienPos(astronautPos: Hex, grid: Hex[]) {
 }
 
 // @WebSocketGateway(3005, { cors: { origin: '*' } })
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({ cors: { origin: '*' }, transports: ['polling'] })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private games: Record<string, GameData> = {};
