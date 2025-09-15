@@ -83,10 +83,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         isAstronautShooting: null,
         isAlienShooting: null,
         currentRadius: 3,
-        astronautImmune: false,
-        alienImmune: false,
         astronautJustPickedCard: false,
         alienJustPickedCard: false,
+        isAstronautImmune: false,
+        isAlienImmune: false,
       } as GameData;
     }
     //add astronaut if there is nobody in game
@@ -187,9 +187,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
 
+    game.astronautJustPickedCard = false;
+    game.alienJustPickedCard = false;
+
     //emit if both moves have been made
     if (game.astronautPendingMove !== null && game.alienPendingMove !== null) {
-      //shooting
+      //SHOOTING CHECK
       if (game.isAstronautShooting) {
         game.lastSeenAstronautPos = game.astronautPos;
         if (didAlienGetShot(game)) {
@@ -203,11 +206,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
 
-      //not shooting
+      //COLLISION CHECK
       if (didCollide(game)) {
         game.lastSeenAstronautPos = game.astronautPendingMove;
         game.lastSeenAlienPos = game.alienPendingMove;
-
         updateAndEmitGameState(data.gameId, game, this.server);
         return;
       }
@@ -219,19 +221,24 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.alienPos = game.alienPendingMove;
       }
 
+      console.log('prije', game.isAstronautImmune);
       if (didAstronautCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAstronautPos = game.cardPos;
         game.cardPos = nextCardPos;
         game.astronautCards++;
         game.astronautJustPickedCard = true;
+        game.isAstronautImmune = true;
       }
+      console.log('posli', game.isAstronautImmune);
+
       if (didAlienCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAlienPos = game.cardPos;
         game.cardPos = nextCardPos;
         game.alienCards++;
         game.alienJustPickedCard = true;
+        game.isAlienImmune = true;
       }
 
       this.moves++;
