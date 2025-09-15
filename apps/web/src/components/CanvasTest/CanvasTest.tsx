@@ -48,7 +48,9 @@ const CanvasTest = () => {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io(process.env.PUBLIC_API_URL);
+    socketRef.current = io('hex-hunt.up.railway.app', {
+      transports: ['websocket'],
+    });
     // socketRef.current = io('/', {
     //   path: '/api/socket.io',
     //   transports: ['polling'],
