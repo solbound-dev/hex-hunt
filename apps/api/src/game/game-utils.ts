@@ -200,6 +200,7 @@ export function updateAndEmitGameState(
     console.log('alien died');
     game.isAlienDead = true;
   }
+
   websocketServer.to(gameId).emit('gameState', game);
   if (!game.astronautJustPickedCard) {
     game.isAstronautImmune = false;
@@ -211,4 +212,44 @@ export function updateAndEmitGameState(
   game.alienPendingMove = null;
   game.isAstronautShooting = null;
   game.isAlienShooting = null;
+}
+
+export function shootInDirection(
+  directionHex: Hex,
+  game: GameData,
+  shooter: 'astronaut' | 'alien',
+) {
+  let targetPos: Hex;
+  if (shooter === 'astronaut') {
+    if (game.isAlienShooting) {
+      targetPos = game.alienPos!;
+    } else {
+      targetPos = game.alienPendingMove!;
+    }
+  } else {
+    if (game.isAstronautShooting) {
+      targetPos = game.astronautPos!;
+    } else {
+      targetPos = game.astronautPendingMove!;
+    }
+  }
+
+  const current = game.astronautPos!;
+  const dir = new Hex(directionHex.q - current.q, directionHex.r - current.r);
+  let position = new Hex(current.q, current.r);
+  while (isInGrid(position, game.grid, game.disappearedHexes)) {
+    position = new Hex(position.q + dir.q, position.r + dir.r);
+    if (position.equals(game.cardPos!)) {
+      game.cardPos = spawnCard(game);
+      return;
+    }
+    if (position.equals(targetPos)) {
+      console.log('alien got shot');
+      if (shooter === 'astronaut') {
+        game.isAlienDead = true;
+      } else {
+        game.isAstronautDead = true;
+      }
+    }
+  }
 }
