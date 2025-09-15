@@ -126,6 +126,36 @@ export function didAlienCollectCard(game: GameData) {
   );
 }
 
+export function didAlienGetShot(game: GameData) {
+  return (
+    !game.isAlienImmune &&
+    ((game.astronautPendingMove!.q === game.alienPendingMove!.q &&
+      game.astronautPendingMove!.r === game.alienPendingMove!.r) ||
+      (game.astronautPendingMove!.q === game.alienPos!.q &&
+        game.astronautPendingMove!.r === game.alienPos!.r))
+  );
+}
+
+export function didAstronautGetShot(game: GameData) {
+  console.log('didAstroGetShotImmune', game.isAstronautImmune);
+  console.log(
+    'didAstroGetShotResult',
+    (!game.isAstronautImmune &&
+      game.alienPendingMove!.q === game.astronautPendingMove!.q &&
+      game.alienPendingMove!.r === game.astronautPendingMove!.r) ||
+      (game.alienPendingMove!.q === game.astronautPos!.q &&
+        game.alienPendingMove!.r === game.astronautPos!.r),
+  );
+
+  return (
+    !game.isAstronautImmune &&
+    ((game.alienPendingMove!.q === game.astronautPendingMove!.q &&
+      game.alienPendingMove!.r === game.astronautPendingMove!.r) ||
+      (game.alienPendingMove!.q === game.astronautPos!.q &&
+        game.alienPendingMove!.r === game.astronautPos!.r))
+  );
+}
+
 export function contractZone(currentRadius: number, grid: Hex[]) {
   console.log('contractZone current radius', currentRadius);
   const newDisappeared = grid.filter(
@@ -204,15 +234,18 @@ export function shootInDirection(
     }
   }
 
-  const current = game.astronautPos!;
+  const current = shooter === 'astronaut' ? game.astronautPos! : game.alienPos!;
   const dir = new Hex(directionHex.q - current.q, directionHex.r - current.r);
   let position = new Hex(current.q, current.r);
   while (isInGrid(position, game.grid, game.disappearedHexes)) {
     position = new Hex(position.q + dir.q, position.r + dir.r);
+    console.log('shooting position', position);
     if (position.equals(game.cardPos!)) {
       game.cardPos = spawnCard(game);
       return;
     }
+
+    //TODO: check if alien got shot
     if (position.equals(targetPos)) {
       console.log('alien got shot');
       if (shooter === 'astronaut') {

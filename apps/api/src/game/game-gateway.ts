@@ -192,6 +192,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     //emit if both moves have been made
     if (game.astronautPendingMove !== null && game.alienPendingMove !== null) {
       //SHOOTING CHECK
+
       if (game.isAstronautShooting) {
         game.lastSeenAstronautPos = game.astronautPos;
         shootInDirection(game.astronautPendingMove, game, 'astronaut');
@@ -200,7 +201,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.lastSeenAlienPos = game.alienPos;
         shootInDirection(game.alienPendingMove, game, 'alien');
       }
-
       //COLLISION CHECK
       if (didCollide(game)) {
         game.lastSeenAstronautPos = game.astronautPendingMove;
@@ -216,7 +216,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.alienPos = game.alienPendingMove;
       }
 
-      console.log('prije', game.isAstronautImmune);
       if (didAstronautCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAstronautPos = game.cardPos;
@@ -225,7 +224,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.astronautJustPickedCard = true;
         game.isAstronautImmune = true;
       }
-      console.log('posli', game.isAstronautImmune);
 
       if (didAlienCollectCard(game)) {
         const nextCardPos = spawnCard(game);
