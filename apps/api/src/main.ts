@@ -37,7 +37,12 @@ async function bootstrap() {
 
   setupFilter(app);
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  if (process.env.NODE_ENV === 'production') {
+    app.listen(port, "0.0.0.0");
+  } else {
+    app.listen(port);
+  }
 }
 
 void bootstrap();
