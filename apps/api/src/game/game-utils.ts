@@ -126,36 +126,6 @@ export function didAlienCollectCard(game: GameData) {
   );
 }
 
-export function didAlienGetShot(game: GameData) {
-  return (
-    !game.isAlienImmune &&
-    ((game.astronautPendingMove!.q === game.alienPendingMove!.q &&
-      game.astronautPendingMove!.r === game.alienPendingMove!.r) ||
-      (game.astronautPendingMove!.q === game.alienPos!.q &&
-        game.astronautPendingMove!.r === game.alienPos!.r))
-  );
-}
-
-export function didAstronautGetShot(game: GameData) {
-  console.log('didAstroGetShotImmune', game.isAstronautImmune);
-  console.log(
-    'didAstroGetShotResult',
-    (!game.isAstronautImmune &&
-      game.alienPendingMove!.q === game.astronautPendingMove!.q &&
-      game.alienPendingMove!.r === game.astronautPendingMove!.r) ||
-      (game.alienPendingMove!.q === game.astronautPos!.q &&
-        game.alienPendingMove!.r === game.astronautPos!.r),
-  );
-
-  return (
-    !game.isAstronautImmune &&
-    ((game.alienPendingMove!.q === game.astronautPendingMove!.q &&
-      game.alienPendingMove!.r === game.astronautPendingMove!.r) ||
-      (game.alienPendingMove!.q === game.astronautPos!.q &&
-        game.alienPendingMove!.r === game.astronautPos!.r))
-  );
-}
-
 export function contractZone(currentRadius: number, grid: Hex[]) {
   console.log('contractZone current radius', currentRadius);
   const newDisappeared = grid.filter(
