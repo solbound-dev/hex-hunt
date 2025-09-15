@@ -10,15 +10,14 @@ import {
 import { Server, Socket } from 'socket.io';
 import {
   didAlienCollectCard,
-  didAlienGetShot,
   didAstronautCollectCard,
-  didAstronautGetShot,
   didCollide,
   GameData,
   generateGrid,
   isInGrid,
   isNeighbor,
   isSameMove,
+  shootInDirection,
   spawnCard,
   updateAndEmitGameState,
 } from './game-utils';
@@ -195,15 +194,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       //SHOOTING CHECK
       if (game.isAstronautShooting) {
         game.lastSeenAstronautPos = game.astronautPos;
-        if (didAlienGetShot(game)) {
-          game.isAlienDead = true;
-        }
+        shootInDirection(game.astronautPendingMove, game, 'astronaut');
       }
       if (game.isAlienShooting) {
         game.lastSeenAlienPos = game.alienPos;
-        if (didAstronautGetShot(game)) {
-          game.isAstronautDead = true;
-        }
+        shootInDirection(game.alienPendingMove, game, 'alien');
       }
 
       //COLLISION CHECK
