@@ -18,11 +18,17 @@ export type GameData = {
   isAstronautDead: boolean;
   isAlienDead: boolean;
   currentRadius: number;
+  astronautImmune: boolean;
+  alienImmune: boolean;
+  astronautJustPickedCard: boolean;
+  alienJustPickedCard: boolean;
   //this should not get sent to both players:
   astronautPos: Hex | null;
   alienPos: Hex | null;
   isAstronautShooting: boolean | null;
   isAlienShooting: boolean | null;
+  isAstronautImmune: boolean;
+  isAlienImmune: boolean;
 };
 
 export function generateGrid(currentRadius: number) {
@@ -124,7 +130,8 @@ export function didAlienCollectCard(game: GameData) {
 
 export function didAlienGetShot(game: GameData) {
   return (
-    (game.astronautPendingMove!.q === game.alienPendingMove!.q &&
+    (!game.isAlienImmune &&
+      game.astronautPendingMove!.q === game.alienPendingMove!.q &&
       game.astronautPendingMove!.r === game.alienPendingMove!.r) ||
     (game.astronautPendingMove!.q === game.alienPos!.q &&
       game.astronautPendingMove!.r === game.alienPos!.r)
@@ -133,7 +140,8 @@ export function didAlienGetShot(game: GameData) {
 
 export function didAstronautGetShot(game: GameData) {
   return (
-    (game.alienPendingMove!.q === game.astronautPendingMove!.q &&
+    (!game.isAstronautImmune &&
+      game.alienPendingMove!.q === game.astronautPendingMove!.q &&
       game.alienPendingMove!.r === game.astronautPendingMove!.r) ||
     (game.alienPendingMove!.q === game.astronautPos!.q &&
       game.alienPendingMove!.r === game.astronautPos!.r)
@@ -162,12 +170,13 @@ export function updateAndEmitGameState(
   if (game.moves % 8 === 0 && game.currentRadius > 1) {
     game.currentRadius--;
     game.disappearedHexes = contractZone(game.currentRadius, game.grid);
-    //spawn card if zone "ate" it
-    if (game.disappearedHexes.some((hex) => hex.equals(game.cardPos!))) {
+    const zoneAteCard = game.disappearedHexes.some((hex) =>
+      hex.equals(game.cardPos!),
+    );
+    if (zoneAteCard) {
       game.cardPos = spawnCard(game);
     }
   }
-
   if (
     game.disappearedHexes.some(
       (hex) => hex.q === game.astronautPos?.q && hex.r === game.astronautPos.r,

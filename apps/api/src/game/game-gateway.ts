@@ -83,6 +83,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         isAstronautShooting: null,
         isAlienShooting: null,
         currentRadius: 3,
+        astronautImmune: false,
+        alienImmune: false,
+        astronautJustPickedCard: false,
+        alienJustPickedCard: false,
       } as GameData;
     }
     //add astronaut if there is nobody in game
@@ -205,17 +209,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.lastSeenAlienPos = game.alienPendingMove;
 
         updateAndEmitGameState(data.gameId, game, this.server);
-        // this.server.to(data.gameId).emit('gameState', game);
-        // game.astronautPendingMove = null;
-        // game.alienPendingMove = null;
-        // game.isAstronautShooting = null;
-        // game.isAlienShooting = null;
-
-        //new
         return;
       }
 
-      //NE
       if (!game.isAstronautShooting) {
         game.astronautPos = game.astronautPendingMove;
       }
@@ -223,56 +219,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.alienPos = game.alienPendingMove;
       }
 
-      //NEBITNO
       if (didAstronautCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAstronautPos = game.cardPos;
         game.cardPos = nextCardPos;
         game.astronautCards++;
+        game.astronautJustPickedCard = true;
       }
       if (didAlienCollectCard(game)) {
         const nextCardPos = spawnCard(game);
         game.lastSeenAlienPos = game.cardPos;
         game.cardPos = nextCardPos;
         game.alienCards++;
+        game.alienJustPickedCard = true;
       }
 
-      //reset and emit
-      //DA
       this.moves++;
       updateAndEmitGameState(data.gameId, game, this.server);
-      // game.moves++;
-      // if (game.moves % 8 === 0 && game.currentRadius > 1) {
-      //   game.currentRadius--;
-      //   game.disappearedHexes = contractZone(game.currentRadius, game.grid);
-      //   //spawn card if zone "ate" it
-      //   if (game.disappearedHexes.some((hex) => hex.equals(game.cardPos!))) {
-      //     game.cardPos = spawnCard(game);
-      //   }
-      // }
-
-      // //DA
-      // if (
-      //   game.disappearedHexes.some(
-      //     (hex) =>
-      //       hex.q === game.astronautPos?.q && hex.r === game.astronautPos.r,
-      //   )
-      // ) {
-      //   game.isAstronautDead = true;
-      // }
-      // if (
-      //   game.disappearedHexes.some(
-      //     (hex) => hex.q === game.alienPos?.q && hex.r === game.alienPos.r,
-      //   )
-      // ) {
-      //   console.log('alien died');
-      //   game.isAlienDead = true;
-      // }
-      // this.server.to(data.gameId).emit('gameState', game);
-      // game.astronautPendingMove = null;
-      // game.alienPendingMove = null;
-      // game.isAstronautShooting = null;
-      // game.isAlienShooting = null;
     }
   }
 }
