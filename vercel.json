@@ -1,8 +1,15 @@
 {
   "version": 2,
   "builds": [
-    { "src": "apps/web/vite.config.ts", "use": "@vercel/static-build", "config": { "distDir": "apps/web/dist" } },
-    { "src": "apps/api/src/main.ts", "use": "@vercel/node" }
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "apps/web/dist" }
+    },
+    {
+      "src": "apps/api/package.json",
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
     { "src": "/api/socket.io/(.*)", "dest": "apps/api/src/main.ts" },
