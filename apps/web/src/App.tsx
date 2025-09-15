@@ -3,9 +3,9 @@ import './App.css';
 import { Route, Switch } from 'wouter';
 import CanvasTest from './components/CanvasTest';
 
-const HomePage = () => {
-  return <div>a</div>;
-};
+// const HomePage = () => {
+//   return <div>a</div>;
+// };
 
 function App() {
   return (

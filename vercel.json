@@ -1,6 +1,7 @@
 {
   "version": 2,
   "routes": [
+    {"src": "/api/socket.io/(.*)", "dest": "apps/api/src/main.ts"},
     { "src": "/api/(.*)", "dest": "apps/api/src/main.ts" },
     { "src": "/(.*\\..*)", "dest": "apps/web/dist/$1" },
     { "src": "/(.*)", "dest": "apps/web/dist/index.html" }
