@@ -34,6 +34,7 @@ const CanvasTest = () => {
   const [gameState, setGameState] = useState<GameData>();
   const [isShooting, setIsShooting] = useState(false);
   const [madeMove, setMadeMove] = useState(false);
+  const [isCanvasHovered, setIsCanvasHovered] = useState(false);
 
   useEffect(() => {
     setAstronautImage(astronautImgRef);
@@ -81,12 +82,14 @@ const CanvasTest = () => {
       cardImgRef,
       skullImgRef,
       gameState,
+      isCanvasHovered,
     );
-  }, [isShooting, gameState]);
+  }, [isShooting, gameState, isCanvasHovered]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (madeMove) return;
     if (!gameState) return;
+    if (gameState.isAstronautDead || gameState.isAlienDead) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -175,7 +178,12 @@ const CanvasTest = () => {
           </button>
         </div>
       </div>
-      <canvas ref={canvasRef} onClick={handleCanvasClick} />
+      <canvas
+        ref={canvasRef}
+        onClick={handleCanvasClick}
+        onMouseEnter={() => setIsCanvasHovered(true)}
+        onMouseLeave={() => setIsCanvasHovered(false)}
+      />
       <div>
         <button
           onClick={() => {

@@ -97,11 +97,8 @@ export function drawLastSeenPlayer(
   }
   ctx.closePath();
   ctx.clip();
-
-  // Set transparency
   ctx.globalAlpha = 0.5;
 
-  // Draw image clipped inside hex
   if (image.complete) {
     ctx.drawImage(
       image,
@@ -180,29 +177,52 @@ export function drawShootHighlight(
   });
 }
 
+export function drawAvailableMovesHighlight(
+  ctx: CanvasRenderingContext2D,
+  pos: Hex,
+  grid: Hex[],
+  disappearedHexes: Hex[],
+  size: number,
+) {
+  const positionInstance = new Hex(pos.q, pos.r);
+  positionInstance.neighbors().forEach((n) => {
+    if (isInGrid(n, grid, disappearedHexes)) {
+      const center = hexToPixel(n);
+      const x = center.x;
+      const y = center.y;
+      ctx.beginPath();
+      ctx.strokeStyle = 'white';
+      for (let i = 0; i < 6; i++) {
+        const angle = ((2 * PI) / 6) * i + PI / 6;
+        const vx = x + size * Math.cos(angle);
+        const vy = y + size * Math.sin(angle);
+
+        if (i === 0) ctx.moveTo(vx, vy);
+        else ctx.lineTo(vx, vy);
+      }
+      ctx.lineWidth = 1;
+      ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+      ctx.fill();
+      ctx.closePath();
+      ctx.stroke();
+    }
+  });
+}
+
 export function drawDeadPlayer(
   ctx: CanvasRenderingContext2D,
   deadPlayerPos: Hex,
   size: number,
   image: HTMLImageElement,
 ) {
-  const center = hexToPixel(deadPlayerPos); // convert hex to pixel coords
+  const center = hexToPixel(deadPlayerPos);
   const x = center.x;
   const y = center.y;
 
   if (image.complete) {
-    // scale image relative to hex size
-    const imgSize = size * 1.2; // tweak multiplier for how big you want it
+    const imgSize = size * 1.2;
     ctx.drawImage(image, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);
   }
-
-  // ctx.beginPath();
-  // ctx.arc(x, y, size * 0.6, 0, 2 * Math.PI); // circle radius scaled to hex size
-  // ctx.fillStyle = 'white';
-  // ctx.fill();
-  // ctx.strokeStyle = 'black';
-  // ctx.lineWidth = 1;
-  // ctx.stroke();
 }
 
 export function drawDisappearedHexes(
@@ -274,6 +294,7 @@ function repaint(
   cardImgRef: React.RefObject<HTMLImageElement | null>,
   skullImgRef: React.RefObject<HTMLImageElement | null>,
   gameState: GameData | undefined,
+  isCanvasHovered: boolean,
 ) {
   if (!gameState) return;
 
@@ -305,6 +326,15 @@ function repaint(
   }
 
   if (socketRef.current?.id === gameState.astronautId) {
+    if (isCanvasHovered) {
+      drawAvailableMovesHighlight(
+        contextRef.current!,
+        gameState.astronautPos!,
+        gameState.grid,
+        gameState.disappearedHexes,
+        HEX_SIZE,
+      );
+    }
     drawPlayer(
       contextRef.current!,
       gameState.astronautPos!,
@@ -313,6 +343,15 @@ function repaint(
       astronautImgRef.current!,
     );
   } else if (socketRef.current?.id === gameState.alienId) {
+    if (isCanvasHovered) {
+      drawAvailableMovesHighlight(
+        contextRef.current!,
+        gameState.alienPos!,
+        gameState.grid,
+        gameState.disappearedHexes,
+        HEX_SIZE,
+      );
+    }
     drawPlayer(
       contextRef.current!,
       gameState.alienPos!,
@@ -366,6 +405,7 @@ export function repaintCanvas(
   cardImgRef: React.RefObject<HTMLImageElement | null>,
   skullImgRef: React.RefObject<HTMLImageElement | null>,
   gameState: GameData | undefined,
+  isCanvasHovered: boolean,
 ) {
   if (isShooting) {
     const pos =
@@ -394,6 +434,7 @@ export function repaintCanvas(
       cardImgRef,
       skullImgRef,
       gameState,
+      isCanvasHovered,
     );
   }
 }

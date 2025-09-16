@@ -43,16 +43,15 @@ export function generateGrid(currentRadius: number) {
 }
 
 export function isSameMove(move: Hex, pos: Hex | null) {
-  if (move.q === pos?.q && move.r === pos?.r) {
-    return true;
-  }
-  return false;
+  const moveInstance = new Hex(move.q, move.r);
+  return moveInstance.equals(pos!);
 }
 
 export function isInGrid(hex: Hex, grid: Hex[], disappearedHexes: Hex[]) {
+  const hexInstance = new Hex(hex.q, hex.r);
   return (
-    grid.some((h) => h.q === hex.q && h.r === hex.r) &&
-    !disappearedHexes.some((h) => h.q === hex.q && h.r === hex.r)
+    grid.some((h) => h.equals(hexInstance)) &&
+    !disappearedHexes.some((h) => h.equals(hexInstance))
   );
 }
 
