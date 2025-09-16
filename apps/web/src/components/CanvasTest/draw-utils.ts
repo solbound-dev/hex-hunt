@@ -11,12 +11,23 @@ import {
 } from './calculation-utils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 
-function drawHex(ctx: CanvasRenderingContext2D, hex: Hex, size: number) {
+type StyleOptions = {
+  strokeStyle: string;
+  lineWidth: number;
+  fillStyle?: string;
+};
+
+function drawHex(
+  ctx: CanvasRenderingContext2D,
+  hex: Hex,
+  size: number,
+  styleOptions: StyleOptions,
+) {
   const center = hexToPixel(hex);
   const x = center.x;
   const y = center.y;
   ctx.beginPath();
-  ctx.strokeStyle = 'white';
+  ctx.strokeStyle = styleOptions.strokeStyle;
   for (let i = 0; i < 6; i++) {
     const angle = ((2 * PI) / 6) * i + PI / 6;
     const vx = x + size * Math.cos(angle);
@@ -25,13 +36,21 @@ function drawHex(ctx: CanvasRenderingContext2D, hex: Hex, size: number) {
     if (i === 0) ctx.moveTo(vx, vy);
     else ctx.lineTo(vx, vy);
   }
-  ctx.lineWidth = 1;
+  ctx.lineWidth = styleOptions.lineWidth;
+
+  if (styleOptions.fillStyle) {
+    ctx.fillStyle = styleOptions.fillStyle;
+    ctx.fill();
+  }
+
   ctx.closePath();
   ctx.stroke();
 }
 
 export function drawGrid(ctx: CanvasRenderingContext2D, grid: Hex[]) {
-  grid.forEach((hex) => drawHex(ctx, hex, HEX_SIZE));
+  grid.forEach((hex) =>
+    drawHex(ctx, hex, HEX_SIZE, { strokeStyle: 'white', lineWidth: 1 }),
+  );
 }
 
 export function drawPlayer(
@@ -45,17 +64,7 @@ export function drawPlayer(
   const x = center.x;
   const y = center.y;
   const color = isAstronaut ? 'blue' : 'red';
-
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const angle = ((2 * PI) / 6) * i + PI / 6;
-    const vx = x + size * Math.cos(angle);
-    const vy = y + size * Math.sin(angle);
-    if (i === 0) ctx.moveTo(vx, vy);
-    else ctx.lineTo(vx, vy);
-  }
-  ctx.closePath();
-
+  drawHex(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
   ctx.save();
   ctx.clip();
 
@@ -85,17 +94,7 @@ export function drawLastSeenPlayer(
   const y = center.y;
 
   ctx.save();
-
-  // Build hex path
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const angle = ((2 * Math.PI) / 6) * i + Math.PI / 6;
-    const vx = x + size * Math.cos(angle);
-    const vy = y + size * Math.sin(angle);
-    if (i === 0) ctx.moveTo(vx, vy);
-    else ctx.lineTo(vx, vy);
-  }
-  ctx.closePath();
+  drawHex(ctx, hex, size, { strokeStyle: 'white', lineWidth: 1 });
   ctx.clip();
   ctx.globalAlpha = 0.5;
 
@@ -156,22 +155,11 @@ export function drawShootHighlight(
 ) {
   pos.neighbors().forEach((n) => {
     if (isInGrid(n, grid, disappearedHexes)) {
-      const center = hexToPixel(n);
-      const x = center.x;
-      const y = center.y;
-      ctx.beginPath();
-      ctx.strokeStyle = 'white';
-      for (let i = 0; i < 6; i++) {
-        const angle = ((2 * PI) / 6) * i + PI / 6;
-        const vx = x + size * Math.cos(angle);
-        const vy = y + size * Math.sin(angle);
-
-        if (i === 0) ctx.moveTo(vx, vy);
-        else ctx.lineTo(vx, vy);
-      }
-      ctx.fillStyle = 'rgba(255, 255, 0, 100)';
-      ctx.fill();
-      ctx.closePath();
+      drawHex(ctx, n, size, {
+        strokeStyle: 'white',
+        lineWidth: 1,
+        fillStyle: 'rgba(255, 255, 0, 100)',
+      });
       ctx.stroke();
     }
   });
@@ -187,23 +175,11 @@ export function drawAvailableMovesHighlight(
   const positionInstance = new Hex(pos.q, pos.r);
   positionInstance.neighbors().forEach((n) => {
     if (isInGrid(n, grid, disappearedHexes)) {
-      const center = hexToPixel(n);
-      const x = center.x;
-      const y = center.y;
-      ctx.beginPath();
-      ctx.strokeStyle = 'white';
-      for (let i = 0; i < 6; i++) {
-        const angle = ((2 * PI) / 6) * i + PI / 6;
-        const vx = x + size * Math.cos(angle);
-        const vy = y + size * Math.sin(angle);
-
-        if (i === 0) ctx.moveTo(vx, vy);
-        else ctx.lineTo(vx, vy);
-      }
-      ctx.lineWidth = 1;
-      ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
-      ctx.fill();
-      ctx.closePath();
+      drawHex(ctx, n, size, {
+        strokeStyle: 'white',
+        lineWidth: 1,
+        fillStyle: 'rgba(0, 255, 0, 0.1)',
+      });
       ctx.stroke();
     }
   });
@@ -232,22 +208,11 @@ export function drawDisappearedHexes(
 ) {
   if (disappearedHexes.length) {
     disappearedHexes.forEach((hex) => {
-      const center = hexToPixel(hex);
-      const x = center.x;
-      const y = center.y;
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(139, 0,0, 0.5)';
-      for (let i = 0; i < 6; i++) {
-        const angle = ((2 * PI) / 6) * i + PI / 6;
-        const vx = x + size * Math.cos(angle);
-        const vy = y + size * Math.sin(angle);
-
-        if (i === 0) ctx.moveTo(vx, vy);
-        else ctx.lineTo(vx, vy);
-      }
-      ctx.fillStyle = 'rgba(139, 0, 0, 0.5)';
-      ctx.fill();
-      ctx.closePath();
+      drawHex(ctx, hex, size, {
+        strokeStyle: 'rgba(139, 0,0,1)',
+        fillStyle: 'rgba(139, 0,0,1)',
+        lineWidth: 1,
+      });
       ctx.stroke();
     });
   }
@@ -263,22 +228,11 @@ export function drawZoneContractionWarning(
     grid.forEach((hex) => {
       const newHex = new Hex(hex.q, hex.r);
       if (newHex.distanceTo(new Hex(0, 0)) === currentRadius) {
-        const center = hexToPixel(hex);
-        const x = center.x;
-        const y = center.y;
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255, 140,0, 0.5)';
-        for (let i = 0; i < 6; i++) {
-          const angle = ((2 * PI) / 6) * i + PI / 6;
-          const vx = x + size * Math.cos(angle);
-          const vy = y + size * Math.sin(angle);
-
-          if (i === 0) ctx.moveTo(vx, vy);
-          else ctx.lineTo(vx, vy);
-        }
-        ctx.fillStyle = 'rgba(255, 140, 0, 0.5)';
-        ctx.fill();
-        ctx.closePath();
+        drawHex(ctx, hex, size, {
+          strokeStyle: 'rgba(255, 140,0, 0.5)',
+          fillStyle: 'rgba(255, 140,0, 0.5)',
+          lineWidth: 1,
+        });
         ctx.stroke();
       }
     });

@@ -112,7 +112,6 @@ const CanvasTest = () => {
     ) {
       return;
     }
-
     setMadeMove(true);
 
     socketRef.current?.emit('updateGame', {
