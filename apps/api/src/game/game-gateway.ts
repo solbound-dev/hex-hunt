@@ -223,6 +223,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.astronautCards++;
         game.astronautJustPickedCard = true;
         game.isAstronautImmune = true;
+        if (game.astronautCards >= 3) {
+          console.log('ASTRONAUT WINS');
+          game.isAlienDead = true;
+        }
       }
 
       if (didAlienCollectCard(game)) {
@@ -232,6 +236,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.alienCards++;
         game.alienJustPickedCard = true;
         game.isAlienImmune = true;
+        if (game.alienCards >= 3) {
+          console.log('ALIEN WINS');
+          game.isAstronautDead = true;
+        }
       }
 
       this.moves++;
