@@ -48,7 +48,6 @@ const CanvasTest = () => {
   }, []);
 
   useEffect(() => {
-    console.log(import.meta.env.VITE_API_URL);
     socketRef.current = io(import.meta.env.VITE_API_URL, {
       transports: ['websocket'],
     });
@@ -65,8 +64,6 @@ const CanvasTest = () => {
       console.log('Player joined:', data),
     );
     socketRef.current.on('gameState', (data) => {
-      console.log('data', data);
-
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
@@ -89,6 +86,7 @@ const CanvasTest = () => {
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (madeMove) return;
+    if (!gameState) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
