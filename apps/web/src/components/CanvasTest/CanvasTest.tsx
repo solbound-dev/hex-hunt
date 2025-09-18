@@ -3,12 +3,15 @@ import c from './style.module.css';
 import {
   generateGrid,
   GRID_RADIUS,
+  Hex,
+  HEX_SIZE,
+  hexToPixel,
   isInGrid,
   isSameMove,
   pixelToHex,
   type GameData,
 } from './calculation-utils';
-import { drawGrid, repaintCanvas } from './draw-utils';
+import { drawGridOrthometric, repaint } from './draw-utils';
 import { io, type Socket } from 'socket.io-client';
 
 import {
@@ -21,6 +24,20 @@ import {
   setContextRef,
   setSkullImage,
 } from './utils';
+
+function inverseOrthometricTransformation(
+  ox: number,
+  oy: number,
+  hexSize: number,
+) {
+  const oxPrime = ox - 7 * hexSize;
+  const oyPrime = oy - 2 * hexSize;
+
+  const x = (oyPrime / 0.35 + oxPrime / 0.7) / 2;
+  const y = (oyPrime / 0.35 - oxPrime / 0.7) / 2;
+
+  return { x, y };
+}
 
 const CanvasTest = () => {
   const astronautImgRef = useRef<HTMLImageElement | null>(null);
@@ -35,6 +52,7 @@ const CanvasTest = () => {
   const [isShooting, setIsShooting] = useState(false);
   const [madeMove, setMadeMove] = useState(false);
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
+  const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
 
   useEffect(() => {
     setAstronautImage(astronautImgRef);
@@ -45,7 +63,7 @@ const CanvasTest = () => {
     const canvas = setCanvasRef(canvasRef);
     const context = canvas!.getContext('2d');
     setContextRef(context, contextRef);
-    drawGrid(contextRef.current!, generateGrid(GRID_RADIUS));
+    drawGridOrthometric(contextRef.current!, generateGrid(GRID_RADIUS));
   }, []);
 
   useEffect(() => {
@@ -72,8 +90,42 @@ const CanvasTest = () => {
   }, []);
 
   useEffect(() => {
-    repaintCanvas(
-      isShooting,
+    const canvas = canvasRef.current!;
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      // Convert mouse coords to board coords
+      const { x, y } = inverseOrthometricTransformation(
+        mouseX,
+        mouseY,
+        HEX_SIZE,
+      );
+
+      // Find nearest hex
+      let nearest: Hex | null = null;
+      let minDist = Infinity;
+      if (!gameState) return;
+
+      for (const h of gameState.grid) {
+        const center = hexToPixel(h);
+        const dx = center.x - x;
+        const dy = center.y - y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < minDist && dist < HEX_SIZE) {
+          nearest = h;
+          minDist = dist;
+        }
+      }
+
+      setHoveredHex(nearest);
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+
+    repaint(
       contextRef,
       canvasRef,
       socketRef,
@@ -83,8 +135,14 @@ const CanvasTest = () => {
       skullImgRef,
       gameState,
       isCanvasHovered,
+      isShooting,
+      hoveredHex,
     );
-  }, [isShooting, gameState, isCanvasHovered]);
+
+    return () => {
+      canvas.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [isShooting, gameState, isCanvasHovered, hoveredHex]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (madeMove) return;
@@ -92,8 +150,11 @@ const CanvasTest = () => {
     if (gameState.isAstronautDead || gameState.isAlienDead) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const ox = event.clientX - rect.left;
+    const oy = event.clientY - rect.top;
+
+    const { x, y } = inverseOrthometricTransformation(ox, oy, HEX_SIZE);
+
     const move = pixelToHex(x, y);
 
     if (

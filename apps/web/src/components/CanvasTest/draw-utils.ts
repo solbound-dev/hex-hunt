@@ -15,45 +15,72 @@ type StyleOptions = {
   strokeStyle: string;
   lineWidth: number;
   fillStyle?: string;
+  blur?: boolean;
 };
 
-function drawHex(
+function applyOrthometricTransformation(x: number, y: number, hexSize: number) {
+  return {
+    ox: x * 0.7 - y * 0.7 + 7 * hexSize,
+    oy: 0.5 * x * 0.7 + 0.5 * y * 0.7 + 2 * hexSize,
+  };
+}
+
+function drawHexOrthometric(
   ctx: CanvasRenderingContext2D,
-  hex: Hex,
+  hex: Hex | null,
   size: number,
   styleOptions: StyleOptions,
 ) {
+  if (!hex) return;
   const center = hexToPixel(hex);
   const x = center.x;
   const y = center.y;
   ctx.beginPath();
-  ctx.strokeStyle = styleOptions.strokeStyle;
   for (let i = 0; i < 6; i++) {
     const angle = ((2 * PI) / 6) * i + PI / 6;
     const vx = x + size * Math.cos(angle);
     const vy = y + size * Math.sin(angle);
 
-    if (i === 0) ctx.moveTo(vx, vy);
-    else ctx.lineTo(vx, vy);
+    const { ox: ovx, oy: ovy } = applyOrthometricTransformation(vx, vy, size);
+    if (i === 0) ctx.moveTo(ovx, ovy);
+    else ctx.lineTo(ovx, ovy);
   }
-  ctx.lineWidth = styleOptions.lineWidth;
-
   if (styleOptions.fillStyle) {
     ctx.fillStyle = styleOptions.fillStyle;
     ctx.fill();
   }
 
+  // Stroke depending on blur mode
+  if (styleOptions.blur) {
+    // Only blurred stroke
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = styleOptions.strokeStyle;
+    ctx.stroke();
+  } else {
+    // Only crisp stroke
+    ctx.strokeStyle = styleOptions.strokeStyle;
+    ctx.lineWidth = styleOptions.lineWidth;
+    ctx.shadowBlur = 0;
+    ctx.stroke();
+  }
+
   ctx.closePath();
   ctx.stroke();
+
+  ctx.restore();
+  ctx.save();
+
+  ctx.fillStyle = 'white';
+  ctx.font = `${Math.floor(size / 4)}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
+  ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
 }
 
-export function drawGrid(ctx: CanvasRenderingContext2D, grid: Hex[]) {
-  grid.forEach((hex) =>
-    drawHex(ctx, hex, HEX_SIZE, { strokeStyle: 'white', lineWidth: 1 }),
-  );
-}
-
-export function drawPlayer(
+export function drawPlayerOrthometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex,
   isAstronaut: boolean,
@@ -64,26 +91,25 @@ export function drawPlayer(
   const x = center.x;
   const y = center.y;
   const color = isAstronaut ? 'blue' : 'red';
-  drawHex(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
-  ctx.save();
-  ctx.clip();
+  drawHexOrthometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
 
+  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
   if (image.complete) {
     ctx.drawImage(
       image,
-      x - image.width,
-      y - image.height,
+      ocx - image.width,
+      ocy - image.height * 1.4,
       image.width * 2,
-      image.height * 2,
+      image.height * 2.1,
     );
   }
   ctx.restore();
   ctx.strokeStyle = color;
   ctx.lineWidth = 3;
-  ctx.stroke();
+  // ctx.stroke();
 }
 
-export function drawLastSeenPlayer(
+export function drawLastSeenPlayerOrthometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex,
   size: number,
@@ -93,79 +119,46 @@ export function drawLastSeenPlayer(
   const x = center.x;
   const y = center.y;
 
-  ctx.save();
-  drawHex(ctx, hex, size, { strokeStyle: 'white', lineWidth: 1 });
-  ctx.clip();
-  ctx.globalAlpha = 0.5;
+  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
 
   if (image.complete) {
     ctx.drawImage(
       image,
-      x - image.width,
-      y - image.height,
+      ocx - image.width,
+      ocy - image.height * 1.4,
       image.width * 2,
-      image.height * 2,
+      image.height * 2.1,
     );
   }
 
   ctx.restore();
 }
 
-export function drawCard(
+export function drawCardOrthometric(
   ctx: CanvasRenderingContext2D,
   cardPos: Hex | null,
   image: HTMLImageElement,
 ) {
   if (cardPos) {
     const center = hexToPixel(cardPos);
+    const x = center.x;
+    const y = center.y;
 
-    const cardWidth = HEX_SIZE * 0.9;
-    const cardHeight = HEX_SIZE * 0.6;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(
-      center.x - cardWidth / 2,
-      center.y - cardHeight / 2,
-      cardWidth,
-      cardHeight,
-    );
-    ctx.closePath();
-    ctx.clip();
+    const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, HEX_SIZE);
 
     if (image.complete) {
       ctx.drawImage(
         image,
-        center.x - image.width,
-        center.y - image.height,
+        ocx - image.width,
+        ocy - image.height * 1.7,
         image.width * 2,
-        image.height * 2,
+        image.height * 2.3,
       );
     }
-    ctx.restore();
   }
 }
 
-export function drawShootHighlight(
-  ctx: CanvasRenderingContext2D,
-  pos: Hex,
-  grid: Hex[],
-  disappearedHexes: Hex[],
-  size: number,
-) {
-  pos.neighbors().forEach((n) => {
-    if (isInGrid(n, grid, disappearedHexes)) {
-      drawHex(ctx, n, size, {
-        strokeStyle: 'white',
-        lineWidth: 1,
-        fillStyle: 'rgba(255, 255, 0, 100)',
-      });
-      ctx.stroke();
-    }
-  });
-}
-
-export function drawAvailableMovesHighlight(
+export function drawAvailableMovesHighlightOrthometric(
   ctx: CanvasRenderingContext2D,
   pos: Hex,
   grid: Hex[],
@@ -175,7 +168,7 @@ export function drawAvailableMovesHighlight(
   const positionInstance = new Hex(pos.q, pos.r);
   positionInstance.neighbors().forEach((n) => {
     if (isInGrid(n, grid, disappearedHexes)) {
-      drawHex(ctx, n, size, {
+      drawHexOrthometric(ctx, n, size, {
         strokeStyle: 'white',
         lineWidth: 1,
         fillStyle: 'rgba(0, 255, 0, 0.1)',
@@ -185,40 +178,26 @@ export function drawAvailableMovesHighlight(
   });
 }
 
-export function drawDeadPlayer(
+export function drawShootHighlightOrthometric(
   ctx: CanvasRenderingContext2D,
-  deadPlayerPos: Hex,
-  size: number,
-  image: HTMLImageElement,
-) {
-  const center = hexToPixel(deadPlayerPos);
-  const x = center.x;
-  const y = center.y;
-
-  if (image.complete) {
-    const imgSize = size * 1.2;
-    ctx.drawImage(image, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);
-  }
-}
-
-export function drawDisappearedHexes(
-  ctx: CanvasRenderingContext2D,
+  pos: Hex,
+  grid: Hex[],
   disappearedHexes: Hex[],
   size: number,
 ) {
-  if (disappearedHexes.length) {
-    disappearedHexes.forEach((hex) => {
-      drawHex(ctx, hex, size, {
-        strokeStyle: 'rgba(139, 0,0,1)',
-        fillStyle: 'rgba(139, 0,0,1)',
+  pos.neighbors().forEach((n) => {
+    if (isInGrid(n, grid, disappearedHexes)) {
+      drawHexOrthometric(ctx, n, size, {
+        strokeStyle: 'white',
         lineWidth: 1,
+        fillStyle: 'rgba(255, 255, 0, 100)',
       });
       ctx.stroke();
-    });
-  }
+    }
+  });
 }
 
-export function drawZoneContractionWarning(
+export function drawZoneContractionWarningOrthometric(
   ctx: CanvasRenderingContext2D,
   grid: Hex[],
   currentRadius: number,
@@ -228,7 +207,7 @@ export function drawZoneContractionWarning(
     grid.forEach((hex) => {
       const newHex = new Hex(hex.q, hex.r);
       if (newHex.distanceTo(new Hex(0, 0)) === currentRadius) {
-        drawHex(ctx, hex, size, {
+        drawHexOrthometric(ctx, hex, size, {
           strokeStyle: 'rgba(255, 140,0, 0.5)',
           fillStyle: 'rgba(255, 140,0, 0.5)',
           lineWidth: 1,
@@ -239,7 +218,77 @@ export function drawZoneContractionWarning(
   }
 }
 
-function repaint(
+export function drawDisappearedHexesOrthometric(
+  ctx: CanvasRenderingContext2D,
+  disappearedHexes: Hex[],
+  size: number,
+) {
+  if (disappearedHexes.length) {
+    disappearedHexes.forEach((hex) => {
+      drawHexOrthometric(ctx, hex, size, {
+        strokeStyle: 'rgba(139, 0,0,1)',
+        fillStyle: 'rgba(139, 0,0,1)',
+        lineWidth: 1,
+      });
+      ctx.stroke();
+    });
+  }
+}
+
+export function drawDeadPlayerOrthometric(
+  ctx: CanvasRenderingContext2D,
+  deadPlayerPos: Hex,
+  size: number,
+  image: HTMLImageElement,
+) {
+  const center = hexToPixel(deadPlayerPos);
+  const x = center.x;
+  const y = center.y;
+
+  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, HEX_SIZE);
+
+  if (image.complete) {
+    const imgSize = size * 0.8;
+    ctx.drawImage(
+      image,
+      ocx - imgSize / 2,
+      ocy - imgSize / 1.7,
+      imgSize,
+      imgSize,
+    );
+  }
+}
+
+export function drawHoverHighlight(
+  ctx: CanvasRenderingContext2D,
+  hex: Hex | null,
+  size: number,
+) {
+  if (!hex) return;
+
+  drawHexOrthometric(ctx, hex, size, {
+    strokeStyle: 'yellow',
+    lineWidth: 2,
+    fillStyle: 'rgba(255, 255, 0, 1)',
+  });
+}
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+export function drawGridOrthometric(
+  ctx: CanvasRenderingContext2D,
+  grid: Hex[],
+) {
+  grid.forEach((hex) =>
+    drawHexOrthometric(ctx, hex, HEX_SIZE, {
+      strokeStyle: 'white',
+      lineWidth: 1,
+    }),
+  );
+}
+
+export function repaint(
   contextRef: React.RefObject<CanvasRenderingContext2D | null>,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
@@ -249,6 +298,8 @@ function repaint(
   skullImgRef: React.RefObject<HTMLImageElement | null>,
   gameState: GameData | undefined,
   isCanvasHovered: boolean,
+  isShooting: boolean,
+  hoveredHex: Hex | null,
 ) {
   if (!gameState) return;
 
@@ -258,9 +309,30 @@ function repaint(
     canvasRef.current!.width,
     canvasRef.current!.height,
   );
-  drawGrid(contextRef.current!, generateGrid(GRID_RADIUS));
+  drawGridOrthometric(contextRef.current!, generateGrid(GRID_RADIUS));
 
-  drawDisappearedHexes(
+  drawHexOrthometric(contextRef.current!, hoveredHex, HEX_SIZE, {
+    strokeStyle: `rgba(255,255,0,1)`,
+    lineWidth: 4,
+    blur: true,
+  });
+
+  if (isShooting) {
+    const pos =
+      socketRef.current?.id === gameState?.astronautId
+        ? new Hex(gameState!.astronautPos!.q, gameState!.astronautPos!.r)
+        : new Hex(gameState!.alienPos!.q, gameState!.alienPos!.r);
+
+    drawShootHighlightOrthometric(
+      contextRef.current!,
+      pos,
+      gameState!.grid,
+      gameState!.disappearedHexes,
+      HEX_SIZE,
+    );
+  }
+
+  drawDisappearedHexesOrthometric(
     contextRef.current!,
     gameState.disappearedHexes,
     HEX_SIZE,
@@ -271,7 +343,7 @@ function repaint(
     (gameState.moves % 8 === 6 || gameState.moves % 8 === 7) &&
     gameState.currentRadius > 1
   ) {
-    drawZoneContractionWarning(
+    drawZoneContractionWarningOrthometric(
       contextRef.current!,
       gameState.grid,
       gameState.currentRadius,
@@ -279,60 +351,83 @@ function repaint(
     );
   }
 
+  //ASTRONAUT --------------------------------
   if (socketRef.current?.id === gameState.astronautId) {
-    if (isCanvasHovered) {
-      drawAvailableMovesHighlight(
-        contextRef.current!,
-        gameState.astronautPos!,
-        gameState.grid,
-        gameState.disappearedHexes,
-        HEX_SIZE,
-      );
-    }
-    drawPlayer(
-      contextRef.current!,
-      gameState.astronautPos!,
-      true,
-      HEX_SIZE,
-      astronautImgRef.current!,
+    paintInOrder(
+      contextRef,
+      astronautImgRef,
+      alienImgRef,
+      cardImgRef,
+      gameState,
+      'astronaut',
+      isCanvasHovered,
     );
+    // if (isCanvasHovered) {
+    //   drawAvailableMovesHighlightOrthometric(
+    //     contextRef.current!,
+    //     gameState.astronautPos!,
+    //     gameState.grid,
+    //     gameState.disappearedHexes,
+    //     HEX_SIZE,
+    //   );
+    // }
+    // drawPlayerOrthometric(
+    //   contextRef.current!,
+    //   gameState.astronautPos!,
+    //   true,
+    //   HEX_SIZE,
+    //   astronautImgRef.current!,
+    // );
+    //ALIEN -------------------------------
   } else if (socketRef.current?.id === gameState.alienId) {
-    if (isCanvasHovered) {
-      drawAvailableMovesHighlight(
-        contextRef.current!,
-        gameState.alienPos!,
-        gameState.grid,
-        gameState.disappearedHexes,
-        HEX_SIZE,
-      );
-    }
-    drawPlayer(
-      contextRef.current!,
-      gameState.alienPos!,
-      false,
-      HEX_SIZE,
-      alienImgRef.current!,
+    paintInOrder(
+      contextRef,
+      astronautImgRef,
+      alienImgRef,
+      cardImgRef,
+      gameState,
+      'alien',
+      isCanvasHovered,
     );
+    // if (isCanvasHovered) {
+    //   drawAvailableMovesHighlightOrthometric(
+    //     contextRef.current!,
+    //     gameState.alienPos!,
+    //     gameState.grid,
+    //     gameState.disappearedHexes,
+    //     HEX_SIZE,
+    //   );
+    // }
+    // drawPlayerOrthometric(
+    //   contextRef.current!,
+    //   gameState.alienPos!,
+    //   false,
+    //   HEX_SIZE,
+    //   alienImgRef.current!,
+    // );
   }
-  if (socketRef.current?.id === gameState.alienId) {
-    drawLastSeenPlayer(
-      contextRef.current!,
-      gameState.lastSeenAstronautPos!,
-      HEX_SIZE,
-      astronautImgRef.current!,
-    );
-  } else if (socketRef.current?.id === gameState.astronautId) {
-    drawLastSeenPlayer(
-      contextRef.current!,
-      gameState.lastSeenAlienPos!,
-      HEX_SIZE,
-      alienImgRef.current!,
-    );
-  }
-  drawCard(contextRef.current!, gameState.cardPos, cardImgRef.current!);
-
+  // if (socketRef.current?.id === gameState.alienId) {
+  //   drawLastSeenPlayerOrthometric(
+  //     contextRef.current!,
+  //     gameState.lastSeenAstronautPos!,
+  //     HEX_SIZE,
+  //     astronautImgRef.current!,
+  //   );
+  // } else if (socketRef.current?.id === gameState.astronautId) {
+  //   drawLastSeenPlayerOrthometric(
+  //     contextRef.current!,
+  //     gameState.lastSeenAlienPos!,
+  //     HEX_SIZE,
+  //     alienImgRef.current!,
+  //   );
+  // }
+  // drawCardOrthometric(
+  //   contextRef.current!,
+  //   gameState.cardPos,
+  //   cardImgRef.current!,
+  // );
   if (gameState.isAstronautDead) {
-    drawDeadPlayer(
+    drawDeadPlayerOrthometric(
       contextRef.current!,
       gameState.astronautPos!,
       HEX_SIZE,
@@ -340,7 +435,7 @@ function repaint(
     );
   }
   if (gameState.isAlienDead) {
-    drawDeadPlayer(
+    drawDeadPlayerOrthometric(
       contextRef.current!,
       gameState.alienPos!,
       HEX_SIZE,
@@ -349,47 +444,105 @@ function repaint(
   }
 }
 
-export function repaintCanvas(
-  isShooting: boolean,
+function paintInOrder(
   contextRef: React.RefObject<CanvasRenderingContext2D | null>,
-  canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
   astronautImgRef: React.RefObject<HTMLImageElement | null>,
   alienImgRef: React.RefObject<HTMLImageElement | null>,
   cardImgRef: React.RefObject<HTMLImageElement | null>,
-  skullImgRef: React.RefObject<HTMLImageElement | null>,
-  gameState: GameData | undefined,
+  gameState: GameData,
+  playerType: 'astronaut' | 'alien',
   isCanvasHovered: boolean,
 ) {
-  if (isShooting) {
-    const pos =
-      socketRef.current?.id === gameState?.astronautId
-        ? new Hex(gameState!.astronautPos!.q, gameState!.astronautPos!.r)
-        : new Hex(gameState!.alienPos!.q, gameState!.alienPos!.r);
+  const assets: Hex[] = [];
 
-    drawShootHighlight(
-      contextRef.current!,
-      pos,
-      gameState!.grid,
-      gameState!.disappearedHexes,
-      HEX_SIZE,
+  if (playerType === 'astronaut') {
+    assets.push(
+      gameState.astronautPos!,
+      gameState.lastSeenAlienPos!,
+      gameState.cardPos!,
     );
-  } else if (
-    gameState?.astronautId &&
-    gameState?.alienId &&
-    gameState?.cardPos
-  ) {
-    repaint(
-      contextRef,
-      canvasRef,
-      socketRef,
-      astronautImgRef,
-      alienImgRef,
-      cardImgRef,
-      skullImgRef,
-      gameState,
-      isCanvasHovered,
+
+    if (isCanvasHovered) {
+      drawAvailableMovesHighlightOrthometric(
+        contextRef.current!,
+        gameState.astronautPos!,
+        gameState.grid,
+        gameState.disappearedHexes,
+        HEX_SIZE,
+      );
+    }
+
+    const sortedAssets = assets.sort((a, b) => a.r - b.r);
+
+    for (let i = 0; i < sortedAssets.length; i++) {
+      const asset = new Hex(sortedAssets[i].q, sortedAssets[i].r);
+      if (asset.equals(gameState.astronautPos!)) {
+        drawPlayerOrthometric(
+          contextRef.current!,
+          gameState.astronautPos!,
+          true,
+          HEX_SIZE,
+          astronautImgRef.current!,
+        );
+      } else if (asset.equals(gameState.lastSeenAlienPos!)) {
+        drawLastSeenPlayerOrthometric(
+          contextRef.current!,
+          gameState.lastSeenAlienPos!,
+          HEX_SIZE,
+          alienImgRef.current!,
+        );
+      } else if (asset.equals(gameState.cardPos!)) {
+        drawCardOrthometric(
+          contextRef.current!,
+          gameState.cardPos,
+          cardImgRef.current!,
+        );
+      }
+    }
+  } else {
+    assets.push(
+      gameState.alienPos!,
+      gameState.lastSeenAstronautPos!,
+      gameState.cardPos!,
     );
+
+    if (isCanvasHovered) {
+      drawAvailableMovesHighlightOrthometric(
+        contextRef.current!,
+        gameState.alienPos!,
+        gameState.grid,
+        gameState.disappearedHexes,
+        HEX_SIZE,
+      );
+    }
+
+    const sortedAssets = assets.sort((a, b) => a.r - b.r);
+
+    for (let i = 0; i < sortedAssets.length; i++) {
+      const asset = new Hex(sortedAssets[i].q, sortedAssets[i].r);
+      if (asset.equals(gameState.alienPos!)) {
+        drawPlayerOrthometric(
+          contextRef.current!,
+          gameState.alienPos!,
+          false,
+          HEX_SIZE,
+          alienImgRef.current!,
+        );
+      } else if (asset.equals(gameState.lastSeenAstronautPos!)) {
+        drawLastSeenPlayerOrthometric(
+          contextRef.current!,
+          gameState.lastSeenAstronautPos!,
+          HEX_SIZE,
+          astronautImgRef.current!,
+        );
+      } else if (asset.equals(gameState.cardPos!)) {
+        drawCardOrthometric(
+          contextRef.current!,
+          gameState.cardPos,
+          cardImgRef.current!,
+        );
+      }
+    }
   }
 }
 
@@ -400,19 +553,20 @@ export function paintCanvasOnGameStart(
   cardImgRef: React.RefObject<HTMLImageElement | null>,
   data: GameData,
 ) {
-  drawPlayer(
+  drawPlayerOrthometric(
     contextRef.current!,
     data.astronautPos!,
     true,
     HEX_SIZE,
     astronautImgRef.current!,
   );
-  drawPlayer(
+  drawPlayerOrthometric(
     contextRef.current!,
     data.alienPos!,
     false,
     HEX_SIZE,
     alienImgRef.current!,
   );
-  drawCard(contextRef.current!, data.cardPos, cardImgRef.current!);
+
+  drawCardOrthometric(contextRef.current!, data.cardPos, cardImgRef.current!);
 }
