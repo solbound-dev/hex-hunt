@@ -45,8 +45,8 @@ export function setCardImage(
 ) {
   const card = new Image();
   card.src = cardSrc;
-  card.width = 80;
-  card.height = 80;
+  card.width = 37;
+  card.height = 25;
   card.onload = () => {
     cardImgRef.current = card;
   };
