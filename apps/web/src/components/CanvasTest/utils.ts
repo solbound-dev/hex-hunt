@@ -6,17 +6,6 @@ import backgroundRef from '../../assets/background-11.png';
 
 import { CANVAS_SIZE, Hex } from './calculation-utils';
 
-export function getPlayerType(
-  socketId: string | null | undefined,
-  astronautId: string | null | undefined,
-  alienId: string | null | undefined,
-) {
-  if (!socketId || !astronautId || !alienId) return '';
-  if (socketId === astronautId) return 'Astronaut';
-  else if (socketId === alienId) return 'Alien';
-  else return '';
-}
-
 export function setBackgroundImage(
   backgroundImgRef: React.RefObject<HTMLImageElement | null>,
 ) {

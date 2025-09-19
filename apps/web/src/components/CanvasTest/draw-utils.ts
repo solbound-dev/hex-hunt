@@ -7,6 +7,8 @@ import {
   hexToPixel,
   isInGrid,
   PI,
+  Player,
+  PlayerType,
   type GameData,
 } from './calculation-utils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
@@ -90,14 +92,14 @@ function drawHexOrthometric(
 export function drawPlayerOrthometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex,
-  isAstronaut: boolean,
+  playerType: PlayerType,
   size: number,
   image: HTMLImageElement,
 ) {
   const center = hexToPixel(hex);
   const x = center.x;
   const y = center.y;
-  const color = isAstronaut ? 'blue' : 'red';
+  const color = playerType === PlayerType.Astronaut ? 'blue' : 'red';
   drawHexOrthometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
 
   const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
@@ -298,7 +300,6 @@ export function repaint(
   contextRef: React.RefObject<CanvasRenderingContext2D | null>,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
-  backgroundImgRef: React.RefObject<HTMLImageElement | null>,
   astronautImgRef: React.RefObject<HTMLImageElement | null>,
   alienImgRef: React.RefObject<HTMLImageElement | null>,
   cardImgRef: React.RefObject<HTMLImageElement | null>,
@@ -309,6 +310,14 @@ export function repaint(
   hoveredHex: Hex | null,
 ) {
   if (!gameState) return;
+
+  const imagesMap: Record<
+    PlayerType,
+    React.RefObject<HTMLImageElement | null>
+  > = {
+    [PlayerType.Astronaut]: astronautImgRef,
+    [PlayerType.Alien]: alienImgRef,
+  };
 
   contextRef.current!.clearRect(
     0,
@@ -331,11 +340,16 @@ export function repaint(
     blur: true,
   });
 
+  const currentPlayer = gameState.players.find(
+    (p) => p.id === socketRef.current?.id,
+  )!;
+
+  const otherPlayers = gameState.players.filter(
+    (p) => p.id !== socketRef.current?.id,
+  );
+
   if (isShooting) {
-    const pos =
-      socketRef.current?.id === gameState?.astronautId
-        ? new Hex(gameState!.astronautPos!.q, gameState!.astronautPos!.r)
-        : new Hex(gameState!.alienPos!.q, gameState!.alienPos!.r);
+    const pos = currentPlayer.pos!;
 
     drawShootHighlightOrthometric(
       contextRef.current!,
@@ -365,30 +379,17 @@ export function repaint(
     );
   }
 
-  //ASTRONAUT --------------------------------
-  if (socketRef.current?.id === gameState.astronautId) {
-    paintInOrder(
-      contextRef,
-      astronautImgRef,
-      alienImgRef,
-      cardImgRef,
-      skullImgRef,
-      gameState,
-      'astronaut',
-      isCanvasHovered,
-    );
-  } else if (socketRef.current?.id === gameState.alienId) {
-    paintInOrder(
-      contextRef,
-      astronautImgRef,
-      alienImgRef,
-      cardImgRef,
-      skullImgRef,
-      gameState,
-      'alien',
-      isCanvasHovered,
-    );
-  }
+  paintInOrder(
+    contextRef,
+    astronautImgRef,
+    alienImgRef,
+    cardImgRef,
+    skullImgRef,
+    gameState,
+    currentPlayer,
+    otherPlayers,
+    isCanvasHovered,
+  );
 }
 
 function paintInOrder(
@@ -398,153 +399,58 @@ function paintInOrder(
   cardImgRef: React.RefObject<HTMLImageElement | null>,
   skullImgRef: React.RefObject<HTMLImageElement | null>,
   gameState: GameData,
-  playerType: 'astronaut' | 'alien',
+  currentPlayer: Player,
+  otherPlayers: Player[],
   isCanvasHovered: boolean,
 ) {
+  if (isCanvasHovered) {
+    drawAvailableMovesHighlightOrthometric(
+      contextRef.current!,
+      currentPlayer.pos!,
+      gameState.grid,
+      gameState.disappearedHexes,
+      HEX_SIZE,
+    );
+  }
+
   const assets: Hex[] = [];
+  otherPlayers.forEach((p) => assets.push(p.lastSeenPos!));
+  assets.push(currentPlayer.pos!, gameState.cardPos!);
 
-  if (playerType === 'astronaut') {
-    assets.push(
-      gameState.astronautPos!,
-      gameState.lastSeenAlienPos!,
-      gameState.cardPos!,
-    );
-
-    if (isCanvasHovered) {
-      drawAvailableMovesHighlightOrthometric(
-        contextRef.current!,
-        gameState.astronautPos!,
-        gameState.grid,
-        gameState.disappearedHexes,
-        HEX_SIZE,
-      );
-    }
-
-    const sortedAssets = assets.sort((a, b) => a.r - b.r);
-
-    for (let i = 0; i < sortedAssets.length; i++) {
-      const asset = new Hex(sortedAssets[i].q, sortedAssets[i].r);
-      if (asset.equals(gameState.astronautPos!)) {
-        if (!gameState.isAstronautDead) {
-          drawPlayerOrthometric(
-            contextRef.current!,
-            gameState.astronautPos!,
-            true,
-            HEX_SIZE,
-            astronautImgRef.current!,
-          );
-        } else {
-          drawDeadPlayerOrthometric(
-            contextRef.current!,
-            gameState.astronautPos!,
-            skullImgRef.current!,
-          );
-        }
-      } else if (asset.equals(gameState.lastSeenAlienPos!)) {
-        drawLastSeenPlayerOrthometric(
+  const sortedAssets = assets.sort((a, b) => a.r - b.r);
+  sortedAssets.forEach((sa) => {
+    const asset = new Hex(sa.q, sa.r);
+    if (asset.equals(currentPlayer.pos!)) {
+      //TODO: neki mapper iz playertype u koji se image mora renderat
+      if (!currentPlayer.isDead) {
+        drawPlayerOrthometric(
           contextRef.current!,
-          gameState.lastSeenAlienPos!,
-          HEX_SIZE,
-          alienImgRef.current!,
-        );
-        if (gameState.isAlienDead) {
-          drawDeadPlayerOrthometric(
-            contextRef.current!,
-            gameState.alienPos!,
-            skullImgRef.current!,
-          );
-        }
-      } else if (asset.equals(gameState.cardPos!)) {
-        drawCardOrthometric(
-          contextRef.current!,
-          gameState.cardPos,
-          cardImgRef.current!,
-        );
-      }
-    }
-  } else {
-    assets.push(
-      gameState.alienPos!,
-      gameState.lastSeenAstronautPos!,
-      gameState.cardPos!,
-    );
-
-    if (isCanvasHovered) {
-      drawAvailableMovesHighlightOrthometric(
-        contextRef.current!,
-        gameState.alienPos!,
-        gameState.grid,
-        gameState.disappearedHexes,
-        HEX_SIZE,
-      );
-    }
-
-    const sortedAssets = assets.sort((a, b) => a.r - b.r);
-
-    for (let i = 0; i < sortedAssets.length; i++) {
-      const asset = new Hex(sortedAssets[i].q, sortedAssets[i].r);
-      if (asset.equals(gameState.alienPos!)) {
-        if (!gameState.isAlienDead) {
-          drawPlayerOrthometric(
-            contextRef.current!,
-            gameState.alienPos!,
-            false,
-            HEX_SIZE,
-            alienImgRef.current!,
-          );
-        } else {
-          drawDeadPlayerOrthometric(
-            contextRef.current!,
-            gameState.alienPos!,
-            skullImgRef.current!,
-          );
-        }
-      } else if (asset.equals(gameState.lastSeenAstronautPos!)) {
-        drawLastSeenPlayerOrthometric(
-          contextRef.current!,
-          gameState.lastSeenAstronautPos!,
+          currentPlayer.pos!,
+          currentPlayer.playerType,
           HEX_SIZE,
           astronautImgRef.current!,
         );
-        if (gameState.isAstronautDead) {
-          drawDeadPlayerOrthometric(
-            contextRef.current!,
-            gameState.astronautPos!,
-            skullImgRef.current!,
-          );
-        }
-      } else if (asset.equals(gameState.cardPos!)) {
-        drawCardOrthometric(
+      } else {
+        drawDeadPlayerOrthometric(
           contextRef.current!,
-          gameState.cardPos,
-          cardImgRef.current!,
+          currentPlayer.pos!,
+          skullImgRef.current!,
         );
       }
+    } else if (asset.equals(gameState.cardPos!)) {
+      drawCardOrthometric(
+        contextRef.current!,
+        gameState.cardPos,
+        cardImgRef.current!,
+      );
+    } else {
+      //TODO: neki mapper iz playertype u koji se image mora renderat
+      drawLastSeenPlayerOrthometric(
+        contextRef.current!,
+        asset,
+        HEX_SIZE,
+        alienImgRef.current!,
+      );
     }
-  }
-}
-
-export function paintCanvasOnGameStart(
-  contextRef: React.RefObject<CanvasRenderingContext2D | null>,
-  astronautImgRef: React.RefObject<HTMLImageElement | null>,
-  alienImgRef: React.RefObject<HTMLImageElement | null>,
-  cardImgRef: React.RefObject<HTMLImageElement | null>,
-  data: GameData,
-) {
-  drawPlayerOrthometric(
-    contextRef.current!,
-    data.astronautPos!,
-    true,
-    HEX_SIZE,
-    astronautImgRef.current!,
-  );
-  drawPlayerOrthometric(
-    contextRef.current!,
-    data.alienPos!,
-    false,
-    HEX_SIZE,
-    alienImgRef.current!,
-  );
-
-  drawCardOrthometric(contextRef.current!, data.cardPos, cardImgRef.current!);
+  });
 }
