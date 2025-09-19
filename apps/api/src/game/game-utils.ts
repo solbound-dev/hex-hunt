@@ -200,6 +200,13 @@ export function updateAndEmitGameState(
     game.isAlienDead = true;
   }
 
+  if (game.astronautCards === 3 && game.astronautPos?.equals(new Hex(0, 0))) {
+    game.isAlienDead = true;
+  }
+  if (game.alienCards === 3 && game.alienPos?.equals(new Hex(0, 0))) {
+    game.isAstronautDead = true;
+  }
+
   websocketServer.to(gameId).emit('gameState', game);
   if (!game.astronautJustPickedCard) {
     game.isAstronautImmune = false;

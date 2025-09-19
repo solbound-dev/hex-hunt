@@ -209,35 +209,38 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       if (!game.isAstronautShooting) {
-        game.astronautPos = game.astronautPendingMove;
+        game.astronautPos = new Hex(
+          game.astronautPendingMove.q,
+          game.astronautPendingMove.r,
+        );
       }
       if (!game.isAlienShooting) {
-        game.alienPos = game.alienPendingMove;
+        game.alienPos = new Hex(
+          game.alienPendingMove.q,
+          game.alienPendingMove.r,
+        );
       }
 
       if (didAstronautCollectCard(game)) {
-        const nextCardPos = spawnCard(game);
-        game.lastSeenAstronautPos = game.cardPos;
-        game.cardPos = nextCardPos;
-        game.astronautCards++;
-        game.astronautJustPickedCard = true;
-        game.isAstronautImmune = true;
-        if (game.astronautCards >= 3) {
-          console.log('ASTRONAUT WINS');
-          game.isAlienDead = true;
+        if (game.astronautCards < 3) {
+          const nextCardPos = spawnCard(game);
+          game.lastSeenAstronautPos = game.cardPos;
+          game.cardPos = nextCardPos;
+          game.astronautCards++;
+          game.astronautJustPickedCard = true;
+          game.isAstronautImmune = true;
         }
+        //maybe we want to put game.cardPos = nextCardPos; here
       }
 
       if (didAlienCollectCard(game)) {
-        const nextCardPos = spawnCard(game);
-        game.lastSeenAlienPos = game.cardPos;
-        game.cardPos = nextCardPos;
-        game.alienCards++;
-        game.alienJustPickedCard = true;
-        game.isAlienImmune = true;
-        if (game.alienCards >= 3) {
-          console.log('ALIEN WINS');
-          game.isAstronautDead = true;
+        if (game.alienCards < 3) {
+          const nextCardPos = spawnCard(game);
+          game.lastSeenAlienPos = game.cardPos;
+          game.cardPos = nextCardPos;
+          game.alienCards++;
+          game.alienJustPickedCard = true;
+          game.isAlienImmune = true;
         }
       }
 
