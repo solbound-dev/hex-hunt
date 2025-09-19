@@ -320,11 +320,11 @@ export function repaint(
     canvasRef.current!.height,
   );
 
-  drawBackgroundImage(
-    contextRef.current!,
-    canvasRef.current!,
-    backgroundImgRef.current!,
-  );
+  // drawBackgroundImage(
+  //   contextRef.current!,
+  //   canvasRef.current!,
+  //   backgroundImgRef.current!,
+  // );
 
   drawGridOrthometric(contextRef.current!, generateGrid(GRID_RADIUS));
 
