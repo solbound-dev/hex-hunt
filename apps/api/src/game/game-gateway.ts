@@ -192,7 +192,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     //emit if both moves have been made
     if (game.astronautPendingMove !== null && game.alienPendingMove !== null) {
       //SHOOTING CHECK
-
       if (game.isAstronautShooting) {
         game.lastSeenAstronautPos = game.astronautPos;
         shootInDirection(game.astronautPendingMove, game, 'astronaut');
