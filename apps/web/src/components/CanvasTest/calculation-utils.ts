@@ -4,28 +4,37 @@ export const PI = 3.14159;
 export const GRID_RADIUS = 3;
 
 export type GameData = {
-  astronautId: string | null;
-  alienId: string | null;
-  lastSeenAstronautPos: Hex | null;
-  lastSeenAlienPos: Hex | null;
   grid: Hex[];
   disappearedHexes: Hex[];
   warningHexes: Hex[];
   moves: number;
   cardPos: Hex | null;
-  astronautCards: number;
-  alienCards: number;
-  astronautPendingMove: Hex | null;
-  alienPendingMove: Hex | null;
-  isAstronautDead: boolean;
-  isAlienDead: boolean;
   currentRadius: number;
   //this should not get sent to both players:
-  astronautPos: Hex | null;
-  alienPos: Hex | null;
-  isAstronautShooting: boolean | null;
-  isAlienShooting: boolean | null;
+  players: Player[];
 };
+
+export enum PlayerType {
+  Astronaut = 'Astronaut',
+  Alien = 'Alien',
+  // Robot = 'Robot',
+  // Drone = 'Drone',
+}
+
+export class Player {
+  constructor(
+    public playerType: PlayerType,
+    public id: string | null = null,
+    public lastSeenPos: Hex | null = null,
+    public cards: number = 0,
+    public pendingMove: Hex | null = null,
+    public isDead: boolean = false,
+    public justPickedCard: boolean = false,
+    public pos: Hex | null = null,
+    public isShooting: boolean | null = null,
+    public isImmune: boolean = false,
+  ) {}
+}
 
 export class Hex {
   q: number;

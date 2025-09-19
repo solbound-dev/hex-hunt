@@ -15,7 +15,6 @@ import { drawGridOrthometric, repaint } from './draw-utils';
 import { io, type Socket } from 'socket.io-client';
 
 import {
-  getPlayerType,
   isNeighbor,
   setAlienImage,
   setAstronautImage,
@@ -132,7 +131,6 @@ const CanvasTest = () => {
       contextRef,
       canvasRef,
       socketRef,
-      backgroundImgRef,
       astronautImgRef,
       alienImgRef,
       cardImgRef,
@@ -151,7 +149,8 @@ const CanvasTest = () => {
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (madeMove) return;
     if (!gameState) return;
-    if (gameState.isAstronautDead || gameState.isAlienDead) return;
+    const deadPlayerExists = gameState.players.find((p) => p.isDead);
+    if (deadPlayerExists) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const ox = event.clientX - rect.left;
@@ -161,19 +160,15 @@ const CanvasTest = () => {
 
     const move = pixelToHex(x, y);
 
+    const currentPlayer = gameState.players.find(
+      (p) => p.id === socketRef.current?.id,
+    )!;
+
     if (
-      gameState?.astronautId === socketRef.current?.id &&
-      (!isNeighbor(move, gameState!.astronautPos) ||
-        !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
-        isSameMove(move, gameState!.astronautPos))
-    ) {
-      return;
-    }
-    if (
-      gameState?.alienId === socketRef.current?.id &&
-      (!isNeighbor(move, gameState!.alienPos) ||
-        !isInGrid(move, gameState!.grid, gameState!.disappearedHexes) ||
-        isSameMove(move, gameState!.alienPos))
+      currentPlayer &&
+      (!isNeighbor(move, currentPlayer.pos) ||
+        !isInGrid(move, gameState.grid, gameState.disappearedHexes) ||
+        isSameMove(move, currentPlayer.pos))
     ) {
       return;
     }
@@ -197,33 +192,23 @@ const CanvasTest = () => {
           <h3>Game: {gameId}</h3>
           <h1>
             You are{' '}
-            <span
-              style={{
-                color:
-                  getPlayerType(
-                    socketRef.current?.id,
-                    gameState?.astronautId,
-                    gameState?.alienId,
-                  ) === 'Astronaut'
-                    ? 'blue'
-                    : 'red',
-              }}>
-              {getPlayerType(
+            <span style={{}}>
+              {/* {getPlayerType(
                 socketRef.current?.id,
                 gameState?.astronautId,
                 gameState?.alienId,
-              )}
+              )} */}
             </span>
           </h1>
         </div>
         <div className={c.astronautScore}>
           <p className={c.normalText}>
-            Astronaut cards: {gameState?.astronautCards || 0} / 3
+            {/* Astronaut cards: {gameState?.astronautCards || 0} / 3 */}
           </p>
         </div>
         <div className={c.alienScore}>
           <p className={c.normalText}>
-            Alien cards: {gameState?.alienCards || 0} / 3
+            {/* Alien cards: {gameState?.alienCards || 0} / 3 */}
           </p>
         </div>
         <input
