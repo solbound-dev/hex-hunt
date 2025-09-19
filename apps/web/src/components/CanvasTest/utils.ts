@@ -2,6 +2,7 @@ import astronautSrc from '../../assets/astronaut.png';
 import alienSrc from '../../assets/alien.png';
 import cardSrc from '../../assets/card.png';
 import skullSrc from '../../assets/skull.png';
+import backgroundRef from '../../assets/background-11.png';
 
 import { CANVAS_SIZE, Hex } from './calculation-utils';
 
@@ -14,6 +15,18 @@ export function getPlayerType(
   if (socketId === astronautId) return 'Astronaut';
   else if (socketId === alienId) return 'Alien';
   else return '';
+}
+
+export function setBackgroundImage(
+  backgroundImgRef: React.RefObject<HTMLImageElement | null>,
+) {
+  const background = new Image();
+  background.src = backgroundRef;
+  background.width = CANVAS_SIZE;
+  background.height = CANVAS_SIZE;
+  background.onload = () => {
+    backgroundImgRef.current = background;
+  };
 }
 
 export function setAstronautImage(

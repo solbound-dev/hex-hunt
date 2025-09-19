@@ -19,6 +19,7 @@ import {
   isNeighbor,
   setAlienImage,
   setAstronautImage,
+  setBackgroundImage,
   setCanvasRef,
   setCardImage,
   setContextRef,
@@ -40,6 +41,7 @@ function inverseOrthometricTransformation(
 }
 
 const CanvasTest = () => {
+  const backgroundImgRef = useRef<HTMLImageElement | null>(null);
   const astronautImgRef = useRef<HTMLImageElement | null>(null);
   const alienImgRef = useRef<HTMLImageElement | null>(null);
   const cardImgRef = useRef<HTMLImageElement | null>(null);
@@ -59,6 +61,7 @@ const CanvasTest = () => {
     setAlienImage(alienImgRef);
     setCardImage(cardImgRef);
     setSkullImage(skullImgRef);
+    setBackgroundImage(backgroundImgRef);
 
     const canvas = setCanvasRef(canvasRef);
     const context = canvas!.getContext('2d');
@@ -129,6 +132,7 @@ const CanvasTest = () => {
       contextRef,
       canvasRef,
       socketRef,
+      backgroundImgRef,
       astronautImgRef,
       alienImgRef,
       cardImgRef,

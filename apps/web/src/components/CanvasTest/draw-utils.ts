@@ -25,6 +25,16 @@ function applyOrthometricTransformation(x: number, y: number, hexSize: number) {
   };
 }
 
+export function drawBackgroundImage(
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  image: HTMLImageElement,
+) {
+  if (image.complete) {
+    ctx.drawImage(image, 0, 0, canvas.width / 2, canvas.height / 2);
+  }
+}
+
 function drawHexOrthometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex | null,
@@ -72,12 +82,12 @@ function drawHexOrthometric(
   ctx.restore();
   ctx.save();
 
-  ctx.fillStyle = 'white';
-  ctx.font = `${Math.floor(size / 4)}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
-  ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
+  // ctx.fillStyle = 'white';
+  // ctx.font = `${Math.floor(size / 4)}px Arial`;
+  // ctx.textAlign = 'center';
+  // ctx.textBaseline = 'middle';
+  // const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
+  // ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
 }
 
 export function drawPlayerOrthometric(
@@ -106,7 +116,6 @@ export function drawPlayerOrthometric(
   ctx.restore();
   ctx.strokeStyle = color;
   ctx.lineWidth = 3;
-  // ctx.stroke();
 }
 
 export function drawLastSeenPlayerOrthometric(
@@ -122,6 +131,8 @@ export function drawLastSeenPlayerOrthometric(
   const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
 
   if (image.complete) {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
     ctx.drawImage(
       image,
       ocx - image.width,
@@ -129,9 +140,8 @@ export function drawLastSeenPlayerOrthometric(
       image.width * 2,
       image.height * 2.1,
     );
+    ctx.restore();
   }
-
-  ctx.restore();
 }
 
 export function drawCardOrthometric(
@@ -238,7 +248,6 @@ export function drawDisappearedHexesOrthometric(
 export function drawDeadPlayerOrthometric(
   ctx: CanvasRenderingContext2D,
   deadPlayerPos: Hex,
-  size: number,
   image: HTMLImageElement,
 ) {
   const center = hexToPixel(deadPlayerPos);
@@ -248,11 +257,11 @@ export function drawDeadPlayerOrthometric(
   const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, HEX_SIZE);
 
   if (image.complete) {
-    const imgSize = size * 0.8;
+    const imgSize = image.width;
     ctx.drawImage(
       image,
       ocx - imgSize / 2,
-      ocy - imgSize / 1.7,
+      ocy - imgSize / 1.2,
       imgSize,
       imgSize,
     );
@@ -283,7 +292,7 @@ export function drawGridOrthometric(
   grid.forEach((hex) =>
     drawHexOrthometric(ctx, hex, HEX_SIZE, {
       strokeStyle: 'white',
-      lineWidth: 1,
+      lineWidth: 1.5,
     }),
   );
 }
@@ -292,6 +301,7 @@ export function repaint(
   contextRef: React.RefObject<CanvasRenderingContext2D | null>,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
+  backgroundImgRef: React.RefObject<HTMLImageElement | null>,
   astronautImgRef: React.RefObject<HTMLImageElement | null>,
   alienImgRef: React.RefObject<HTMLImageElement | null>,
   cardImgRef: React.RefObject<HTMLImageElement | null>,
@@ -309,6 +319,13 @@ export function repaint(
     canvasRef.current!.width,
     canvasRef.current!.height,
   );
+
+  drawBackgroundImage(
+    contextRef.current!,
+    canvasRef.current!,
+    backgroundImgRef.current!,
+  );
+
   drawGridOrthometric(contextRef.current!, generateGrid(GRID_RADIUS));
 
   drawHexOrthometric(contextRef.current!, hoveredHex, HEX_SIZE, {
@@ -358,88 +375,21 @@ export function repaint(
       astronautImgRef,
       alienImgRef,
       cardImgRef,
+      skullImgRef,
       gameState,
       'astronaut',
       isCanvasHovered,
     );
-    // if (isCanvasHovered) {
-    //   drawAvailableMovesHighlightOrthometric(
-    //     contextRef.current!,
-    //     gameState.astronautPos!,
-    //     gameState.grid,
-    //     gameState.disappearedHexes,
-    //     HEX_SIZE,
-    //   );
-    // }
-    // drawPlayerOrthometric(
-    //   contextRef.current!,
-    //   gameState.astronautPos!,
-    //   true,
-    //   HEX_SIZE,
-    //   astronautImgRef.current!,
-    // );
-    //ALIEN -------------------------------
   } else if (socketRef.current?.id === gameState.alienId) {
     paintInOrder(
       contextRef,
       astronautImgRef,
       alienImgRef,
       cardImgRef,
+      skullImgRef,
       gameState,
       'alien',
       isCanvasHovered,
-    );
-    // if (isCanvasHovered) {
-    //   drawAvailableMovesHighlightOrthometric(
-    //     contextRef.current!,
-    //     gameState.alienPos!,
-    //     gameState.grid,
-    //     gameState.disappearedHexes,
-    //     HEX_SIZE,
-    //   );
-    // }
-    // drawPlayerOrthometric(
-    //   contextRef.current!,
-    //   gameState.alienPos!,
-    //   false,
-    //   HEX_SIZE,
-    //   alienImgRef.current!,
-    // );
-  }
-  // if (socketRef.current?.id === gameState.alienId) {
-  //   drawLastSeenPlayerOrthometric(
-  //     contextRef.current!,
-  //     gameState.lastSeenAstronautPos!,
-  //     HEX_SIZE,
-  //     astronautImgRef.current!,
-  //   );
-  // } else if (socketRef.current?.id === gameState.astronautId) {
-  //   drawLastSeenPlayerOrthometric(
-  //     contextRef.current!,
-  //     gameState.lastSeenAlienPos!,
-  //     HEX_SIZE,
-  //     alienImgRef.current!,
-  //   );
-  // }
-  // drawCardOrthometric(
-  //   contextRef.current!,
-  //   gameState.cardPos,
-  //   cardImgRef.current!,
-  // );
-  if (gameState.isAstronautDead) {
-    drawDeadPlayerOrthometric(
-      contextRef.current!,
-      gameState.astronautPos!,
-      HEX_SIZE,
-      skullImgRef.current!,
-    );
-  }
-  if (gameState.isAlienDead) {
-    drawDeadPlayerOrthometric(
-      contextRef.current!,
-      gameState.alienPos!,
-      HEX_SIZE,
-      skullImgRef.current!,
     );
   }
 }
@@ -449,6 +399,7 @@ function paintInOrder(
   astronautImgRef: React.RefObject<HTMLImageElement | null>,
   alienImgRef: React.RefObject<HTMLImageElement | null>,
   cardImgRef: React.RefObject<HTMLImageElement | null>,
+  skullImgRef: React.RefObject<HTMLImageElement | null>,
   gameState: GameData,
   playerType: 'astronaut' | 'alien',
   isCanvasHovered: boolean,
@@ -477,13 +428,21 @@ function paintInOrder(
     for (let i = 0; i < sortedAssets.length; i++) {
       const asset = new Hex(sortedAssets[i].q, sortedAssets[i].r);
       if (asset.equals(gameState.astronautPos!)) {
-        drawPlayerOrthometric(
-          contextRef.current!,
-          gameState.astronautPos!,
-          true,
-          HEX_SIZE,
-          astronautImgRef.current!,
-        );
+        if (!gameState.isAstronautDead) {
+          drawPlayerOrthometric(
+            contextRef.current!,
+            gameState.astronautPos!,
+            true,
+            HEX_SIZE,
+            astronautImgRef.current!,
+          );
+        } else {
+          drawDeadPlayerOrthometric(
+            contextRef.current!,
+            gameState.astronautPos!,
+            skullImgRef.current!,
+          );
+        }
       } else if (asset.equals(gameState.lastSeenAlienPos!)) {
         drawLastSeenPlayerOrthometric(
           contextRef.current!,
@@ -491,6 +450,13 @@ function paintInOrder(
           HEX_SIZE,
           alienImgRef.current!,
         );
+        if (gameState.isAlienDead) {
+          drawDeadPlayerOrthometric(
+            contextRef.current!,
+            gameState.alienPos!,
+            skullImgRef.current!,
+          );
+        }
       } else if (asset.equals(gameState.cardPos!)) {
         drawCardOrthometric(
           contextRef.current!,
@@ -521,13 +487,21 @@ function paintInOrder(
     for (let i = 0; i < sortedAssets.length; i++) {
       const asset = new Hex(sortedAssets[i].q, sortedAssets[i].r);
       if (asset.equals(gameState.alienPos!)) {
-        drawPlayerOrthometric(
-          contextRef.current!,
-          gameState.alienPos!,
-          false,
-          HEX_SIZE,
-          alienImgRef.current!,
-        );
+        if (!gameState.isAlienDead) {
+          drawPlayerOrthometric(
+            contextRef.current!,
+            gameState.alienPos!,
+            false,
+            HEX_SIZE,
+            alienImgRef.current!,
+          );
+        } else {
+          drawDeadPlayerOrthometric(
+            contextRef.current!,
+            gameState.alienPos!,
+            skullImgRef.current!,
+          );
+        }
       } else if (asset.equals(gameState.lastSeenAstronautPos!)) {
         drawLastSeenPlayerOrthometric(
           contextRef.current!,
@@ -535,6 +509,13 @@ function paintInOrder(
           HEX_SIZE,
           astronautImgRef.current!,
         );
+        if (gameState.isAstronautDead) {
+          drawDeadPlayerOrthometric(
+            contextRef.current!,
+            gameState.astronautPos!,
+            skullImgRef.current!,
+          );
+        }
       } else if (asset.equals(gameState.cardPos!)) {
         drawCardOrthometric(
           contextRef.current!,
