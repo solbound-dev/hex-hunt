@@ -60,16 +60,13 @@ function drawHexOrthometric(
     ctx.fill();
   }
 
-  // Stroke depending on blur mode
   if (styleOptions.blur) {
-    // Only blurred stroke
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 4;
     ctx.shadowBlur = 30;
     ctx.shadowColor = styleOptions.strokeStyle;
     ctx.stroke();
   } else {
-    // Only crisp stroke
     ctx.strokeStyle = styleOptions.strokeStyle;
     ctx.lineWidth = styleOptions.lineWidth;
     ctx.shadowBlur = 0;
