@@ -17,10 +17,12 @@ import {
   isInGrid,
   isNeighbor,
   isSameMove,
+  MAX_PLAYERS,
   Player,
   PlayerType,
   shootInDirection,
   spawnCard,
+  START_GRID_RADIUS,
   updateAndEmitGameState,
 } from './game-utils';
 import { Hex } from './Hex';
@@ -29,7 +31,6 @@ import { Hex } from './Hex';
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private games: Record<string, GameData> = {};
-  private moves: number = 0;
 
   handleConnection(client: Socket) {
     console.log('Client connected:', client.id);
@@ -37,6 +38,31 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: Socket) {
     console.log('Client disconnected:', client.id);
   }
+
+  @SubscribeMessage('start')
+  handleStart(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { gameId: string },
+  ) {
+    const { gameId } = data;
+
+    if (!this.games[gameId]) {
+      console.log(`Game ${gameId} doesn't exists`);
+      return;
+    }
+
+    const game = this.games[gameId];
+
+    if (game.started) return;
+
+    game.started = true;
+
+    game.cardPos = spawnCard(game);
+    this.server.to(gameId).emit('gameStart', this.games[gameId]);
+    console.log('GAME STARTED===============================');
+    game.players.forEach((p) => (p.pendingMove = null));
+  }
+
   // A player joins a game room
   @SubscribeMessage('joinGame')
   async handleJoinGame(
@@ -53,19 +79,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     if (!this.games[gameId]) {
       this.games[gameId] = {
-        grid: generateGrid(3),
+        grid: generateGrid(START_GRID_RADIUS),
         disappearedHexes: [] as Hex[],
         warningHexes: [] as Hex[],
         moves: 0,
         cardPos: null,
-        currentRadius: 3,
+        currentRadius: START_GRID_RADIUS,
+        started: false,
         players: [],
       } as GameData;
     }
 
     const game = this.games[gameId];
 
-    if (game.players.length >= 4) {
+    if (game.players.length >= MAX_PLAYERS || game.started) {
       client.emit('gameFull');
       return;
     }

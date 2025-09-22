@@ -10,6 +10,7 @@ export type GameData = {
   moves: number;
   cardPos: Hex | null;
   currentRadius: number;
+  started: boolean;
   //this should not get sent to both players:
   players: Player[];
 };
