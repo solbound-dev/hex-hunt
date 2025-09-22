@@ -15,8 +15,8 @@ export type GameData = {
 export enum PlayerType {
   Astronaut = 'Astronaut',
   Alien = 'Alien',
-  // Robot = 'Robot',
-  // Drone = 'Drone',
+  Robot = 'Robot',
+  Wizard = 'Wizard',
 }
 
 export class Player {

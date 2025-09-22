@@ -1,5 +1,7 @@
 import astronautSrc from '../../assets/astronaut.png';
 import alienSrc from '../../assets/alien.png';
+import robotSrc from '../../assets/robot.png';
+import wizardSrc from '../../assets/wizard.png';
 import cardSrc from '../../assets/card.png';
 import skullSrc from '../../assets/skull.png';
 import backgroundRef from '../../assets/background-11.png';
@@ -39,6 +41,30 @@ export function setAlienImage(
   alien.height = 50;
   alien.onload = () => {
     alienImgRef.current = alien;
+  };
+}
+
+export function setRobotImage(
+  robotImgRef: React.RefObject<HTMLImageElement | null>,
+) {
+  const robot = new Image();
+  robot.src = robotSrc;
+  robot.width = 50;
+  robot.height = 50;
+  robot.onload = () => {
+    robotImgRef.current = robot;
+  };
+}
+
+export function setWizardImage(
+  wizardImgRef: React.RefObject<HTMLImageElement | null>,
+) {
+  const wizard = new Image();
+  wizard.src = wizardSrc;
+  wizard.width = 50;
+  wizard.height = 50;
+  wizard.onload = () => {
+    wizardImgRef.current = wizard;
   };
 }
 

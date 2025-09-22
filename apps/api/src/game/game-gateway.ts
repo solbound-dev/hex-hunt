@@ -63,7 +63,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const game = this.games[gameId];
 
-    if (game.players.length >= 2) {
+    if (game.players.length >= 4) {
       client.emit('gameFull');
       return;
     }
@@ -90,9 +90,33 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       newPlayer.lastSeenPos = newPlayer.pos;
       game.players.push(newPlayer);
       this.server.to(gameId).emit('playerJoined', { playerId: client.id });
+      return;
+    }
+    //do the same for robot and wizard
+    if (
+      !game.players.some((player) => player.playerType === PlayerType.Robot)
+    ) {
+      await client.join(gameId);
+      const newPlayer = new Player(PlayerType.Robot);
+      newPlayer.pos = getAvailablePlayerPos(game.players, game.grid);
+      newPlayer.id = client.id;
+      newPlayer.lastSeenPos = newPlayer.pos;
+      game.players.push(newPlayer);
+      this.server.to(gameId).emit('playerJoined', { playerId: client.id });
+      return;
+    }
+    if (
+      !game.players.some((player) => player.playerType === PlayerType.Wizard)
+    ) {
+      await client.join(gameId);
+      const newPlayer = new Player(PlayerType.Wizard);
+      newPlayer.pos = getAvailablePlayerPos(game.players, game.grid);
+      newPlayer.id = client.id;
+      newPlayer.lastSeenPos = newPlayer.pos;
+      game.players.push(newPlayer);
+      this.server.to(gameId).emit('playerJoined', { playerId: client.id });
       // return;
     }
-    //do the same for robot and drone
 
     game.cardPos = spawnCard(game);
     this.server.to(gameId).emit('gameStart', this.games[gameId]);
