@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import {
+  checkCollisionAndUpdate,
   GameData,
   generateGrid,
   getAvailablePlayerPos,
@@ -122,61 +123,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(gameId).emit('gameStart', this.games[gameId]);
     console.log('GAME STARTED===============================');
     game.players.forEach((p) => (p.pendingMove = null));
-
-    // if (
-    //   this.games[gameId].alienId !== null &&
-    //   this.games[gameId].astronautId !== null
-    // ) {
-    //   // Reject third player
-    //   client.emit('gameFull');
-    //   console.log('GAME FULL');
-    //   return;
-    // }
-    // let didInsertAstronaut = false;
-    // if (
-    //   this.games[gameId].alienId === null &&
-    //   this.games[gameId].astronautId === null
-    // ) {
-    //   await client.join(gameId);
-    //   this.games[gameId].astronautId = client.id;
-    //   this.games[gameId].astronautPos =
-    //     this.games[gameId].grid[
-    //       Math.floor(Math.random() * this.games[gameId].grid.length)
-    //     ];
-    //   this.games[gameId].lastSeenAstronautPos = this.games[gameId].astronautPos;
-    //   didInsertAstronaut = true;
-    //   console.log(`Client ${client.id} joined game ${gameId}`);
-    //   this.server.to(gameId).emit('playerJoined', { playerId: client.id });
-    // }
-
-    // //add alien if astronaut is already in game
-    // if (
-    //   !didInsertAstronaut &&
-    //   this.games[gameId].alienId === null &&
-    //   this.games[gameId].astronautId !== client.id
-    // ) {
-    //   this.games[gameId].alienId = client.id;
-    //   this.games[gameId].alienPos = getAlienPos(
-    //     this.games[gameId].astronautPos,
-    //     this.games[gameId].grid,
-    //   );
-    //   this.games[gameId].lastSeenAlienPos = this.games[gameId].alienPos;
-    //   await client.join(gameId);
-    //   console.log(`Client ${client.id} joined game ${gameId}`);
-    //   this.server.to(gameId).emit('playerJoined', { playerId: client.id });
-    // }
-    // // Start game when 2 players are present
-    // if (
-    //   this.games[gameId].astronautId !== null &&
-    //   this.games[gameId].alienId !== null
-    // ) {
-    //   this.games[gameId].cardPos = spawnCard(this.games[gameId]);
-
-    //   console.log('GAME STARTED');
-    //   this.server.to(gameId).emit('gameStart', this.games[gameId]);
-    //   this.games[gameId].astronautPendingMove = null;
-    //   this.games[gameId].alienPendingMove = null;
-    // }
   }
 
   // Broadcast a game state update to only players in that room
@@ -213,14 +159,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           shootInDirection(p.pendingMove!, game, p);
         }
       });
+
       //COLLISION CHECK
       //TODO: triba za svakog gledat je li se s ikin sudarija i ako je
       //ne dat mu da se makne (valjda ne triba oba ogranicit)
       //jer ce se taj drugi kad budemo za njega gledali
 
-      //pomaknit ih ako ne pucaju
+      game.players.forEach((p) => checkCollisionAndUpdate(p.id!, game));
+
+      //move players if the aren't shooting
       game.players.forEach((p) => {
-        if (!p.isShooting) {
+        if (!p.isShooting && !p.didJustCollide) {
           p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
         }
       });

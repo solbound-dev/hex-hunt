@@ -355,7 +355,7 @@ export function repaint(
   );
 
   if (isShooting) {
-    const pos = currentPlayer.pos!;
+    const pos = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);
 
     drawShootHighlightIsometric(
       contextRef.current!,
@@ -437,7 +437,6 @@ function paintInOrder(
     const asset = new Hex(sa.pos.q, sa.pos.r);
 
     if (asset.equals(currentPlayer.pos!)) {
-      //TODO: neki mapper iz playertype u koji se image mora renderat
       const playerImage = mapPlayerTypeToImage(
         currentPlayer.playerType,
         astronautImgRef,
@@ -452,7 +451,6 @@ function paintInOrder(
           currentPlayer.playerType,
           HEX_SIZE,
           playerImage.current!,
-          // astronautImgRef.current!,
         );
       } else {
         drawDeadPlayerIsometric(
@@ -468,8 +466,6 @@ function paintInOrder(
         cardImgRef.current!,
       );
     } else {
-      //TODO: neki mapper iz playertype u koji se image mora renderat
-
       const lastSeenPlayerImage = mapPlayerTypeToImage(
         sa.type,
         astronautImgRef,
