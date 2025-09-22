@@ -20,7 +20,7 @@ type StyleOptions = {
   blur?: boolean;
 };
 
-function applyOrthometricTransformation(x: number, y: number, hexSize: number) {
+function applyIsometricTransformation(x: number, y: number, hexSize: number) {
   return {
     ox: x * 0.7 - y * 0.7 + 7 * hexSize,
     oy: 0.5 * x * 0.7 + 0.5 * y * 0.7 + 2 * hexSize,
@@ -37,7 +37,7 @@ export function drawBackgroundImage(
   }
 }
 
-function drawHexOrthometric(
+function drawHexIsometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex | null,
   size: number,
@@ -53,7 +53,7 @@ function drawHexOrthometric(
     const vx = x + size * Math.cos(angle);
     const vy = y + size * Math.sin(angle);
 
-    const { ox: ovx, oy: ovy } = applyOrthometricTransformation(vx, vy, size);
+    const { ox: ovx, oy: ovy } = applyIsometricTransformation(vx, vy, size);
     if (i === 0) ctx.moveTo(ovx, ovy);
     else ctx.lineTo(ovx, ovy);
   }
@@ -85,11 +85,11 @@ function drawHexOrthometric(
   // ctx.font = `${Math.floor(size / 4)}px Arial`;
   // ctx.textAlign = 'center';
   // ctx.textBaseline = 'middle';
-  // const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
+  // const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
   // ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
 }
 
-export function drawPlayerOrthometric(
+export function drawPlayerIsometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex,
   playerType: PlayerType,
@@ -118,9 +118,9 @@ export function drawPlayerOrthometric(
       color = 'blue';
   }
 
-  drawHexOrthometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
+  drawHexIsometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
 
-  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
+  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
   if (image.complete) {
     ctx.drawImage(
       image,
@@ -135,7 +135,7 @@ export function drawPlayerOrthometric(
   ctx.lineWidth = 3;
 }
 
-export function drawLastSeenPlayerOrthometric(
+export function drawLastSeenPlayerIsometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex,
   size: number,
@@ -145,7 +145,7 @@ export function drawLastSeenPlayerOrthometric(
   const x = center.x;
   const y = center.y;
 
-  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
+  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
 
   if (image.complete) {
     ctx.save();
@@ -161,7 +161,7 @@ export function drawLastSeenPlayerOrthometric(
   }
 }
 
-export function drawCardOrthometric(
+export function drawCardIsometric(
   ctx: CanvasRenderingContext2D,
   cardPos: Hex | null,
   image: HTMLImageElement,
@@ -171,7 +171,7 @@ export function drawCardOrthometric(
     const x = center.x;
     const y = center.y;
 
-    const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, HEX_SIZE);
+    const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
 
     if (image.complete) {
       ctx.drawImage(
@@ -185,7 +185,7 @@ export function drawCardOrthometric(
   }
 }
 
-export function drawAvailableMovesHighlightOrthometric(
+export function drawAvailableMovesHighlightIsometric(
   ctx: CanvasRenderingContext2D,
   pos: Hex,
   grid: Hex[],
@@ -195,7 +195,7 @@ export function drawAvailableMovesHighlightOrthometric(
   const positionInstance = new Hex(pos.q, pos.r);
   positionInstance.neighbors().forEach((n) => {
     if (isInGrid(n, grid, disappearedHexes)) {
-      drawHexOrthometric(ctx, n, size, {
+      drawHexIsometric(ctx, n, size, {
         strokeStyle: 'white',
         lineWidth: 1,
         fillStyle: 'rgba(0, 255, 0, 0.1)',
@@ -205,7 +205,7 @@ export function drawAvailableMovesHighlightOrthometric(
   });
 }
 
-export function drawShootHighlightOrthometric(
+export function drawShootHighlightIsometric(
   ctx: CanvasRenderingContext2D,
   pos: Hex,
   grid: Hex[],
@@ -214,7 +214,7 @@ export function drawShootHighlightOrthometric(
 ) {
   pos.neighbors().forEach((n) => {
     if (isInGrid(n, grid, disappearedHexes)) {
-      drawHexOrthometric(ctx, n, size, {
+      drawHexIsometric(ctx, n, size, {
         strokeStyle: 'white',
         lineWidth: 1,
         fillStyle: 'rgba(255, 255, 0, 100)',
@@ -224,7 +224,7 @@ export function drawShootHighlightOrthometric(
   });
 }
 
-export function drawZoneContractionWarningOrthometric(
+export function drawZoneContractionWarningIsometric(
   ctx: CanvasRenderingContext2D,
   grid: Hex[],
   currentRadius: number,
@@ -234,7 +234,7 @@ export function drawZoneContractionWarningOrthometric(
     grid.forEach((hex) => {
       const newHex = new Hex(hex.q, hex.r);
       if (newHex.distanceTo(new Hex(0, 0)) === currentRadius) {
-        drawHexOrthometric(ctx, hex, size, {
+        drawHexIsometric(ctx, hex, size, {
           strokeStyle: 'rgba(255, 140,0, 0.5)',
           fillStyle: 'rgba(255, 140,0, 0.5)',
           lineWidth: 1,
@@ -245,14 +245,14 @@ export function drawZoneContractionWarningOrthometric(
   }
 }
 
-export function drawDisappearedHexesOrthometric(
+export function drawDisappearedHexesIsometric(
   ctx: CanvasRenderingContext2D,
   disappearedHexes: Hex[],
   size: number,
 ) {
   if (disappearedHexes.length) {
     disappearedHexes.forEach((hex) => {
-      drawHexOrthometric(ctx, hex, size, {
+      drawHexIsometric(ctx, hex, size, {
         strokeStyle: 'rgba(139, 0,0,1)',
         fillStyle: 'rgba(139, 0,0,1)',
         lineWidth: 1,
@@ -262,7 +262,7 @@ export function drawDisappearedHexesOrthometric(
   }
 }
 
-export function drawDeadPlayerOrthometric(
+export function drawDeadPlayerIsometric(
   ctx: CanvasRenderingContext2D,
   deadPlayerPos: Hex,
   image: HTMLImageElement,
@@ -271,7 +271,7 @@ export function drawDeadPlayerOrthometric(
   const x = center.x;
   const y = center.y;
 
-  const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, HEX_SIZE);
+  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
 
   if (image.complete) {
     const imgSize = image.width;
@@ -292,22 +292,16 @@ export function drawHoverHighlight(
 ) {
   if (!hex) return;
 
-  drawHexOrthometric(ctx, hex, size, {
+  drawHexIsometric(ctx, hex, size, {
     strokeStyle: 'yellow',
     lineWidth: 2,
     fillStyle: 'rgba(255, 255, 0, 1)',
   });
 }
-//-----------------------------------------------------------------
-//-----------------------------------------------------------------
-//-----------------------------------------------------------------
 
-export function drawGridOrthometric(
-  ctx: CanvasRenderingContext2D,
-  grid: Hex[],
-) {
+export function drawGridIsometric(ctx: CanvasRenderingContext2D, grid: Hex[]) {
   grid.forEach((hex) =>
-    drawHexOrthometric(ctx, hex, HEX_SIZE, {
+    drawHexIsometric(ctx, hex, HEX_SIZE, {
       strokeStyle: 'white',
       lineWidth: 1.5,
     }),
@@ -344,9 +338,9 @@ export function repaint(
   //   backgroundImgRef.current!,
   // );
 
-  drawGridOrthometric(contextRef.current!, generateGrid(GRID_RADIUS));
+  drawGridIsometric(contextRef.current!, generateGrid(GRID_RADIUS));
 
-  drawHexOrthometric(contextRef.current!, hoveredHex, HEX_SIZE, {
+  drawHexIsometric(contextRef.current!, hoveredHex, HEX_SIZE, {
     strokeStyle: `rgba(255,255,0,1)`,
     lineWidth: 4,
     blur: true,
@@ -363,7 +357,7 @@ export function repaint(
   if (isShooting) {
     const pos = currentPlayer.pos!;
 
-    drawShootHighlightOrthometric(
+    drawShootHighlightIsometric(
       contextRef.current!,
       pos,
       gameState!.grid,
@@ -372,7 +366,7 @@ export function repaint(
     );
   }
 
-  drawDisappearedHexesOrthometric(
+  drawDisappearedHexesIsometric(
     contextRef.current!,
     gameState.disappearedHexes,
     HEX_SIZE,
@@ -383,7 +377,7 @@ export function repaint(
     (gameState.moves % 8 === 6 || gameState.moves % 8 === 7) &&
     gameState.currentRadius > 1
   ) {
-    drawZoneContractionWarningOrthometric(
+    drawZoneContractionWarningIsometric(
       contextRef.current!,
       gameState.grid,
       gameState.currentRadius,
@@ -420,7 +414,7 @@ function paintInOrder(
   isCanvasHovered: boolean,
 ) {
   if (isCanvasHovered) {
-    drawAvailableMovesHighlightOrthometric(
+    drawAvailableMovesHighlightIsometric(
       contextRef.current!,
       currentPlayer.pos!,
       gameState.grid,
@@ -452,7 +446,7 @@ function paintInOrder(
         wizardImgRef,
       );
       if (!currentPlayer.isDead) {
-        drawPlayerOrthometric(
+        drawPlayerIsometric(
           contextRef.current!,
           currentPlayer.pos!,
           currentPlayer.playerType,
@@ -461,14 +455,14 @@ function paintInOrder(
           // astronautImgRef.current!,
         );
       } else {
-        drawDeadPlayerOrthometric(
+        drawDeadPlayerIsometric(
           contextRef.current!,
           currentPlayer.pos!,
           skullImgRef.current!,
         );
       }
     } else if (asset.equals(gameState.cardPos!)) {
-      drawCardOrthometric(
+      drawCardIsometric(
         contextRef.current!,
         gameState.cardPos,
         cardImgRef.current!,
@@ -484,7 +478,7 @@ function paintInOrder(
         wizardImgRef,
       );
 
-      drawLastSeenPlayerOrthometric(
+      drawLastSeenPlayerIsometric(
         contextRef.current!,
         asset,
         HEX_SIZE,
