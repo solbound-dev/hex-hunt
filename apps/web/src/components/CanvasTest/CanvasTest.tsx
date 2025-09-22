@@ -28,7 +28,7 @@ import {
   setWizardImage,
 } from './utils';
 
-function inverseOrthometricTransformation(
+function inverseIsometricTransformation(
   ox: number,
   oy: number,
   hexSize: number,
@@ -107,11 +107,7 @@ const CanvasTest = () => {
       const mouseY = event.clientY - rect.top;
 
       // Convert mouse coords to board coords
-      const { x, y } = inverseOrthometricTransformation(
-        mouseX,
-        mouseY,
-        HEX_SIZE,
-      );
+      const { x, y } = inverseIsometricTransformation(mouseX, mouseY, HEX_SIZE);
 
       // Find nearest hex
       let nearest: Hex | null = null;
@@ -165,7 +161,7 @@ const CanvasTest = () => {
     const ox = event.clientX - rect.left;
     const oy = event.clientY - rect.top;
 
-    const { x, y } = inverseOrthometricTransformation(ox, oy, HEX_SIZE);
+    const { x, y } = inverseIsometricTransformation(ox, oy, HEX_SIZE);
 
     const move = pixelToHex(x, y);
 
