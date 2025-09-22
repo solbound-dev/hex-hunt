@@ -1,6 +1,9 @@
 import { Hex } from './Hex';
 import { DefaultEventsMap, Server } from 'socket.io';
 
+export const MAX_PLAYERS = 4;
+export const START_GRID_RADIUS = 3;
+
 export type GameData = {
   grid: Hex[];
   disappearedHexes: Hex[];
@@ -8,6 +11,7 @@ export type GameData = {
   moves: number;
   cardPos: Hex | null;
   currentRadius: number;
+  started: boolean;
   //this should not get sent to both players:
   players: Player[]; //we currently send position of every player to every player
 };

@@ -80,7 +80,7 @@ const CanvasTest = () => {
       transports: ['websocket'],
     });
     socketRef.current.on('gameFull', () =>
-      console.log('This game is already full!'),
+      console.log('This game already started'),
     );
 
     socketRef.current.on('gameStart', (data) => {
@@ -231,6 +231,13 @@ const CanvasTest = () => {
               socketRef.current?.emit('joinGame', { gameId: gameId });
             }}>
             Enter game{' '}
+          </button>{' '}
+          <button
+            onClick={() => {
+              socketRef.current?.emit('start', { gameId: gameId });
+            }}
+            disabled={gameState?.started}>
+            Start game
           </button>
         </div>
       </div>
