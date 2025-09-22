@@ -99,7 +99,25 @@ export function drawPlayerOrthometric(
   const center = hexToPixel(hex);
   const x = center.x;
   const y = center.y;
-  const color = playerType === PlayerType.Astronaut ? 'blue' : 'red';
+
+  let color: string;
+  switch (playerType) {
+    case PlayerType.Astronaut:
+      color = 'blue';
+      break;
+    case PlayerType.Alien:
+      color = 'green';
+      break;
+    case PlayerType.Robot:
+      color = 'red';
+      break;
+    case PlayerType.Wizard:
+      color = 'purple';
+      break;
+    default:
+      color = 'blue';
+  }
+
   drawHexOrthometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
 
   const { ox: ocx, oy: ocy } = applyOrthometricTransformation(x, y, size);
@@ -107,7 +125,7 @@ export function drawPlayerOrthometric(
     ctx.drawImage(
       image,
       ocx - image.width,
-      ocy - image.height * 1.4,
+      ocy - image.height * 1.5,
       image.width * 2,
       image.height * 2.1,
     );
@@ -135,7 +153,7 @@ export function drawLastSeenPlayerOrthometric(
     ctx.drawImage(
       image,
       ocx - image.width,
-      ocy - image.height * 1.4,
+      ocy - image.height * 1.5,
       image.width * 2,
       image.height * 2.1,
     );
@@ -302,6 +320,8 @@ export function repaint(
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
   astronautImgRef: React.RefObject<HTMLImageElement | null>,
   alienImgRef: React.RefObject<HTMLImageElement | null>,
+  robotImgRef: React.RefObject<HTMLImageElement | null>,
+  wizardImgRef: React.RefObject<HTMLImageElement | null>,
   cardImgRef: React.RefObject<HTMLImageElement | null>,
   skullImgRef: React.RefObject<HTMLImageElement | null>,
   gameState: GameData | undefined,
@@ -310,14 +330,6 @@ export function repaint(
   hoveredHex: Hex | null,
 ) {
   if (!gameState) return;
-
-  const imagesMap: Record<
-    PlayerType,
-    React.RefObject<HTMLImageElement | null>
-  > = {
-    [PlayerType.Astronaut]: astronautImgRef,
-    [PlayerType.Alien]: alienImgRef,
-  };
 
   contextRef.current!.clearRect(
     0,
@@ -383,6 +395,8 @@ export function repaint(
     contextRef,
     astronautImgRef,
     alienImgRef,
+    robotImgRef,
+    wizardImgRef,
     cardImgRef,
     skullImgRef,
     gameState,
@@ -396,6 +410,8 @@ function paintInOrder(
   contextRef: React.RefObject<CanvasRenderingContext2D | null>,
   astronautImgRef: React.RefObject<HTMLImageElement | null>,
   alienImgRef: React.RefObject<HTMLImageElement | null>,
+  robotImgRef: React.RefObject<HTMLImageElement | null>,
+  wizardImgRef: React.RefObject<HTMLImageElement | null>,
   cardImgRef: React.RefObject<HTMLImageElement | null>,
   skullImgRef: React.RefObject<HTMLImageElement | null>,
   gameState: GameData,
@@ -413,22 +429,36 @@ function paintInOrder(
     );
   }
 
-  const assets: Hex[] = [];
-  otherPlayers.forEach((p) => assets.push(p.lastSeenPos!));
-  assets.push(currentPlayer.pos!, gameState.cardPos!);
+  const assets: Asset[] = [];
+  otherPlayers.forEach((p) =>
+    assets.push({ pos: p.lastSeenPos!, type: p.playerType }),
+  );
+  assets.push(
+    { pos: currentPlayer.pos!, type: currentPlayer.playerType },
+    { pos: gameState.cardPos!, type: 'card' },
+  );
 
-  const sortedAssets = assets.sort((a, b) => a.r - b.r);
+  const sortedAssets = assets.sort((a, b) => a.pos.r - b.pos.r);
   sortedAssets.forEach((sa) => {
-    const asset = new Hex(sa.q, sa.r);
+    const asset = new Hex(sa.pos.q, sa.pos.r);
+
     if (asset.equals(currentPlayer.pos!)) {
       //TODO: neki mapper iz playertype u koji se image mora renderat
+      const playerImage = mapPlayerTypeToImage(
+        currentPlayer.playerType,
+        astronautImgRef,
+        alienImgRef,
+        robotImgRef,
+        wizardImgRef,
+      );
       if (!currentPlayer.isDead) {
         drawPlayerOrthometric(
           contextRef.current!,
           currentPlayer.pos!,
           currentPlayer.playerType,
           HEX_SIZE,
-          astronautImgRef.current!,
+          playerImage.current!,
+          // astronautImgRef.current!,
         );
       } else {
         drawDeadPlayerOrthometric(
@@ -445,12 +475,54 @@ function paintInOrder(
       );
     } else {
       //TODO: neki mapper iz playertype u koji se image mora renderat
+
+      const lastSeenPlayerImage = mapPlayerTypeToImage(
+        sa.type,
+        astronautImgRef,
+        alienImgRef,
+        robotImgRef,
+        wizardImgRef,
+      );
+
       drawLastSeenPlayerOrthometric(
         contextRef.current!,
         asset,
         HEX_SIZE,
-        alienImgRef.current!,
+        lastSeenPlayerImage.current!,
       );
     }
   });
+}
+
+type Asset = {
+  pos: Hex;
+  type: PlayerType | 'card';
+};
+
+function mapPlayerTypeToImage(
+  playerType: PlayerType | 'card',
+  astronautImgRef: React.RefObject<HTMLImageElement | null>,
+  alienImgRef: React.RefObject<HTMLImageElement | null>,
+  robotImgRef: React.RefObject<HTMLImageElement | null>,
+  wizardImgRef: React.RefObject<HTMLImageElement | null>,
+) {
+  let image: React.RefObject<HTMLImageElement | null>;
+  switch (playerType) {
+    case PlayerType.Astronaut:
+      image = astronautImgRef;
+      break;
+    case PlayerType.Alien:
+      image = alienImgRef;
+      break;
+    case PlayerType.Robot:
+      image = robotImgRef;
+      break;
+    case PlayerType.Wizard:
+      image = wizardImgRef;
+      break;
+    default:
+      image = astronautImgRef;
+  }
+
+  return image;
 }

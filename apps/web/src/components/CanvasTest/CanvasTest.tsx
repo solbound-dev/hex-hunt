@@ -9,6 +9,7 @@ import {
   isInGrid,
   isSameMove,
   pixelToHex,
+  PlayerType,
   type GameData,
 } from './calculation-utils';
 import { drawGridOrthometric, repaint } from './draw-utils';
@@ -22,7 +23,9 @@ import {
   setCanvasRef,
   setCardImage,
   setContextRef,
+  setRobotImage,
   setSkullImage,
+  setWizardImage,
 } from './utils';
 
 function inverseOrthometricTransformation(
@@ -43,6 +46,8 @@ const CanvasTest = () => {
   const backgroundImgRef = useRef<HTMLImageElement | null>(null);
   const astronautImgRef = useRef<HTMLImageElement | null>(null);
   const alienImgRef = useRef<HTMLImageElement | null>(null);
+  const robotImgRef = useRef<HTMLImageElement | null>(null);
+  const wizardImgRef = useRef<HTMLImageElement | null>(null);
   const cardImgRef = useRef<HTMLImageElement | null>(null);
   const skullImgRef = useRef<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -58,6 +63,8 @@ const CanvasTest = () => {
   useEffect(() => {
     setAstronautImage(astronautImgRef);
     setAlienImage(alienImgRef);
+    setRobotImage(robotImgRef);
+    setWizardImage(wizardImgRef);
     setCardImage(cardImgRef);
     setSkullImage(skullImgRef);
     setBackgroundImage(backgroundImgRef);
@@ -133,6 +140,8 @@ const CanvasTest = () => {
       socketRef,
       astronautImgRef,
       alienImgRef,
+      robotImgRef,
+      wizardImgRef,
       cardImgRef,
       skullImgRef,
       gameState,
@@ -181,6 +190,13 @@ const CanvasTest = () => {
     });
   };
 
+  const colors = {
+    [PlayerType.Astronaut]: 'blue',
+    [PlayerType.Alien]: 'green',
+    [PlayerType.Robot]: 'red',
+    [PlayerType.Wizard]: 'purple',
+  };
+
   return (
     <div>
       <div>
@@ -190,26 +206,21 @@ const CanvasTest = () => {
             style={{ backgroundColor: madeMove ? 'lightgreen' : 'grey' }}></div>
           <h3>my id: {socketRef.current?.id}</h3>
           <h3>Game: {gameId}</h3>
-          <h1>
-            You are{' '}
-            <span style={{}}>
-              {/* {getPlayerType(
-                socketRef.current?.id,
-                gameState?.astronautId,
-                gameState?.alienId,
-              )} */}
-            </span>
-          </h1>
         </div>
-        <div className={c.astronautScore}>
-          <p className={c.normalText}>
-            {/* Astronaut cards: {gameState?.astronautCards || 0} / 3 */}
-          </p>
-        </div>
-        <div className={c.alienScore}>
-          <p className={c.normalText}>
-            {/* Alien cards: {gameState?.alienCards || 0} / 3 */}
-          </p>
+        <div className={c.gameInfoContainer}>
+          {gameState?.players.map((p) => (
+            <div
+              key={p.id}
+              style={{
+                color: colors[p.playerType],
+                textDecoration: p.isDead ? 'line-through' : 'none',
+                fontWeight: p.id === socketRef.current?.id ? 'bold' : 'normal',
+                fontSize: p.id === socketRef.current?.id ? '40px' : '32px',
+              }}>
+              {p.playerType}
+              {p.id === socketRef.current?.id ? ' (you)' : ''} | {p.cards} / 3
+            </div>
+          ))}
         </div>
         <input
           type='text'
