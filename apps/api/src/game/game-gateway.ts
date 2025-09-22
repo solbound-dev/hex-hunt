@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import {
   checkCollisionAndUpdate,
+  checkDidPlayerCollectCardAndUpdate,
   GameData,
   generateGrid,
   getAvailablePlayerPos,
@@ -116,7 +117,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       newPlayer.lastSeenPos = newPlayer.pos;
       game.players.push(newPlayer);
       this.server.to(gameId).emit('playerJoined', { playerId: client.id });
-      // return;
     }
 
     game.cardPos = spawnCard(game);
@@ -135,6 +135,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!isInGrid(data.move, game.grid, game.disappearedHexes)) {
       return;
     }
+
     game.players.forEach((p) => {
       if (client.id === p.id) {
         if (p.isShooting === null) {
@@ -150,7 +151,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     game.players.forEach((p) => (p.justPickedCard = false));
 
-    //   //emit if both moves have been made
     const waitingForMoves = game.players.some((p) => p.pendingMove === null);
     if (!waitingForMoves) {
       game.players.forEach((p) => {
@@ -160,12 +160,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       });
 
-      //COLLISION CHECK
-      //TODO: triba za svakog gledat je li se s ikin sudarija i ako je
-      //ne dat mu da se makne (valjda ne triba oba ogranicit)
-      //jer ce se taj drugi kad budemo za njega gledali
-
-      game.players.forEach((p) => checkCollisionAndUpdate(p.id!, game));
+      //collision check
+      game.players.forEach((p) => checkCollisionAndUpdate(p, game));
 
       //move players if the aren't shooting
       game.players.forEach((p) => {
@@ -175,6 +171,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
 
       //TODO: vidit jesu li skupili karticu
+      game.players.forEach((p) => checkDidPlayerCollectCardAndUpdate(p, game));
 
       updateAndEmitGameState(data.gameId, game, this.server);
     }

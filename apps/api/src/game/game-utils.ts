@@ -127,7 +127,7 @@ export function shootInDirection(
         game.cardPos = spawnCard(game);
         return;
       }
-      if (position.equals(targetPos)) {
+      if (position.equals(targetPos) && !p.isImmune) {
         p.isDead = true;
         console.log('dead', p.playerType);
       }
@@ -196,8 +196,7 @@ export function contractZone(currentRadius: number, grid: Hex[]) {
   return newDisappeared;
 }
 
-export function checkCollisionAndUpdate(id: string, game: GameData) {
-  const currentPlayer = game.players.find((p) => id === p.id)!;
+export function checkCollisionAndUpdate(currentPlayer: Player, game: GameData) {
   let currentPlayerNextPosition: Hex;
 
   if (currentPlayer.isShooting) {
@@ -213,7 +212,7 @@ export function checkCollisionAndUpdate(id: string, game: GameData) {
   }
 
   game.players.forEach((p) => {
-    if (p.id === id) return;
+    if (p.id === currentPlayer.id) return;
     let otherPlayerNextPosition: Hex;
     if (p.isShooting) {
       otherPlayerNextPosition = new Hex(p.pos!.q, p.pos!.r);
@@ -228,6 +227,19 @@ export function checkCollisionAndUpdate(id: string, game: GameData) {
       currentPlayer.didJustCollide = true;
     }
   });
+}
+
+export function checkDidPlayerCollectCardAndUpdate(
+  player: Player,
+  game: GameData,
+) {
+  if (player.pos?.equals(game.cardPos!)) {
+    player.cards++;
+    player.lastSeenPos = game.cardPos;
+    game.cardPos = spawnCard(game);
+    player.justPickedCard = true;
+    player.isImmune = true;
+  }
 }
 
 // const possibleHexes = game.grid.filter(
@@ -381,47 +393,4 @@ export function checkCollisionAndUpdate(id: string, game: GameData) {
 //   game.alienPendingMove = null;
 //   game.isAstronautShooting = null;
 //   game.isAlienShooting = null;
-// }
-
-// export function shootInDirection(
-//   directionHex: Hex,
-//   game: GameData,
-//   shooter: 'astronaut' | 'alien',
-// ) {
-//   let targetPos: Hex;
-//   if (shooter === 'astronaut') {
-//     if (game.isAlienShooting) {
-//       targetPos = game.alienPos!;
-//     } else {
-//       targetPos = game.alienPendingMove!;
-//     }
-//   } else {
-//     if (game.isAstronautShooting) {
-//       targetPos = game.astronautPos!;
-//     } else {
-//       targetPos = game.astronautPendingMove!;
-//     }
-//   }
-
-//   const current = shooter === 'astronaut' ? game.astronautPos! : game.alienPos!;
-//   const dir = new Hex(directionHex.q - current.q, directionHex.r - current.r);
-//   let position = new Hex(current.q, current.r);
-//   while (isInGrid(position, game.grid, game.disappearedHexes)) {
-//     position = new Hex(position.q + dir.q, position.r + dir.r);
-//     console.log('shooting position', position);
-//     if (position.equals(game.cardPos!)) {
-//       game.cardPos = spawnCard(game);
-//       return;
-//     }
-
-//     //TODO: check if alien got shot
-//     if (position.equals(targetPos)) {
-//       console.log('alien got shot');
-//       if (shooter === 'astronaut') {
-//         game.isAlienDead = true;
-//       } else {
-//         game.isAstronautDead = true;
-//       }
-//     }
-//   }
 // }
