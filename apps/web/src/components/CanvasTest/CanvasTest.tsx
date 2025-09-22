@@ -12,7 +12,7 @@ import {
   PlayerType,
   type GameData,
 } from './calculation-utils';
-import { drawGridOrthometric, repaint } from './draw-utils';
+import { drawGridIsometric, repaint } from './draw-utils';
 import { io, type Socket } from 'socket.io-client';
 
 import {
@@ -72,7 +72,7 @@ const CanvasTest = () => {
     const canvas = setCanvasRef(canvasRef);
     const context = canvas!.getContext('2d');
     setContextRef(context, contextRef);
-    drawGridOrthometric(contextRef.current!, generateGrid(GRID_RADIUS));
+    drawGridIsometric(contextRef.current!, generateGrid(GRID_RADIUS));
   }, []);
 
   useEffect(() => {

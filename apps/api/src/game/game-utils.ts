@@ -31,6 +31,7 @@ export class Player {
     public pos: Hex | null = null,
     public isShooting: boolean | null = null,
     public isImmune: boolean = false,
+    public didJustCollide: boolean = false,
   ) {}
 }
 
@@ -107,7 +108,7 @@ export function shootInDirection(
   shooter: Player,
 ) {
   game.players.forEach((p) => {
-    if (p.id !== shooter.id) {
+    if (p.id === shooter.id) {
       return;
     }
     let targetPos: Hex;
@@ -126,47 +127,12 @@ export function shootInDirection(
         game.cardPos = spawnCard(game);
         return;
       }
-
       if (position.equals(targetPos)) {
         p.isDead = true;
+        console.log('dead', p.playerType);
       }
     }
   });
-
-  // if (shooter === 'astronaut') {
-  //   if (game.isAlienShooting) {
-  //     targetPos = game.alienPos!;
-  //   } else {
-  //     targetPos = game.alienPendingMove!;
-  //   }
-  // } else {
-  //   if (game.isAstronautShooting) {
-  //     targetPos = game.astronautPos!;
-  //   } else {
-  //     targetPos = game.astronautPendingMove!;
-  //   }
-  // }
-  // const current = shooter === 'astronaut' ? game.astronautPos! : game.alienPos!;
-  // const dir = new Hex(directionHex.q - current.q, directionHex.r - current.r);
-  // let position = new Hex(current.q, current.r);
-  // while (isInGrid(position, game.grid, game.disappearedHexes)) {
-  //   position = new Hex(position.q + dir.q, position.r + dir.r);
-  //   console.log('shooting position', position);
-  //   if (position.equals(game.cardPos!)) {
-  //     game.cardPos = spawnCard(game);
-  //     return;
-  //   }
-
-  //   //TODO: check if alien got shot
-  //   if (position.equals(targetPos)) {
-  //     console.log('alien got shot');
-  //     if (shooter === 'astronaut') {
-  //       game.isAlienDead = true;
-  //     } else {
-  //       game.isAstronautDead = true;
-  //     }
-  //   }
-  // }
 }
 
 export function updateAndEmitGameState(
@@ -218,6 +184,7 @@ export function updateAndEmitGameState(
     }
     p.pendingMove = null;
     p.isShooting = null;
+    p.didJustCollide = false;
   });
 }
 
@@ -227,6 +194,40 @@ export function contractZone(currentRadius: number, grid: Hex[]) {
     (h) => h.distanceTo(new Hex(0, 0)) > currentRadius,
   );
   return newDisappeared;
+}
+
+export function checkCollisionAndUpdate(id: string, game: GameData) {
+  const currentPlayer = game.players.find((p) => id === p.id)!;
+  let currentPlayerNextPosition: Hex;
+
+  if (currentPlayer.isShooting) {
+    currentPlayerNextPosition = new Hex(
+      currentPlayer.pos!.q,
+      currentPlayer.pos!.r,
+    );
+  } else {
+    currentPlayerNextPosition = new Hex(
+      currentPlayer.pendingMove!.q,
+      currentPlayer.pendingMove!.r,
+    );
+  }
+
+  game.players.forEach((p) => {
+    if (p.id === id) return;
+    let otherPlayerNextPosition: Hex;
+    if (p.isShooting) {
+      otherPlayerNextPosition = new Hex(p.pos!.q, p.pos!.r);
+    } else {
+      otherPlayerNextPosition = new Hex(p.pendingMove!.q, p.pendingMove!.r);
+    }
+    if (currentPlayerNextPosition.equals(otherPlayerNextPosition)) {
+      currentPlayer.lastSeenPos = new Hex(
+        currentPlayer.pos!.q,
+        currentPlayer.pos!.r,
+      );
+      currentPlayer.didJustCollide = true;
+    }
+  });
 }
 
 // const possibleHexes = game.grid.filter(
