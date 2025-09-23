@@ -1,149 +1,50 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import c from './style.module.css';
 import {
-  generateGrid,
-  GRID_RADIUS,
   Hex,
   HEX_SIZE,
   hexToPixel,
   inverseIsometricTransformation,
   isInGrid,
   isSameMove,
-  MOVE_DURATION,
   pixelToHex,
   type GameData,
 } from './calculation-utils';
-import { colors, drawGridIsometric, repaint } from './draw-utils';
-import { io, type Socket } from 'socket.io-client';
+import { colors, repaint } from './draw-utils';
 
+import { isNeighbor } from './utils';
 import {
-  isNeighbor,
-  setAlienImage,
-  setAstronautImage,
-  setBackgroundImage,
-  setCanvasRef,
-  setCardImage,
-  setContextRef,
-  setRobotImage,
-  setSkullImage,
-  setWizardImage,
-} from './utils';
+  useInitializeGame,
+  useInitializeSockets,
+  useTimer,
+} from './game-hooks';
 
-const CanvasTest = () => {
-  const backgroundImgRef = useRef<HTMLImageElement | null>(null);
-  const astronautImgRef = useRef<HTMLImageElement | null>(null);
-  const alienImgRef = useRef<HTMLImageElement | null>(null);
-  const robotImgRef = useRef<HTMLImageElement | null>(null);
-  const wizardImgRef = useRef<HTMLImageElement | null>(null);
-  const cardImgRef = useRef<HTMLImageElement | null>(null);
-  const skullImgRef = useRef<HTMLImageElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const contextRef = useRef<CanvasRenderingContext2D>(null);
-  const socketRef = useRef<Socket | null>(null);
+const Game = () => {
   const [gameId, setGameId] = useState('');
   const [gameState, setGameState] = useState<GameData>();
   const [isShooting, setIsShooting] = useState(false);
   const [madeMove, setMadeMove] = useState(false);
-  const [ranOutOfTime, setRanOutOfTime] = useState(false);
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
   const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<number>(MOVE_DURATION);
-  const [eventDate, setEventDate] = useState('');
-  const [countdownStarted, setCountdownStarted] = useState(false);
 
-  useEffect(() => {
-    setAstronautImage(astronautImgRef);
-    setAlienImage(alienImgRef);
-    setRobotImage(robotImgRef);
-    setWizardImage(wizardImgRef);
-    setCardImage(cardImgRef);
-    setSkullImage(skullImgRef);
-    setBackgroundImage(backgroundImgRef);
+  const {
+    astronautImgRef,
+    alienImgRef,
+    robotImgRef,
+    wizardImgRef,
+    cardImgRef,
+    skullImgRef,
+    canvasRef,
+    contextRef,
+  } = useInitializeGame();
 
-    const canvas = setCanvasRef(canvasRef);
-    const context = canvas!.getContext('2d');
-    setContextRef(context, contextRef);
-    drawGridIsometric(contextRef.current!, generateGrid(GRID_RADIUS));
-  }, []);
+  const socketRef = useInitializeSockets(
+    setGameState,
+    setIsShooting,
+    setMadeMove,
+  );
 
-  //sockets init
-  useEffect(() => {
-    socketRef.current = io(import.meta.env.VITE_API_URL, {
-      transports: ['websocket'],
-    });
-    socketRef.current.on('gameFull', () =>
-      console.log('This game already started'),
-    );
-
-    socketRef.current.on('gameStart', (data) => {
-      console.log('Game started! Data:', socketRef.current?.id, data);
-      setGameState(data);
-    });
-
-    socketRef.current.on('playerJoined', (data) =>
-      console.log('Player joined:', data),
-    );
-    socketRef.current.on('gameState', (data) => {
-      setGameState(data);
-      setIsShooting(false);
-      setMadeMove(false);
-    });
-  }, []);
-
-  //reset timer
-  useEffect(() => {
-    const playerIsDead = gameState?.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
-    );
-
-    if (playerIsDead) {
-      return;
-    }
-
-    setEventDate(
-      new Date(new Date().getTime() + MOVE_DURATION * 1000).toISOString(),
-    );
-    if (gameState) {
-      setCountdownStarted(true);
-    }
-  }, [gameState]);
-
-  //timer logic
-  useEffect(() => {
-    if (countdownStarted && eventDate) {
-      const countdownInterval = setInterval(() => {
-        const currentTime = new Date().getTime();
-        const eventTime = new Date(eventDate).getTime();
-        let remainingTime = eventTime - currentTime;
-        if (remainingTime <= 0) {
-          remainingTime = 0;
-          clearInterval(countdownInterval);
-          setCountdownStarted(false);
-          if (!madeMove) {
-            setRanOutOfTime(true);
-          }
-        }
-        setTimeRemaining(remainingTime);
-      }, 1000);
-
-      return () => clearInterval(countdownInterval);
-    }
-  }, [countdownStarted, eventDate, timeRemaining, gameId, madeMove]);
-
-  //ran out of time
-  useEffect(() => {
-    const playerIsDead = gameState?.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
-    );
-    if (ranOutOfTime && !madeMove && !playerIsDead) {
-      socketRef.current?.emit('updateGame', {
-        gameId,
-        move: null,
-        isShooting: false,
-        didRunOutOfTime: true,
-      });
-    }
-  }, [ranOutOfTime, gameId, madeMove, gameState?.players]);
+  const timeRemaining = useTimer(gameState, socketRef, madeMove, gameId);
 
   //canvas click
   useEffect(() => {
@@ -152,15 +53,12 @@ const CanvasTest = () => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
       const mouseY = event.clientY - rect.top;
-
-      // Convert mouse coords to board coords
       const { x, y } = inverseIsometricTransformation(mouseX, mouseY, HEX_SIZE);
 
-      // Find nearest hex
       let nearest: Hex | null = null;
       let minDist = Infinity;
-      if (!gameState) return;
 
+      if (!gameState) return;
       for (const h of gameState.grid) {
         const center = hexToPixel(h);
         const dx = center.x - x;
@@ -196,7 +94,21 @@ const CanvasTest = () => {
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [isShooting, gameState, isCanvasHovered, hoveredHex]);
+  }, [
+    isShooting,
+    gameState,
+    isCanvasHovered,
+    hoveredHex,
+    alienImgRef,
+    astronautImgRef,
+    canvasRef,
+    cardImgRef,
+    contextRef,
+    robotImgRef,
+    skullImgRef,
+    wizardImgRef,
+    socketRef,
+  ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (madeMove) return;
@@ -304,4 +216,4 @@ const CanvasTest = () => {
   );
 };
 
-export default CanvasTest;
+export default Game;

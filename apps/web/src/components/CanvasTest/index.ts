@@ -1,3 +1,3 @@
-import CanvasTest from './CanvasTest';
+import CanvasTest from './Game';
 
 export default CanvasTest;
