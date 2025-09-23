@@ -2,6 +2,7 @@ export const CANVAS_SIZE = 1000;
 export const HEX_SIZE = 70; // radius of hexagon
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
+export const MOVE_DURATION = 10;
 
 export type GameData = {
   grid: Hex[];
@@ -132,4 +133,18 @@ export function isSameMove(move: Hex, pos: Hex | null) {
     return true;
   }
   return false;
+}
+
+export function inverseIsometricTransformation(
+  ox: number,
+  oy: number,
+  hexSize: number,
+) {
+  const oxPrime = ox - 7 * hexSize;
+  const oyPrime = oy - 2 * hexSize;
+
+  const x = (oyPrime / 0.35 + oxPrime / 0.7) / 2;
+  const y = (oyPrime / 0.35 - oxPrime / 0.7) / 2;
+
+  return { x, y };
 }

@@ -6,13 +6,14 @@ import {
   Hex,
   HEX_SIZE,
   hexToPixel,
+  inverseIsometricTransformation,
   isInGrid,
   isSameMove,
+  MOVE_DURATION,
   pixelToHex,
-  PlayerType,
   type GameData,
 } from './calculation-utils';
-import { drawGridIsometric, repaint } from './draw-utils';
+import { colors, drawGridIsometric, repaint } from './draw-utils';
 import { io, type Socket } from 'socket.io-client';
 
 import {
@@ -27,20 +28,6 @@ import {
   setSkullImage,
   setWizardImage,
 } from './utils';
-
-function inverseIsometricTransformation(
-  ox: number,
-  oy: number,
-  hexSize: number,
-) {
-  const oxPrime = ox - 7 * hexSize;
-  const oyPrime = oy - 2 * hexSize;
-
-  const x = (oyPrime / 0.35 + oxPrime / 0.7) / 2;
-  const y = (oyPrime / 0.35 - oxPrime / 0.7) / 2;
-
-  return { x, y };
-}
 
 const CanvasTest = () => {
   const backgroundImgRef = useRef<HTMLImageElement | null>(null);
@@ -57,8 +44,12 @@ const CanvasTest = () => {
   const [gameState, setGameState] = useState<GameData>();
   const [isShooting, setIsShooting] = useState(false);
   const [madeMove, setMadeMove] = useState(false);
+  const [ranOutOfTime, setRanOutOfTime] = useState(false);
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
   const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(MOVE_DURATION);
+  const [eventDate, setEventDate] = useState('');
+  const [countdownStarted, setCountdownStarted] = useState(false);
 
   useEffect(() => {
     setAstronautImage(astronautImgRef);
@@ -75,6 +66,7 @@ const CanvasTest = () => {
     drawGridIsometric(contextRef.current!, generateGrid(GRID_RADIUS));
   }, []);
 
+  //sockets init
   useEffect(() => {
     socketRef.current = io(import.meta.env.VITE_API_URL, {
       transports: ['websocket'],
@@ -98,9 +90,64 @@ const CanvasTest = () => {
     });
   }, []);
 
+  //reset timer
+  useEffect(() => {
+    const playerIsDead = gameState?.players.some(
+      (p) => p.id === socketRef.current?.id && p.isDead,
+    );
+
+    if (playerIsDead) {
+      return;
+    }
+
+    setEventDate(
+      new Date(new Date().getTime() + MOVE_DURATION * 1000).toISOString(),
+    );
+    if (gameState) {
+      setCountdownStarted(true);
+    }
+  }, [gameState]);
+
+  //timer logic
+  useEffect(() => {
+    if (countdownStarted && eventDate) {
+      const countdownInterval = setInterval(() => {
+        const currentTime = new Date().getTime();
+        const eventTime = new Date(eventDate).getTime();
+        let remainingTime = eventTime - currentTime;
+        if (remainingTime <= 0) {
+          remainingTime = 0;
+          clearInterval(countdownInterval);
+          setCountdownStarted(false);
+          if (!madeMove) {
+            setRanOutOfTime(true);
+          }
+        }
+        setTimeRemaining(remainingTime);
+      }, 1000);
+
+      return () => clearInterval(countdownInterval);
+    }
+  }, [countdownStarted, eventDate, timeRemaining, gameId, madeMove]);
+
+  //ran out of time
+  useEffect(() => {
+    const playerIsDead = gameState?.players.some(
+      (p) => p.id === socketRef.current?.id && p.isDead,
+    );
+    if (ranOutOfTime && !madeMove && !playerIsDead) {
+      socketRef.current?.emit('updateGame', {
+        gameId,
+        move: null,
+        isShooting: false,
+        didRunOutOfTime: true,
+      });
+    }
+  }, [ranOutOfTime, gameId, madeMove, gameState?.players]);
+
+  //canvas click
   useEffect(() => {
     const canvas = canvasRef.current!;
-
     const handleMouseMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
@@ -154,8 +201,10 @@ const CanvasTest = () => {
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (madeMove) return;
     if (!gameState) return;
-    const deadPlayerExists = gameState.players.find((p) => p.isDead);
-    if (deadPlayerExists) return;
+    const playerIsDead = gameState.players.some(
+      (p) => p.id === socketRef.current?.id && p.isDead,
+    );
+    if (playerIsDead) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const ox = event.clientX - rect.left;
@@ -184,13 +233,6 @@ const CanvasTest = () => {
       move: pixelToHex(x, y),
       isShooting: isShooting,
     });
-  };
-
-  const colors = {
-    [PlayerType.Astronaut]: 'blue',
-    [PlayerType.Alien]: 'green',
-    [PlayerType.Robot]: 'red',
-    [PlayerType.Wizard]: 'purple',
   };
 
   return (
@@ -239,6 +281,9 @@ const CanvasTest = () => {
             disabled={gameState?.started}>
             Start game
           </button>
+          <span className={c.normalText}>
+            {Math.round(timeRemaining / 1000)}
+          </span>
         </div>
       </div>
       <canvas
