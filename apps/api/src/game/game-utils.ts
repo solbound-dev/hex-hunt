@@ -36,6 +36,7 @@ export class Player {
     public isShooting: boolean | null = null,
     public isImmune: boolean = false,
     public didJustCollide: boolean = false,
+    public didWin: boolean = false,
   ) {}
 }
 
@@ -203,6 +204,8 @@ export function contractZone(currentRadius: number, grid: Hex[]) {
 export function checkCollisionAndUpdate(currentPlayer: Player, game: GameData) {
   let currentPlayerNextPosition: Hex;
 
+  if (currentPlayer.isDead) return;
+
   if (currentPlayer.isShooting) {
     currentPlayerNextPosition = new Hex(
       currentPlayer.pos!.q,
@@ -217,6 +220,7 @@ export function checkCollisionAndUpdate(currentPlayer: Player, game: GameData) {
 
   game.players.forEach((p) => {
     if (p.id === currentPlayer.id) return;
+    if (p.isDead) return;
     let otherPlayerNextPosition: Hex;
     if (p.isShooting) {
       otherPlayerNextPosition = new Hex(p.pos!.q, p.pos!.r);

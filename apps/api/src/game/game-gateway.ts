@@ -156,29 +156,53 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('updateGame')
   handleUpdateGame(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { gameId: string; move: Hex; isShooting: boolean },
+    @MessageBody()
+    data: {
+      gameId: string;
+      move: Hex | null;
+      isShooting: boolean;
+      didRunOutOfTime: boolean;
+    },
   ) {
     const game = this.games[data.gameId];
-    if (!isInGrid(data.move, game.grid, game.disappearedHexes)) {
-      return;
+    console.log('didRunOutOfTime', data.didRunOutOfTime);
+
+    if (data.move) {
+      if (!isInGrid(data.move, game.grid, game.disappearedHexes)) {
+        return;
+      }
     }
+
+    game.players.forEach((p) => {
+      if (client.id === p.id) {
+        if (data.didRunOutOfTime) {
+          p.isDead = true;
+        }
+      }
+    });
 
     game.players.forEach((p) => {
       if (client.id === p.id) {
         if (p.isShooting === null) {
           p.isShooting = data.isShooting;
         }
-        if (p.pendingMove === null) {
-          if (isSameMove(data.move, p.pos)) return;
-          if (!isNeighbor(data.move, p.pos)) return;
+
+        if (data.move) {
+          if (p.pendingMove === null) {
+            if (isSameMove(data.move, p.pos)) return;
+            if (!isNeighbor(data.move, p.pos)) return;
+          }
+          p.pendingMove = new Hex(data.move.q, data.move.r);
         }
-        p.pendingMove = new Hex(data.move.q, data.move.r);
       }
     });
 
     game.players.forEach((p) => (p.justPickedCard = false));
 
-    const waitingForMoves = game.players.some((p) => p.pendingMove === null);
+    const waitingForMoves = game.players.some(
+      (p) => p.pendingMove === null && !p.isDead,
+    );
+
     if (!waitingForMoves) {
       game.players.forEach((p) => {
         if (p.isShooting) {
@@ -192,7 +216,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       //move players if the aren't shooting
       game.players.forEach((p) => {
-        if (!p.isShooting && !p.didJustCollide) {
+        if (!p.isShooting && !p.didJustCollide && !p.isDead) {
           p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
         }
       });

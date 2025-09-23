@@ -13,6 +13,13 @@ import {
 } from './calculation-utils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 
+export const colors = {
+  [PlayerType.Astronaut]: 'blue',
+  [PlayerType.Alien]: 'green',
+  [PlayerType.Robot]: 'red',
+  [PlayerType.Wizard]: 'purple',
+};
+
 type StyleOptions = {
   strokeStyle: string;
   lineWidth: number;
