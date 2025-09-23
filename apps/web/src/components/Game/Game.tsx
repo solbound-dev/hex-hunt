@@ -10,7 +10,7 @@ import {
   pixelToHex,
   type GameData,
 } from './calculation-utils';
-import { colors, repaint } from './draw-utils';
+import { repaint } from './draw-utils';
 
 import { isNeighbor } from './utils';
 import {
@@ -18,6 +18,7 @@ import {
   useInitializeSockets,
   useTimer,
 } from './game-hooks';
+import { GameStatus } from './GameStatus';
 
 const Game = () => {
   const [gameId, setGameId] = useState('');
@@ -150,67 +151,32 @@ const Game = () => {
   return (
     <div>
       <div>
-        <div className={c.gameInfoContainer}>
-          <div
-            className={c.madeMoveIndicator}
-            style={{ backgroundColor: madeMove ? 'lightgreen' : 'grey' }}></div>
-          <h3>my id: {socketRef.current?.id}</h3>
-          <h3>Game: {gameId}</h3>
-        </div>
-        <div className={c.gameInfoContainer}>
-          {gameState?.players.map((p) => (
-            <div
-              key={p.id}
-              style={{
-                color: colors[p.playerType],
-                textDecoration: p.isDead ? 'line-through' : 'none',
-                fontWeight: p.id === socketRef.current?.id ? 'bold' : 'normal',
-                fontSize: p.id === socketRef.current?.id ? '40px' : '32px',
-              }}>
-              {p.playerType}
-              {p.id === socketRef.current?.id ? ' (you)' : ''} | {p.cards} / 3
-            </div>
-          ))}
-        </div>
-        <input
-          type='text'
-          placeholder='gameId'
-          value={gameId}
-          onChange={(e) => setGameId(e.target.value)}
+        <GameStatus
+          gameId={gameId}
+          gameState={gameState}
+          timeRemaining={timeRemaining}
+          madeMove={madeMove}
+          socketRef={socketRef}
+          setGameId={setGameId}
+        />
+      </div>
+      <div className={c.canvasWrapper}>
+        {' '}
+        <canvas
+          ref={canvasRef}
+          onClick={handleCanvasClick}
+          onMouseEnter={() => setIsCanvasHovered(true)}
+          onMouseLeave={() => setIsCanvasHovered(false)}
         />
         <div>
           <button
-            className={c.normalText}
+            className={c.button}
             onClick={() => {
-              socketRef.current?.emit('joinGame', { gameId: gameId });
+              if (!madeMove) setIsShooting((prev) => !prev);
             }}>
-            Enter game{' '}
-          </button>{' '}
-          <button
-            onClick={() => {
-              socketRef.current?.emit('start', { gameId: gameId });
-            }}
-            disabled={gameState?.started}>
-            Start game
+            {isShooting ? 'Cancel Shooting' : 'Shoot'}
           </button>
-          <span className={c.normalText}>
-            {Math.round(timeRemaining / 1000)}
-          </span>
         </div>
-      </div>
-      <canvas
-        ref={canvasRef}
-        onClick={handleCanvasClick}
-        onMouseEnter={() => setIsCanvasHovered(true)}
-        onMouseLeave={() => setIsCanvasHovered(false)}
-      />
-      <div>
-        <button
-          onClick={() => {
-            if (!madeMove) setIsShooting((prev) => !prev);
-          }}>
-          {isShooting ? 'Cancel Shooting' : 'Shoot'}
-        </button>
       </div>
     </div>
   );
