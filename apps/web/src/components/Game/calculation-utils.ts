@@ -1,5 +1,6 @@
-export const CANVAS_SIZE = 1000;
-export const HEX_SIZE = 70; // radius of hexagon
+export const CANVAS_SIZE = window.innerHeight / 1.6;
+console.log(CANVAS_SIZE);
+export const HEX_SIZE = (CANVAS_SIZE / 70) * 5;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
 export const MOVE_DURATION = 10;

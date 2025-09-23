@@ -25,8 +25,8 @@ export function setAstronautImage(
 ) {
   const astronaut = new Image();
   astronaut.src = astronautSrc;
-  astronaut.width = 160;
-  astronaut.height = 160;
+  astronaut.width = (160 / 1000) * CANVAS_SIZE;
+  astronaut.height = (160 / 1000) * CANVAS_SIZE;
   astronaut.onload = () => {
     astronautImgRef.current = astronaut;
   };
@@ -37,8 +37,8 @@ export function setAlienImage(
 ) {
   const alien = new Image();
   alien.src = alienSrc;
-  alien.width = 50;
-  alien.height = 50;
+  alien.width = (50 / 1000) * CANVAS_SIZE;
+  alien.height = (50 / 1000) * CANVAS_SIZE;
   alien.onload = () => {
     alienImgRef.current = alien;
   };
@@ -49,8 +49,8 @@ export function setRobotImage(
 ) {
   const robot = new Image();
   robot.src = robotSrc;
-  robot.width = 50;
-  robot.height = 50;
+  robot.width = (50 / 1000) * CANVAS_SIZE;
+  robot.height = (50 / 1000) * CANVAS_SIZE;
   robot.onload = () => {
     robotImgRef.current = robot;
   };
@@ -61,8 +61,8 @@ export function setWizardImage(
 ) {
   const wizard = new Image();
   wizard.src = wizardSrc;
-  wizard.width = 50;
-  wizard.height = 50;
+  wizard.width = (50 / 1000) * CANVAS_SIZE;
+  wizard.height = (50 / 1000) * CANVAS_SIZE;
   wizard.onload = () => {
     wizardImgRef.current = wizard;
   };
@@ -73,8 +73,8 @@ export function setCardImage(
 ) {
   const card = new Image();
   card.src = cardSrc;
-  card.width = 37;
-  card.height = 25;
+  card.width = (37 / 1000) * CANVAS_SIZE;
+  card.height = (25 / 1000) * CANVAS_SIZE;
   card.onload = () => {
     cardImgRef.current = card;
   };
@@ -85,8 +85,8 @@ export function setSkullImage(
 ) {
   const skull = new Image();
   skull.src = skullSrc;
-  skull.width = 80;
-  skull.height = 80;
+  skull.width = (80 / 1000) * CANVAS_SIZE;
+  skull.height = (80 / 1000) * CANVAS_SIZE;
   skull.onload = () => {
     skullImageRef.current = skull;
   };
