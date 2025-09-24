@@ -148,3 +148,13 @@ export function inverseIsometricTransformation(
 
   return { x, y };
 }
+
+export function getMousePosition(
+  event: MouseEvent | React.MouseEvent<HTMLCanvasElement>,
+  rect: DOMRect,
+) {
+  const ox = event.clientX - rect.left;
+  const oy = event.clientY - rect.top;
+  const coordinates = inverseIsometricTransformation(ox, oy, HEX_SIZE);
+  return coordinates;
+}

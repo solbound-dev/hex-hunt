@@ -1,15 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { drawGridIsometric } from './draw-utils';
-import {
-  setAlienImage,
-  setAstronautImage,
-  setCanvasRef,
-  setCardImage,
-  setContextRef,
-  setRobotImage,
-  setSkullImage,
-  setWizardImage,
-} from './utils';
+import { getContext, setCanvasRef, setImgRef } from './utils';
 import {
   generateGrid,
   GRID_RADIUS,
@@ -19,40 +10,39 @@ import {
 import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 
+export type ImgRef = {
+  astronaut: HTMLImageElement | null;
+  alien: HTMLImageElement | null;
+  robot: HTMLImageElement | null;
+  wizard: HTMLImageElement | null;
+  skull: HTMLImageElement | null;
+  card: HTMLImageElement | null;
+};
+
 export const useInitializeGame = () => {
-  // const backgroundImgRef = useRef<HTMLImageElement | null>(null);
-  const astronautImgRef = useRef<HTMLImageElement | null>(null);
-  const alienImgRef = useRef<HTMLImageElement | null>(null);
-  const robotImgRef = useRef<HTMLImageElement | null>(null);
-  const wizardImgRef = useRef<HTMLImageElement | null>(null);
-  const cardImgRef = useRef<HTMLImageElement | null>(null);
-  const skullImgRef = useRef<HTMLImageElement | null>(null);
+  const imgRef = useRef<ImgRef>({
+    astronaut: null,
+    alien: null,
+    robot: null,
+    wizard: null,
+    skull: null,
+    card: null,
+  });
+
+  setImgRef(imgRef);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const contextRef = useRef<CanvasRenderingContext2D>(null);
 
   useEffect(() => {
-    setAstronautImage(astronautImgRef);
-    setAlienImage(alienImgRef);
-    setRobotImage(robotImgRef);
-    setWizardImage(wizardImgRef);
-    setCardImage(cardImgRef);
-    setSkullImage(skullImgRef);
-    // setBackgroundImage(backgroundImgRef);
-    const canvas = setCanvasRef(canvasRef);
-    const context = canvas!.getContext('2d');
-    setContextRef(context, contextRef);
-    drawGridIsometric(contextRef.current!, generateGrid(GRID_RADIUS));
+    setCanvasRef(canvasRef);
+    const context = getContext(canvasRef);
+
+    if (!context) return;
+    drawGridIsometric(context, generateGrid(GRID_RADIUS));
   }, []);
 
   return {
-    astronautImgRef,
-    alienImgRef,
-    robotImgRef,
-    wizardImgRef,
-    cardImgRef,
-    skullImgRef,
+    imgRef,
     canvasRef,
-    contextRef,
   };
 };
 
@@ -94,7 +84,6 @@ export const useTimer = (
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
   madeMove: boolean,
   gameId: string,
-  //   setRanOutOfTime: (ranOutOfTime: boolean) => void,
 ) => {
   const [eventDate, setEventDate] = useState('');
   const [countdownStarted, setCountdownStarted] = useState(false);

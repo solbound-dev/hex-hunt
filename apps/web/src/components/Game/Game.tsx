@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import c from './style.module.css';
 import {
+  getMousePosition,
   Hex,
   HEX_SIZE,
   hexToPixel,
-  inverseIsometricTransformation,
   isInGrid,
   isSameMove,
   pixelToHex,
@@ -28,23 +28,13 @@ const Game = () => {
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
   const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
 
-  const {
-    astronautImgRef,
-    alienImgRef,
-    robotImgRef,
-    wizardImgRef,
-    cardImgRef,
-    skullImgRef,
-    canvasRef,
-    contextRef,
-  } = useInitializeGame();
+  const { imgRef, canvasRef } = useInitializeGame();
 
   const socketRef = useInitializeSockets(
     setGameState,
     setIsShooting,
     setMadeMove,
   );
-
   const timeRemaining = useTimer(gameState, socketRef, madeMove, gameId);
 
   //canvas click
@@ -52,9 +42,8 @@ const Game = () => {
     const canvas = canvasRef.current!;
     const handleMouseMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-      const { x, y } = inverseIsometricTransformation(mouseX, mouseY, HEX_SIZE);
+
+      const { x, y } = getMousePosition(event, rect);
 
       let nearest: Hex | null = null;
       let minDist = Infinity;
@@ -77,15 +66,9 @@ const Game = () => {
     canvas.addEventListener('mousemove', handleMouseMove);
 
     repaint(
-      contextRef,
       canvasRef,
       socketRef,
-      astronautImgRef,
-      alienImgRef,
-      robotImgRef,
-      wizardImgRef,
-      cardImgRef,
-      skullImgRef,
+      imgRef,
       gameState,
       isCanvasHovered,
       isShooting,
@@ -100,14 +83,8 @@ const Game = () => {
     gameState,
     isCanvasHovered,
     hoveredHex,
-    alienImgRef,
-    astronautImgRef,
     canvasRef,
-    cardImgRef,
-    contextRef,
-    robotImgRef,
-    skullImgRef,
-    wizardImgRef,
+    imgRef,
     socketRef,
   ]);
 
@@ -120,10 +97,7 @@ const Game = () => {
     if (playerIsDead) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
-    const ox = event.clientX - rect.left;
-    const oy = event.clientY - rect.top;
-
-    const { x, y } = inverseIsometricTransformation(ox, oy, HEX_SIZE);
+    const { x, y } = getMousePosition(event, rect);
 
     const move = pixelToHex(x, y);
 
