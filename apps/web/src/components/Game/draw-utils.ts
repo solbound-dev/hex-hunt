@@ -12,6 +12,7 @@ import {
   type GameData,
 } from './calculation-utils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
+import type { ImgRef } from './game-hooks';
 
 export const colors = {
   [PlayerType.Astronaut]: 'blue',
@@ -316,15 +317,9 @@ export function drawGridIsometric(ctx: CanvasRenderingContext2D, grid: Hex[]) {
 }
 
 export function repaint(
-  contextRef: React.RefObject<CanvasRenderingContext2D | null>,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
-  astronautImgRef: React.RefObject<HTMLImageElement | null>,
-  alienImgRef: React.RefObject<HTMLImageElement | null>,
-  robotImgRef: React.RefObject<HTMLImageElement | null>,
-  wizardImgRef: React.RefObject<HTMLImageElement | null>,
-  cardImgRef: React.RefObject<HTMLImageElement | null>,
-  skullImgRef: React.RefObject<HTMLImageElement | null>,
+  imgRef: React.RefObject<ImgRef>,
   gameState: GameData | undefined,
   isCanvasHovered: boolean,
   isShooting: boolean,
@@ -332,22 +327,14 @@ export function repaint(
 ) {
   if (!gameState) return;
 
-  contextRef.current!.clearRect(
-    0,
-    0,
-    canvasRef.current!.width,
-    canvasRef.current!.height,
-  );
+  const context = canvasRef.current?.getContext('2d');
+  if (!context) return;
 
-  // drawBackgroundImage(
-  //   contextRef.current!,
-  //   canvasRef.current!,
-  //   backgroundImgRef.current!,
-  // );
+  context.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
 
-  drawGridIsometric(contextRef.current!, generateGrid(GRID_RADIUS));
+  drawGridIsometric(context, generateGrid(GRID_RADIUS));
 
-  drawHexIsometric(contextRef.current!, hoveredHex, HEX_SIZE, {
+  drawHexIsometric(context, hoveredHex, HEX_SIZE, {
     strokeStyle: `rgba(255,255,0,1)`,
     lineWidth: 4,
     blur: true,
@@ -365,7 +352,7 @@ export function repaint(
     const pos = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);
 
     drawShootHighlightIsometric(
-      contextRef.current!,
+      context,
       pos,
       gameState!.grid,
       gameState!.disappearedHexes,
@@ -373,11 +360,7 @@ export function repaint(
     );
   }
 
-  drawDisappearedHexesIsometric(
-    contextRef.current!,
-    gameState.disappearedHexes,
-    HEX_SIZE,
-  );
+  drawDisappearedHexesIsometric(context, gameState.disappearedHexes, HEX_SIZE);
 
   if (
     gameState.moves &&
@@ -385,7 +368,7 @@ export function repaint(
     gameState.currentRadius > 1
   ) {
     drawZoneContractionWarningIsometric(
-      contextRef.current!,
+      context,
       gameState.grid,
       gameState.currentRadius,
       HEX_SIZE,
@@ -393,13 +376,8 @@ export function repaint(
   }
 
   paintInOrder(
-    contextRef,
-    astronautImgRef,
-    alienImgRef,
-    robotImgRef,
-    wizardImgRef,
-    cardImgRef,
-    skullImgRef,
+    context,
+    imgRef,
     gameState,
     currentPlayer,
     otherPlayers,
@@ -408,13 +386,8 @@ export function repaint(
 }
 
 function paintInOrder(
-  contextRef: React.RefObject<CanvasRenderingContext2D | null>,
-  astronautImgRef: React.RefObject<HTMLImageElement | null>,
-  alienImgRef: React.RefObject<HTMLImageElement | null>,
-  robotImgRef: React.RefObject<HTMLImageElement | null>,
-  wizardImgRef: React.RefObject<HTMLImageElement | null>,
-  cardImgRef: React.RefObject<HTMLImageElement | null>,
-  skullImgRef: React.RefObject<HTMLImageElement | null>,
+  context: CanvasRenderingContext2D,
+  imgRef: React.RefObject<ImgRef>,
   gameState: GameData,
   currentPlayer: Player,
   otherPlayers: Player[],
@@ -422,7 +395,7 @@ function paintInOrder(
 ) {
   if (isCanvasHovered) {
     drawAvailableMovesHighlightIsometric(
-      contextRef.current!,
+      context,
       currentPlayer.pos!,
       gameState.grid,
       gameState.disappearedHexes,
@@ -446,46 +419,33 @@ function paintInOrder(
     if (asset.equals(currentPlayer.pos!)) {
       const playerImage = mapPlayerTypeToImage(
         currentPlayer.playerType,
-        astronautImgRef,
-        alienImgRef,
-        robotImgRef,
-        wizardImgRef,
+        imgRef,
       );
       if (!currentPlayer.isDead) {
         drawPlayerIsometric(
-          contextRef.current!,
+          context,
           currentPlayer.pos!,
           currentPlayer.playerType,
           HEX_SIZE,
-          playerImage.current!,
+          playerImage!,
         );
       } else {
         drawDeadPlayerIsometric(
-          contextRef.current!,
+          context,
           currentPlayer.pos!,
-          skullImgRef.current!,
+          imgRef.current.skull!,
         );
       }
     } else if (asset.equals(gameState.cardPos!)) {
-      drawCardIsometric(
-        contextRef.current!,
-        gameState.cardPos,
-        cardImgRef.current!,
-      );
+      drawCardIsometric(context, gameState.cardPos, imgRef.current.card!);
     } else {
-      const lastSeenPlayerImage = mapPlayerTypeToImage(
-        sa.type,
-        astronautImgRef,
-        alienImgRef,
-        robotImgRef,
-        wizardImgRef,
-      );
+      const lastSeenPlayerImage = mapPlayerTypeToImage(sa.type, imgRef);
 
       drawLastSeenPlayerIsometric(
-        contextRef.current!,
+        context,
         asset,
         HEX_SIZE,
-        lastSeenPlayerImage.current!,
+        lastSeenPlayerImage!,
       );
     }
   });
@@ -498,27 +458,24 @@ type Asset = {
 
 function mapPlayerTypeToImage(
   playerType: PlayerType | 'card',
-  astronautImgRef: React.RefObject<HTMLImageElement | null>,
-  alienImgRef: React.RefObject<HTMLImageElement | null>,
-  robotImgRef: React.RefObject<HTMLImageElement | null>,
-  wizardImgRef: React.RefObject<HTMLImageElement | null>,
+  imgRef: React.RefObject<ImgRef>,
 ) {
-  let image: React.RefObject<HTMLImageElement | null>;
+  let image: HTMLImageElement | null;
   switch (playerType) {
     case PlayerType.Astronaut:
-      image = astronautImgRef;
+      image = imgRef.current.astronaut;
       break;
     case PlayerType.Alien:
-      image = alienImgRef;
+      image = imgRef.current.alien;
       break;
     case PlayerType.Robot:
-      image = robotImgRef;
+      image = imgRef.current.robot;
       break;
     case PlayerType.Wizard:
-      image = wizardImgRef;
+      image = imgRef.current.wizard;
       break;
     default:
-      image = astronautImgRef;
+      image = imgRef.current.astronaut;
   }
 
   return image;

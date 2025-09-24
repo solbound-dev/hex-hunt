@@ -7,6 +7,7 @@ import skullSrc from '../../assets/skull.png';
 import backgroundRef from '../../assets/background-11.png';
 
 import { CANVAS_SIZE, Hex } from './calculation-utils';
+import type { ImgRef } from './game-hooks';
 
 export function setBackgroundImage(
   backgroundImgRef: React.RefObject<HTMLImageElement | null>,
@@ -17,78 +18,6 @@ export function setBackgroundImage(
   background.height = CANVAS_SIZE;
   background.onload = () => {
     backgroundImgRef.current = background;
-  };
-}
-
-export function setAstronautImage(
-  astronautImgRef: React.RefObject<HTMLImageElement | null>,
-) {
-  const astronaut = new Image();
-  astronaut.src = astronautSrc;
-  astronaut.width = (160 / 1000) * CANVAS_SIZE;
-  astronaut.height = (160 / 1000) * CANVAS_SIZE;
-  astronaut.onload = () => {
-    astronautImgRef.current = astronaut;
-  };
-}
-
-export function setAlienImage(
-  alienImgRef: React.RefObject<HTMLImageElement | null>,
-) {
-  const alien = new Image();
-  alien.src = alienSrc;
-  alien.width = (50 / 1000) * CANVAS_SIZE;
-  alien.height = (50 / 1000) * CANVAS_SIZE;
-  alien.onload = () => {
-    alienImgRef.current = alien;
-  };
-}
-
-export function setRobotImage(
-  robotImgRef: React.RefObject<HTMLImageElement | null>,
-) {
-  const robot = new Image();
-  robot.src = robotSrc;
-  robot.width = (50 / 1000) * CANVAS_SIZE;
-  robot.height = (50 / 1000) * CANVAS_SIZE;
-  robot.onload = () => {
-    robotImgRef.current = robot;
-  };
-}
-
-export function setWizardImage(
-  wizardImgRef: React.RefObject<HTMLImageElement | null>,
-) {
-  const wizard = new Image();
-  wizard.src = wizardSrc;
-  wizard.width = (50 / 1000) * CANVAS_SIZE;
-  wizard.height = (50 / 1000) * CANVAS_SIZE;
-  wizard.onload = () => {
-    wizardImgRef.current = wizard;
-  };
-}
-
-export function setCardImage(
-  cardImgRef: React.RefObject<HTMLImageElement | null>,
-) {
-  const card = new Image();
-  card.src = cardSrc;
-  card.width = (37 / 1000) * CANVAS_SIZE;
-  card.height = (25 / 1000) * CANVAS_SIZE;
-  card.onload = () => {
-    cardImgRef.current = card;
-  };
-}
-
-export function setSkullImage(
-  skullImageRef: React.RefObject<HTMLImageElement | null>,
-) {
-  const skull = new Image();
-  skull.src = skullSrc;
-  skull.width = (80 / 1000) * CANVAS_SIZE;
-  skull.height = (80 / 1000) * CANVAS_SIZE;
-  skull.onload = () => {
-    skullImageRef.current = skull;
   };
 }
 
@@ -103,21 +32,69 @@ export function setCanvasRef(
   return canvas;
 }
 
-export function setContextRef(
-  context: CanvasRenderingContext2D | null,
-  contextRef: React.RefObject<CanvasRenderingContext2D | null>,
+export function getContext(
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
 ) {
+  const context = canvasRef.current?.getContext('2d');
   context!.scale(2, 2);
   context!.strokeStyle = 'white';
   context!.lineWidth = 1;
-  contextRef.current = context;
+  return context;
 }
 
 export function isNeighbor(clickedHex: Hex, currentPos: Hex | null) {
   if (!(currentPos instanceof Hex)) {
     currentPos = new Hex(currentPos!.q, currentPos!.r);
   }
-  return currentPos?.neighbors().some((n) => n.equals(clickedHex))
-    ? true
-    : false;
+  return currentPos?.neighbors().some((n) => n.equals(clickedHex));
+}
+
+export function setImgRef(imgRef: React.RefObject<ImgRef>) {
+  const astronaut = new Image();
+  astronaut.src = astronautSrc;
+  astronaut.width = (160 / 1000) * CANVAS_SIZE;
+  astronaut.height = (160 / 1000) * CANVAS_SIZE;
+  astronaut.onload = () => {
+    imgRef.current.astronaut = astronaut;
+  };
+
+  const alien = new Image();
+  alien.src = alienSrc;
+  alien.width = (50 / 1000) * CANVAS_SIZE;
+  alien.height = (50 / 1000) * CANVAS_SIZE;
+  alien.onload = () => {
+    imgRef.current.alien = alien;
+  };
+
+  const robot = new Image();
+  robot.src = robotSrc;
+  robot.width = (50 / 1000) * CANVAS_SIZE;
+  robot.height = (50 / 1000) * CANVAS_SIZE;
+  robot.onload = () => {
+    imgRef.current.robot = robot;
+  };
+
+  const wizard = new Image();
+  wizard.src = wizardSrc;
+  wizard.width = (50 / 1000) * CANVAS_SIZE;
+  wizard.height = (50 / 1000) * CANVAS_SIZE;
+  wizard.onload = () => {
+    imgRef.current.wizard = wizard;
+  };
+
+  const skull = new Image();
+  skull.src = skullSrc;
+  skull.width = (80 / 1000) * CANVAS_SIZE;
+  skull.height = (80 / 1000) * CANVAS_SIZE;
+  skull.onload = () => {
+    imgRef.current.skull = skull;
+  };
+
+  const card = new Image();
+  card.src = cardSrc;
+  card.width = (37 / 1000) * CANVAS_SIZE;
+  card.height = (25 / 1000) * CANVAS_SIZE;
+  card.onload = () => {
+    imgRef.current.card = card;
+  };
 }
