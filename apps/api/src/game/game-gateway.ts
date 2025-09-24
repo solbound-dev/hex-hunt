@@ -9,28 +9,18 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import {
-  checkCollisionAndUpdate,
-  checkDidPlayerCollectCardAndUpdate,
-  GameData,
-  generateGrid,
-  getAvailablePlayerPos,
-  isInGrid,
-  isNeighbor,
-  isSameMove,
   MAX_PLAYERS,
   Player,
   PlayerType,
-  shootInDirection,
-  spawnCard,
-  START_GRID_RADIUS,
   updateAndEmitGameState,
 } from './game-utils';
-import { Hex } from './Hex';
+import { Hex } from './hex';
+import { Game } from './game';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  private games: Record<string, GameData> = {};
+  private games: Record<string, Game> = {};
 
   handleConnection(client: Socket) {
     console.log('Client connected:', client.id);
@@ -56,14 +46,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (game.started) return;
 
     game.started = true;
-
-    game.cardPos = spawnCard(game);
+    game.spawnCard();
     this.server.to(gameId).emit('gameStart', this.games[gameId]);
+
+    console.log('sending', game);
+
     console.log('GAME STARTED===============================');
     game.players.forEach((p) => (p.pendingMove = null));
   }
 
-  // A player joins a game room
   @SubscribeMessage('joinGame')
   async handleJoinGame(
     @ConnectedSocket() client: Socket,
@@ -78,16 +69,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
     if (!this.games[gameId]) {
-      this.games[gameId] = {
-        grid: generateGrid(START_GRID_RADIUS),
-        disappearedHexes: [] as Hex[],
-        warningHexes: [] as Hex[],
-        moves: 0,
-        cardPos: null,
-        currentRadius: START_GRID_RADIUS,
-        started: false,
-        players: [],
-      } as GameData;
+      this.games[gameId] = new Game();
+      this.games[gameId].generateGrid();
     }
 
     const game = this.games[gameId];
@@ -97,62 +80,29 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    if (
-      !game.players.some((player) => player.playerType === PlayerType.Astronaut)
-    ) {
-      await client.join(gameId);
-      const newPlayer = new Player(PlayerType.Astronaut);
-      newPlayer.pos = getAvailablePlayerPos(game.players, game.grid);
-      newPlayer.id = client.id;
-      newPlayer.lastSeenPos = newPlayer.pos;
-      game.players.push(newPlayer);
-      this.server.to(gameId).emit('playerJoined', { playerId: client.id });
-      return;
-    }
-    if (
-      !game.players.some((player) => player.playerType === PlayerType.Alien)
-    ) {
-      await client.join(gameId);
-      const newPlayer = new Player(PlayerType.Alien);
-      newPlayer.pos = getAvailablePlayerPos(game.players, game.grid);
-      newPlayer.id = client.id;
-      newPlayer.lastSeenPos = newPlayer.pos;
-      game.players.push(newPlayer);
-      this.server.to(gameId).emit('playerJoined', { playerId: client.id });
-      return;
-    }
-    //do the same for robot and wizard
-    if (
-      !game.players.some((player) => player.playerType === PlayerType.Robot)
-    ) {
-      await client.join(gameId);
-      const newPlayer = new Player(PlayerType.Robot);
-      newPlayer.pos = getAvailablePlayerPos(game.players, game.grid);
-      newPlayer.id = client.id;
-      newPlayer.lastSeenPos = newPlayer.pos;
-      game.players.push(newPlayer);
-      this.server.to(gameId).emit('playerJoined', { playerId: client.id });
-      return;
-    }
-    if (
-      !game.players.some((player) => player.playerType === PlayerType.Wizard)
-    ) {
-      await client.join(gameId);
-      const newPlayer = new Player(PlayerType.Wizard);
-      newPlayer.pos = getAvailablePlayerPos(game.players, game.grid);
-      newPlayer.id = client.id;
-      newPlayer.lastSeenPos = newPlayer.pos;
-      game.players.push(newPlayer);
-      this.server.to(gameId).emit('playerJoined', { playerId: client.id });
-    }
+    const playerTypeOrder = [
+      PlayerType.Astronaut,
+      PlayerType.Alien,
+      PlayerType.Robot,
+      PlayerType.Wizard,
+    ];
+    const newPlayerType = playerTypeOrder[game.players.length];
 
-    game.cardPos = spawnCard(game);
-    this.server.to(gameId).emit('gameStart', this.games[gameId]);
-    console.log('GAME STARTED===============================');
-    game.players.forEach((p) => (p.pendingMove = null));
+    await client.join(gameId);
+    const pos = game.getAvailablePlayerPos();
+    const newPlayer = new Player(newPlayerType, client.id, pos, pos);
+    game.players.push(newPlayer);
+
+    this.server.to(gameId).emit('playerJoined', { playerId: client.id });
+
+    if (game.players.length === MAX_PLAYERS) {
+      game.spawnCard();
+      this.server.to(gameId).emit('gameStart', this.games[gameId]);
+      console.log('GAME STARTED===============================');
+      game.players.forEach((p) => (p.pendingMove = null));
+    }
   }
 
-  // Broadcast a game state update to only players in that room
   @SubscribeMessage('updateGame')
   handleUpdateGame(
     @ConnectedSocket() client: Socket,
@@ -168,7 +118,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('didRunOutOfTime', data.didRunOutOfTime);
 
     if (data.move) {
-      if (!isInGrid(data.move, game.grid, game.disappearedHexes)) {
+      if (!game.isInGrid(data.move)) {
         return;
       }
     }
@@ -189,8 +139,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         if (data.move) {
           if (p.pendingMove === null) {
-            if (isSameMove(data.move, p.pos)) return;
-            if (!isNeighbor(data.move, p.pos)) return;
+            if (p.pos.equals(data.move)) return;
+            if (!p.pos.isNeighbor(data.move)) return;
           }
           p.pendingMove = new Hex(data.move.q, data.move.r);
         }
@@ -207,22 +157,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       game.players.forEach((p) => {
         if (p.isShooting) {
           p.lastSeenPos = p.pos;
-          shootInDirection(p.pendingMove!, game, p);
+          game.shootInDirection(p.pendingMove!, p);
         }
       });
 
-      //collision check
-      game.players.forEach((p) => checkCollisionAndUpdate(p, game));
+      game.players.forEach((p) => game.checkCollisionAndUpdate(p));
 
-      //move players if the aren't shooting
       game.players.forEach((p) => {
         if (!p.isShooting && !p.didJustCollide && !p.isDead) {
           p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
         }
       });
 
-      //TODO: vidit jesu li skupili karticu
-      game.players.forEach((p) => checkDidPlayerCollectCardAndUpdate(p, game));
+      game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
 
       updateAndEmitGameState(data.gameId, game, this.server);
     }
