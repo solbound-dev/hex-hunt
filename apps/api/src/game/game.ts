@@ -1,4 +1,4 @@
-import { Player, START_GRID_RADIUS } from './game-utils';
+import { Player, START_GRID_RADIUS } from './game.utils';
 import { Hex } from './hex';
 
 export class Game {
