@@ -1,5 +1,6 @@
-import { Player, START_GRID_RADIUS } from './game-utils';
+import { START_GRID_RADIUS } from './game-utils';
 import { Hex } from './Hex';
+import { Player } from './Player';
 
 export class Game {
   constructor(
