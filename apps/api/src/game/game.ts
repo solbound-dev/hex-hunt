@@ -23,6 +23,7 @@ export class Game {
         break;
       }
     }
+    if (!pos) throw new Error('No available position found');
     return pos;
   }
 
