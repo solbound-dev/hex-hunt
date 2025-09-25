@@ -1,31 +1,42 @@
-export const CANVAS_SIZE = 1000;
-export const HEX_SIZE = 70; // radius of hexagon
+export const CANVAS_SIZE = window.innerHeight / 1.6;
+export const HEX_SIZE = (CANVAS_SIZE / 70) * 5;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
+export const MOVE_DURATION = 10;
 
 export type GameData = {
-  astronautId: string | null;
-  alienId: string | null;
-  lastSeenAstronautPos: Hex | null;
-  lastSeenAlienPos: Hex | null;
   grid: Hex[];
   disappearedHexes: Hex[];
   warningHexes: Hex[];
   moves: number;
   cardPos: Hex | null;
-  astronautCards: number;
-  alienCards: number;
-  astronautPendingMove: Hex | null;
-  alienPendingMove: Hex | null;
-  isAstronautDead: boolean;
-  isAlienDead: boolean;
   currentRadius: number;
+  started: boolean;
   //this should not get sent to both players:
-  astronautPos: Hex | null;
-  alienPos: Hex | null;
-  isAstronautShooting: boolean | null;
-  isAlienShooting: boolean | null;
+  players: Player[];
 };
+
+export enum PlayerType {
+  Astronaut = 'Astronaut',
+  Alien = 'Alien',
+  Robot = 'Robot',
+  Wizard = 'Wizard',
+}
+
+export class Player {
+  constructor(
+    public playerType: PlayerType,
+    public id: string | null = null,
+    public lastSeenPos: Hex | null = null,
+    public cards: number = 0,
+    public pendingMove: Hex | null = null,
+    public isDead: boolean = false,
+    public justPickedCard: boolean = false,
+    public pos: Hex | null = null,
+    public isShooting: boolean | null = null,
+    public isImmune: boolean = false,
+  ) {}
+}
 
 export class Hex {
   q: number;
@@ -122,4 +133,45 @@ export function isSameMove(move: Hex, pos: Hex | null) {
     return true;
   }
   return false;
+}
+
+export function inverseIsometricTransformation(
+  ox: number,
+  oy: number,
+  hexSize: number,
+) {
+  const oxPrime = ox - 7 * hexSize;
+  const oyPrime = oy - 2 * hexSize;
+
+  const x = (oyPrime / 0.35 + oxPrime / 0.7) / 2;
+  const y = (oyPrime / 0.35 - oxPrime / 0.7) / 2;
+
+  return { x, y };
+}
+
+export function getMousePosition(
+  event: MouseEvent | React.MouseEvent<HTMLCanvasElement>,
+  rect: DOMRect,
+) {
+  const ox = event.clientX - rect.left;
+  const oy = event.clientY - rect.top;
+  const coordinates = inverseIsometricTransformation(ox, oy, HEX_SIZE);
+  return coordinates;
+}
+
+export function getNearestHex(gameState: GameData, x: number, y: number) {
+  let nearest: Hex | null = null;
+  let minDist = Infinity;
+
+  for (const h of gameState.grid) {
+    const center = hexToPixel(h);
+    const dx = center.x - x;
+    const dy = center.y - y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < minDist && dist < HEX_SIZE) {
+      nearest = h;
+      minDist = dist;
+    }
+  }
+  return nearest;
 }
