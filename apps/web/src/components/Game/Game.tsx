@@ -131,6 +131,7 @@ const Game = () => {
         />
         <div>
           <button
+            disabled={madeMove || !gameState}
             className={c.button}
             onClick={() => {
               if (!madeMove) setIsShooting((prev) => !prev);

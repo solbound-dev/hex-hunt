@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import {
   isNeighbor,
   MAX_PLAYERS,
+  MOVE_DURATION,
   Player,
   PlayerType,
   updateAndEmitGameState,
@@ -49,10 +50,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     game.started = true;
     game.spawnCard();
     this.server.to(gameId).emit('gameStart', this.games[gameId]);
-
-    console.log('sending', game);
-
     console.log('GAME STARTED===============================');
+    game.moveExpiryDate = new Date(
+      new Date().getTime() + MOVE_DURATION * 1000,
+    ).toISOString();
     game.players.forEach((p) => (p.pendingMove = null));
   }
 
@@ -99,6 +100,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (game.players.length === MAX_PLAYERS) {
       game.spawnCard();
+      game.moveExpiryDate = new Date(
+        new Date().getTime() + MOVE_DURATION * 1000,
+      ).toISOString();
       this.server.to(gameId).emit('gameStart', this.games[gameId]);
       console.log('GAME STARTED===============================');
       game.players.forEach((p) => (p.pendingMove = null));
@@ -117,7 +121,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     },
   ) {
     const game = this.games[data.gameId];
-    console.log('didRunOutOfTime', data.didRunOutOfTime);
+
+    if (!game) return;
+
+    const gameContainsClient = game.players.some((p) => p.id === client.id);
+    if (!gameContainsClient) return;
 
     if (data.move) {
       if (!game.isInGrid(data.move)) {
@@ -127,7 +135,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     game.players.forEach((p) => {
       if (client.id === p.id) {
-        if (data.didRunOutOfTime) {
+        const moveTooLate = new Date() > new Date(game.moveExpiryDate);
+        if (data.didRunOutOfTime || moveTooLate) {
           p.isDead = true;
         }
       }

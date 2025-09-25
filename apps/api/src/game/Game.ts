@@ -3,6 +3,7 @@ import { Hex } from './Hex';
 
 export class Game {
   constructor(
+    public moveExpiryDate: string = '',
     public disappearedHexes: Hex[] = [],
     public warningHexes: Hex[] = [],
     public moves: number = 0,

@@ -4,6 +4,7 @@ import { Hex } from './Hex';
 
 export const MAX_PLAYERS = 4;
 export const START_GRID_RADIUS = 3;
+export const MOVE_DURATION = 10;
 
 export enum PlayerType {
   Astronaut = 'Astronaut',
