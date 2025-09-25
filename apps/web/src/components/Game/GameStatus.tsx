@@ -1,8 +1,8 @@
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import c from './style.module.css';
 import type { Socket } from 'socket.io-client';
-import type { GameData } from './calculation-utils';
-import { colors } from './draw-utils';
+import type { GameData } from '../../utils/calculation-utils';
+import { colors } from '../../utils/draw-utils';
 
 type GameStatusProps = {
   gameId: string;

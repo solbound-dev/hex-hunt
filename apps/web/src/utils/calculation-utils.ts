@@ -158,3 +158,20 @@ export function getMousePosition(
   const coordinates = inverseIsometricTransformation(ox, oy, HEX_SIZE);
   return coordinates;
 }
+
+export function getNearestHex(gameState: GameData, x: number, y: number) {
+  let nearest: Hex | null = null;
+  let minDist = Infinity;
+
+  for (const h of gameState.grid) {
+    const center = hexToPixel(h);
+    const dx = center.x - x;
+    const dy = center.y - y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < minDist && dist < HEX_SIZE) {
+      nearest = h;
+      minDist = dist;
+    }
+  }
+  return nearest;
+}

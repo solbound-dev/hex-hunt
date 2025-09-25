@@ -12,7 +12,7 @@ import {
   type GameData,
 } from './calculation-utils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
-import type { ImgRef } from './game-hooks';
+import type { ImgRef } from '../hooks/game';
 
 export const colors = {
   [PlayerType.Astronaut]: 'blue',
