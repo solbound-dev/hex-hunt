@@ -14,7 +14,7 @@ export class Game {
     public players: Player[] = [], //we currently send position of every player to every player
   ) {}
 
-  getAvailablePlayerPos() {
+  getAvailablePlayerPos(): Hex {
     if (this.grid.length === 0) {
       throw new Error('Grid is empty, cannot get available player position.');
     }
