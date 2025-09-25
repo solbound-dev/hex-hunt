@@ -49,5 +49,8 @@ jobs:
       - name: Run types build
         run: yarn workspace @hex-hunt-app/types build
 
+      - name: Run backend build
+        run: yarn workspace api run build
+
       - name: Run ESLint
         run: yarn workspace api run lint
