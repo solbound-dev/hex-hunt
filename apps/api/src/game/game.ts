@@ -15,6 +15,9 @@ export class Game {
   ) {}
 
   getAvailablePlayerPos() {
+    if (this.grid.length === 0) {
+      throw new Error('Grid is empty, cannot get available player position.');
+    }
     let pos: Hex;
     while (true) {
       const randomIndex = Math.floor(Math.random() * this.grid.length);
@@ -23,7 +26,6 @@ export class Game {
         break;
       }
     }
-    if (!pos) throw new Error('No available position found');
     return pos;
   }
 
