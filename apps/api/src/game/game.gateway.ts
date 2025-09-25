@@ -13,7 +13,7 @@ import {
   Player,
   PlayerType,
   updateAndEmitGameState,
-} from './game.utils';
+} from './game-utils';
 import { Hex } from './hex';
 import { Game } from './game';
 
