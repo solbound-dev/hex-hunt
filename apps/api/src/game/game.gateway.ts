@@ -12,12 +12,11 @@ import {
   isNeighbor,
   MAX_PLAYERS,
   MOVE_DURATION,
-  Player,
-  PlayerType,
   updateAndEmitGameState,
 } from './game-utils';
 import { Hex } from './Hex';
 import { Game } from './Game';
+import { Player, PlayerType } from './Player';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
