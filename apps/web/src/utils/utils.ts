@@ -1,13 +1,13 @@
-import astronautSrc from '../../assets/astronaut.png';
-import alienSrc from '../../assets/alien.png';
-import robotSrc from '../../assets/robot.png';
-import wizardSrc from '../../assets/wizard.png';
-import cardSrc from '../../assets/card.png';
-import skullSrc from '../../assets/skull.png';
-import backgroundRef from '../../assets/background-11.png';
+import astronautSrc from '../assets/astronaut.png';
+import alienSrc from '../assets/alien.png';
+import robotSrc from '../assets/robot.png';
+import wizardSrc from '../assets/wizard.png';
+import cardSrc from '../assets/card.png';
+import skullSrc from '../assets/skull.png';
+import backgroundRef from '../assets/background-11.png';
 
 import { CANVAS_SIZE, Hex } from './calculation-utils';
-import type { ImgRef } from './game-hooks';
+import type { ImgRef } from '../hooks/game';
 
 export function setBackgroundImage(
   backgroundImgRef: React.RefObject<HTMLImageElement | null>,

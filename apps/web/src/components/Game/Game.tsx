@@ -2,22 +2,21 @@ import { useEffect, useState } from 'react';
 import c from './style.module.css';
 import {
   getMousePosition,
+  getNearestHex,
   Hex,
-  HEX_SIZE,
-  hexToPixel,
   isInGrid,
   isSameMove,
   pixelToHex,
   type GameData,
-} from './calculation-utils';
-import { repaint } from './draw-utils';
+} from '../../utils/calculation-utils';
+import { repaint } from '../../utils/draw-utils';
 
-import { isNeighbor } from './utils';
+import { isNeighbor } from '../../utils/utils';
 import {
   useInitializeGame,
   useInitializeSockets,
   useTimer,
-} from './game-hooks';
+} from '../../hooks/game';
 import { GameStatus } from './GameStatus';
 
 const Game = () => {
@@ -44,21 +43,9 @@ const Game = () => {
       const rect = canvas.getBoundingClientRect();
 
       const { x, y } = getMousePosition(event, rect);
-
-      let nearest: Hex | null = null;
-      let minDist = Infinity;
-
       if (!gameState) return;
-      for (const h of gameState.grid) {
-        const center = hexToPixel(h);
-        const dx = center.x - x;
-        const dy = center.y - y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < minDist && dist < HEX_SIZE) {
-          nearest = h;
-          minDist = dist;
-        }
-      }
+
+      const nearest = getNearestHex(gameState, x, y);
 
       setHoveredHex(nearest);
     };
