@@ -49,6 +49,12 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: '**/package.json'
 
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Prepare Yarn 3.6.4
+        run: corepack prepare yarn@3.6.4 --activate
+
       - name: Install dependencies
         run: yarn install --immutable
 
