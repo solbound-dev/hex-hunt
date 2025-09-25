@@ -1,6 +1,6 @@
-import { Game } from './game';
+import { Game } from './Game';
 import { DefaultEventsMap, Server } from 'socket.io';
-import { Hex } from './hex';
+import { Hex } from './Hex';
 
 export const MAX_PLAYERS = 4;
 export const START_GRID_RADIUS = 3;
