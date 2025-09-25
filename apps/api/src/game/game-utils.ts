@@ -5,18 +5,6 @@ import { Hex } from './hex';
 export const MAX_PLAYERS = 4;
 export const START_GRID_RADIUS = 3;
 
-// export type GameData = {
-//   grid: Hex[];
-//   disappearedHexes: Hex[];
-//   warningHexes: Hex[];
-//   moves: number;
-//   cardPos: Hex | null;
-//   currentRadius: number;
-//   started: boolean;
-//   //this should not get sent to both players:
-//   players: Player[]; //we currently send position of every player to every player
-// };
-
 export enum PlayerType {
   Astronaut = 'Astronaut',
   Alien = 'Alien',
@@ -39,6 +27,10 @@ export class Player {
     public didJustCollide: boolean = false,
     public didWin: boolean = false,
   ) {}
+}
+
+export function isNeighbor(hex: Hex, other: Hex) {
+  return hex.neighbors().some((n) => n.equals(other));
 }
 
 //myb Game

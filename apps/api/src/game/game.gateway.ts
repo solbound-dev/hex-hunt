@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import {
+  isNeighbor,
   MAX_PLAYERS,
   Player,
   PlayerType,
@@ -89,6 +90,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const newPlayerType = playerTypeOrder[game.players.length];
 
     await client.join(gameId);
+
     const pos = game.getAvailablePlayerPos();
     const newPlayer = new Player(newPlayerType, client.id, pos, pos);
     game.players.push(newPlayer);
@@ -140,7 +142,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (data.move) {
           if (p.pendingMove === null) {
             if (p.pos.equals(data.move)) return;
-            if (!p.pos.isNeighbor(data.move)) return;
+            if (!isNeighbor(p.pos, data.move)) return;
           }
           p.pendingMove = new Hex(data.move.q, data.move.r);
         }

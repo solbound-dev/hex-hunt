@@ -36,9 +36,9 @@ export class Hex {
     return directions.map((dir) => new Hex(this.q + dir.q, this.r + dir.r));
   }
 
-  isNeighbor(hex: Hex) {
-    return this.neighbors().some((n) => n.equals(hex));
-  }
+  // isNeighbor(hex: Hex) {
+  //   return this.neighbors().some((n) => n.equals(hex));
+  // }
 
   toString() {
     return `${this.q},${this.r}`;
