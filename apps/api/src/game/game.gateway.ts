@@ -15,8 +15,8 @@ import {
   PlayerType,
   updateAndEmitGameState,
 } from './game-utils';
-import { Hex } from './hex';
-import { Game } from './game';
+import { Hex } from './Hex';
+import { Game } from './Game';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
