@@ -6,6 +6,7 @@ import {
   Hex,
   isInGrid,
   isSameMove,
+  MOVE_DURATION_IN_SECONDS,
   pixelToHex,
   type GameData,
 } from '../../utils/calculation-utils';
@@ -18,6 +19,7 @@ import {
   useTimer,
 } from '../../hooks/game';
 import { GameStatus } from './GameStatus';
+import toast from 'react-hot-toast';
 
 const Game = () => {
   const [gameId, setGameId] = useState('');
@@ -26,6 +28,10 @@ const Game = () => {
   const [madeMove, setMadeMove] = useState(false);
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
   const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(
+    MOVE_DURATION_IN_SECONDS,
+  );
+  const [ranOutOfTime, setRanOutOfTime] = useState(false);
 
   const { imgRef, canvasRef } = useInitializeGame();
 
@@ -33,8 +39,26 @@ const Game = () => {
     setGameState,
     setIsShooting,
     setMadeMove,
+    setTimeRemaining,
+    setRanOutOfTime,
   );
-  const timeRemaining = useTimer(gameState, socketRef, madeMove, gameId);
+  useTimer(
+    gameState,
+    socketRef,
+    madeMove,
+    gameId,
+    timeRemaining,
+    setTimeRemaining,
+    ranOutOfTime,
+    setRanOutOfTime,
+  );
+
+  useEffect(() => {
+    const winner = gameState?.players.find((p) => p.won);
+    if (winner) {
+      toast.success(`${winner.playerType} WON!`);
+    }
+  }, [gameState]);
 
   //canvas click
   useEffect(() => {
@@ -78,6 +102,10 @@ const Game = () => {
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (madeMove) return;
     if (!gameState) return;
+
+    const gameHasWinner = gameState.players.some((p) => p.won);
+    if (gameHasWinner) return;
+
     const playerIsDead = gameState.players.some(
       (p) => p.id === socketRef.current?.id && p.isDead,
     );
@@ -138,6 +166,18 @@ const Game = () => {
             }}>
             {isShooting ? 'Cancel Shooting' : 'Shoot'}
           </button>
+          {gameState?.players.some((p) => p.won) && (
+            <button
+              onClick={() => {
+                console.log('gameState on restart', gameState);
+                console.log('timeRemaining on restart', timeRemaining);
+                socketRef.current?.emit('restartGame', {
+                  gameId,
+                });
+              }}>
+              Restart
+            </button>
+          )}
         </div>
       </div>
     </div>

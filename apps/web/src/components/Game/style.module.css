@@ -65,10 +65,20 @@
   cursor: pointer;
   font-size: 20px;
 }
+
+.button:disabled {
+  background: #555;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
 .input {
   font-size: 20px;
   padding: 10px;
   margin: 5px;
   border-radius: 6px;
   border: 1px solid #555;
+}
+.input:disabled {
+  background: #ddd;
 }

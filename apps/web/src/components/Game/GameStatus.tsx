@@ -25,6 +25,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
     <div className={c.statusWrapper}>
       <div className={c.gameInfoContainer}>
         <input
+          disabled={!!gameState?.started}
           className={c.input}
           type='text'
           placeholder='gameId'
@@ -43,7 +44,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           onClick={() => {
             socketRef.current?.emit('start', { gameId: gameId });
           }}
-          disabled={gameState?.started}>
+          disabled={gameState?.started || !gameId}>
           Start game
         </button>
         <span className={c.normalText}>{Math.round(timeRemaining / 1000)}</span>
@@ -67,8 +68,9 @@ export const GameStatus: React.FC<GameStatusProps> = ({
               fontWeight: p.id === socketRef.current?.id ? 'bold' : 'normal',
               fontSize: p.id === socketRef.current?.id ? '24px' : '20px',
             }}>
-            {p.playerType}
+            {p.playerType} ({p.wins})
             {p.id === socketRef.current?.id ? ' (you)' : ''} | {p.cards} / 3
+            {p.won && ' WON!'}
           </div>
         ))}
       </div>

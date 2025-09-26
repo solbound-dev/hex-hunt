@@ -11,7 +11,8 @@ import { Server, Socket } from 'socket.io';
 import {
   isNeighbor,
   MAX_PLAYERS,
-  MOVE_DURATION,
+  MOVE_DURATION_IN_SECONDS,
+  START_GRID_RADIUS,
   updateAndEmitGameState,
 } from './game-utils';
 import { Hex } from './Hex';
@@ -51,7 +52,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(gameId).emit('gameStart', this.games[gameId]);
     console.log('GAME STARTED===============================');
     game.moveExpiryDate = new Date(
-      new Date().getTime() + MOVE_DURATION * 1000,
+      new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
     ).toISOString();
     game.players.forEach((p) => (p.pendingMove = null));
   }
@@ -100,7 +101,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (game.players.length === MAX_PLAYERS) {
       game.spawnCard();
       game.moveExpiryDate = new Date(
-        new Date().getTime() + MOVE_DURATION * 1000,
+        new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
       ).toISOString();
       this.server.to(gameId).emit('gameStart', this.games[gameId]);
       console.log('GAME STARTED===============================');
@@ -120,7 +121,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     },
   ) {
     const game = this.games[data.gameId];
-
     if (!game) return;
 
     const gameContainsClient = game.players.some((p) => p.id === client.id);
@@ -131,6 +131,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
     }
+
+    const gameContainsWinner = game.players.some((p) => p.won);
+    if (gameContainsWinner) return;
 
     game.players.forEach((p) => {
       if (client.id === p.id) {
@@ -183,5 +186,49 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       updateAndEmitGameState(data.gameId, game, this.server);
     }
+  }
+
+  @SubscribeMessage('restartGame')
+  handleRestartGame(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { gameId: string },
+  ) {
+    const { gameId } = data;
+
+    const game = this.games[data.gameId];
+    if (!game) return;
+
+    const gameContainsClient = game.players.some((p) => p.id === client.id);
+    if (!gameContainsClient) return;
+
+    const gameContainsWinner = game.players.some((p) => p.won);
+    if (!gameContainsWinner) return;
+
+    //reset everything and emit
+    game.moveExpiryDate = '';
+    game.disappearedHexes = [];
+    game.warningHexes = [];
+    game.moves = 0;
+    game.cardPos = null;
+    game.currentRadius = START_GRID_RADIUS;
+
+    game.players.forEach((p) => {
+      p.pos = game.getAvailablePlayerPos();
+      p.lastSeenPos = p.pos;
+      p.won = false;
+      p.cards = 0;
+      p.pendingMove = null;
+      p.isDead = false;
+      p.justPickedCard = false;
+      p.isShooting = null;
+      p.isImmune = false;
+      p.didJustCollide = false;
+    });
+
+    game.spawnCard();
+    game.moveExpiryDate = new Date(
+      new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
+    ).toISOString();
+    this.server.to(gameId).emit('gameStart', game);
   }
 }

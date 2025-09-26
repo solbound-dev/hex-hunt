@@ -2,7 +2,7 @@ export const CANVAS_SIZE = window.innerHeight / 1.6;
 export const HEX_SIZE = (CANVAS_SIZE / 70) * 5;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
-export const MOVE_DURATION = 10;
+export const MOVE_DURATION_IN_SECONDS = 10;
 
 export type GameData = {
   grid: Hex[];
@@ -12,6 +12,7 @@ export type GameData = {
   cardPos: Hex | null;
   currentRadius: number;
   started: boolean;
+  won: boolean;
   //this should not get sent to both players:
   players: Player[];
 };
@@ -35,6 +36,8 @@ export class Player {
     public pos: Hex | null = null,
     public isShooting: boolean | null = null,
     public isImmune: boolean = false,
+    public won: boolean = false,
+    public wins: number = 0,
   ) {}
 }
 

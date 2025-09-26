@@ -4,7 +4,7 @@ import { getContext, setCanvasRef, setImgRef } from '../utils/utils';
 import {
   generateGrid,
   GRID_RADIUS,
-  MOVE_DURATION,
+  MOVE_DURATION_IN_SECONDS,
   type GameData,
 } from '../utils/calculation-utils';
 import { io, type Socket } from 'socket.io-client';
@@ -50,6 +50,8 @@ export const useInitializeSockets = (
   setGameState: (data: GameData) => void,
   setIsShooting: (isShooting: boolean) => void,
   setMadeMove: (madeMove: boolean) => void,
+  setTimeRemaining: (time: number) => void,
+  setRanOutOfTime: (ranOutOfTime: boolean) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
 
@@ -64,6 +66,10 @@ export const useInitializeSockets = (
     socketRef.current.on('gameStart', (data) => {
       console.log('Game started! Data:', socketRef.current?.id, data);
       setGameState(data);
+      setTimeRemaining(MOVE_DURATION_IN_SECONDS * 1000);
+      setIsShooting(false);
+      setMadeMove(false);
+      setRanOutOfTime(false);
     });
 
     socketRef.current.on('playerJoined', (data) =>
@@ -73,8 +79,15 @@ export const useInitializeSockets = (
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
+      setRanOutOfTime(false);
     });
-  }, [setGameState, setIsShooting, setMadeMove]);
+  }, [
+    setGameState,
+    setIsShooting,
+    setMadeMove,
+    setTimeRemaining,
+    setRanOutOfTime,
+  ]);
 
   return socketRef;
 };
@@ -84,11 +97,13 @@ export const useTimer = (
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
   madeMove: boolean,
   gameId: string,
+  timeRemaining: number,
+  setTimeRemaining: (time: number) => void,
+  ranOutOfTime: boolean,
+  setRanOutOfTime: (ranOutOfTime: boolean) => void,
 ) => {
   const [eventDate, setEventDate] = useState('');
   const [countdownStarted, setCountdownStarted] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<number>(MOVE_DURATION);
-  const [ranOutOfTime, setRanOutOfTime] = useState(false);
 
   //reset timer
   useEffect(() => {
@@ -101,7 +116,9 @@ export const useTimer = (
     }
 
     setEventDate(
-      new Date(new Date().getTime() + MOVE_DURATION * 1000).toISOString(),
+      new Date(
+        new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
+      ).toISOString(),
     );
     if (gameState) {
       setCountdownStarted(true);
@@ -135,14 +152,19 @@ export const useTimer = (
     gameId,
     madeMove,
     setRanOutOfTime,
+    setTimeRemaining,
   ]);
 
   //ran out of time
   useEffect(() => {
+    const winner = gameState?.players.find((p) => p.won);
+    if (winner) return;
+
     const playerIsDead = gameState?.players.some(
       (p) => p.id === socketRef.current?.id && p.isDead,
     );
-    if (ranOutOfTime && !madeMove && !playerIsDead) {
+    const gameHasWinner = gameState?.players.some((p) => p.won);
+    if (ranOutOfTime && !madeMove && !playerIsDead && !gameHasWinner) {
       socketRef.current?.emit('updateGame', {
         gameId,
         move: null,
@@ -150,7 +172,14 @@ export const useTimer = (
         didRunOutOfTime: true,
       });
     }
-  }, [ranOutOfTime, gameId, madeMove, gameState?.players, socketRef]);
+  }, [
+    ranOutOfTime,
+    gameId,
+    madeMove,
+    gameState?.players,
+    socketRef,
+    gameState,
+  ]);
 
-  return timeRemaining;
+  return { timeRemaining, setTimeRemaining };
 };

@@ -6,6 +6,8 @@ export class Player {
     public id: string,
     public pos: Hex,
     public lastSeenPos: Hex,
+    public won: boolean = false,
+    public wins: number = 0,
     public cards: number = 0,
     public pendingMove: Hex | null = null,
     public isDead: boolean = false,
@@ -13,7 +15,6 @@ export class Player {
     public isShooting: boolean | null = null,
     public isImmune: boolean = false,
     public didJustCollide: boolean = false,
-    public didWin: boolean = false,
   ) {}
 }
 

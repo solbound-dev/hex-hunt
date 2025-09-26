@@ -429,7 +429,7 @@ function paintInOrder(
           HEX_SIZE,
           playerImage!,
         );
-      } else {
+      } else if (currentPlayer.isDead) {
         drawDeadPlayerIsometric(
           context,
           currentPlayer.pos!,
