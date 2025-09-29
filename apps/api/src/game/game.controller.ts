@@ -7,7 +7,8 @@ export class GameController {
   constructor(private readonly gameService: GameService) {}
 
   @Get()
-  getGames(): Game[] {
+  getGames() {
+    console.log('getGames controller');
     return this.gameService.getGames();
   }
 

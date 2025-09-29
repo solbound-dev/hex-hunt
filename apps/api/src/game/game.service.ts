@@ -13,11 +13,12 @@ import { Hex } from './Hex';
 export class GameService {
   private games: Record<string, Game> = {};
 
-  getGames(): Game[] {
-    return Object.values(this.games);
+  getGames() {
+    console.log('service', this.games);
+    return Object.keys(this.games);
   }
 
-  getGame(id: string): Game | undefined {
+  getGame(id: string) {
     return this.games[id];
   }
 

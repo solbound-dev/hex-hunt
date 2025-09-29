@@ -20,6 +20,7 @@ import {
 } from '../../hooks/game';
 import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
+import { useGetAllGames } from '../../api/game/useGetAllGames';
 
 const Game = () => {
   const [gameId, setGameId] = useState('');
@@ -136,6 +137,11 @@ const Game = () => {
       isShooting: isShooting,
     });
   };
+
+  // const { data: allGames } = useGetAllGames();
+  // console.log('allgames', allGames);
+
+  // console.log('aa');
 
   return (
     <div>

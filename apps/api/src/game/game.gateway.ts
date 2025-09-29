@@ -14,7 +14,6 @@ import { GameService } from './game.service';
 @WebSocketGateway({ cors: { origin: '*' } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  // private games: Record<string, Game> = {};
   constructor(private readonly gameService: GameService) {}
 
   handleConnection(client: Socket) {
@@ -82,72 +81,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const game = this.gameService.updateGame(client.id, data);
     if (!game) return;
     this.server.to(data.gameId).emit('gameState', game);
-
-    // const game = this.games[data.gameId];
-    // if (!game) return;
-
-    // const gameContainsClient = game.players.some((p) => p.id === client.id);
-    // if (!gameContainsClient) return;
-
-    // if (data.move) {
-    //   if (!game.isInGrid(data.move)) {
-    //     return;
-    //   }
-    // }
-
-    // const gameContainsWinner = game.players.some((p) => p.won);
-    // if (gameContainsWinner) return;
-
-    // game.players.forEach((p) => {
-    //   if (client.id === p.id) {
-    //     const moveTooLate = new Date() > new Date(game.moveExpiryDate);
-    //     if (data.didRunOutOfTime || moveTooLate) {
-    //       p.isDead = true;
-    //     }
-    //   }
-    // });
-
-    // game.players.forEach((p) => {
-    //   if (client.id === p.id) {
-    //     if (p.isShooting === null) {
-    //       p.isShooting = data.isShooting;
-    //     }
-
-    //     if (data.move) {
-    //       if (p.pendingMove === null) {
-    //         if (p.pos.equals(data.move)) return;
-    //         if (!isNeighbor(p.pos, data.move)) return;
-    //       }
-    //       p.pendingMove = new Hex(data.move.q, data.move.r);
-    //     }
-    //   }
-    // });
-
-    // game.players.forEach((p) => (p.justPickedCard = false));
-
-    // const waitingForMoves = game.players.some(
-    //   (p) => p.pendingMove === null && !p.isDead,
-    // );
-
-    // if (!waitingForMoves) {
-    //   game.players.forEach((p) => {
-    //     if (p.isShooting) {
-    //       p.lastSeenPos = p.pos;
-    //       game.shootInDirection(p.pendingMove, p);
-    //     }
-    //   });
-
-    //   game.players.forEach((p) => game.checkCollisionAndUpdate(p));
-
-    //   game.players.forEach((p) => {
-    //     if (!p.isShooting && !p.didJustCollide && !p.isDead) {
-    //       p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
-    //     }
-    //   });
-
-    //   game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
-
-    //   updateAndEmitGameState(data.gameId, game, this.server);
   }
 
   @SubscribeMessage('restartGame')
