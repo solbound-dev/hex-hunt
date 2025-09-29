@@ -146,4 +146,63 @@ export class Game {
       player.isImmune = true;
     }
   }
+
+  updateState() {
+    this.moves++;
+    if (this.moves % 8 === 0 && this.currentRadius > 1) {
+      this.currentRadius--;
+      this.contractZone();
+      const zoneAteCard = this.disappearedHexes.some((hex) =>
+        hex.equals(this.cardPos!),
+      );
+      if (zoneAteCard) {
+        this.spawnCard();
+      }
+    }
+
+    this.players.forEach((p) => {
+      const playerIsInForbiddenZone = this.disappearedHexes.some((h) => {
+        h.equals(p.pos);
+      });
+      if (playerIsInForbiddenZone) {
+        console.log(`${p.playerType} died`);
+        p.isDead = true;
+      }
+    });
+
+    this.players.forEach((p) => {
+      if (p.cards === 3 && p.pos?.equals(new Hex(0, 0))) {
+        this.players.forEach((op) => {
+          if (op.id !== p.id) {
+            op.isDead = true;
+          }
+        });
+      }
+    });
+
+    const numberOfDeadPlayers = this.players.reduce(
+      (prev, curr) => prev + (curr.isDead ? 1 : 0),
+      0,
+    );
+
+    if (numberOfDeadPlayers === this.players.length - 1) {
+      this.players.forEach((p) => {
+        if (!p.isDead) {
+          p.won = true;
+          p.wins++;
+        }
+      });
+    }
+
+    //emit was here
+
+    this.players.forEach((p) => {
+      if (!p.justPickedCard) {
+        p.isImmune = false;
+      }
+      p.pendingMove = null;
+      p.isShooting = null;
+      p.didJustCollide = false;
+    });
+  }
 }
