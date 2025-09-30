@@ -10,7 +10,7 @@ const setupFilter = (app: INestApplication) => {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 

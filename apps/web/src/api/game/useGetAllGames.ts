@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '..';
 
-const getGames = async () => {
+const getAvailableGameIds = async () => {
   const response = await api.get<string[]>('games');
 
   return response.data;
 };
 
-export const useGetAllGames = () => {
+export const useGetAvailableGameIds = () => {
   return useQuery({
     queryKey: ['games'],
-    queryFn: getGames,
-    staleTime: Infinity,
+    queryFn: getAvailableGameIds,
+    refetchInterval: 5000,
   });
 };

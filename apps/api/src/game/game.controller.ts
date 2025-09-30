@@ -9,7 +9,7 @@ export class GameController {
   @Get()
   getGames() {
     console.log('getGames controller');
-    return this.gameService.getGames();
+    return this.gameService.getAvailableGames();
   }
 
   @Get(':id')

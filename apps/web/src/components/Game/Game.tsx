@@ -20,7 +20,8 @@ import {
 } from '../../hooks/game';
 import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
-import { useGetAllGames } from '../../api/game/useGetAllGames';
+import { useGetAvailableGameIds } from '../../api/game/useGetAllGames';
+import { useJoinGame } from '../../api/game/useJoinGame';
 
 const Game = () => {
   const [gameId, setGameId] = useState('');
@@ -33,9 +34,10 @@ const Game = () => {
     MOVE_DURATION_IN_SECONDS,
   );
   const [ranOutOfTime, setRanOutOfTime] = useState(false);
-
   const { imgRef, canvasRef } = useInitializeGame();
+  const { data: allGames } = useGetAvailableGameIds();
 
+  const { mutate } = useJoinGame();
   const socketRef = useInitializeSockets(
     setGameState,
     setIsShooting,
@@ -74,9 +76,7 @@ const Game = () => {
 
       setHoveredHex(nearest);
     };
-
     canvas.addEventListener('mousemove', handleMouseMove);
-
     repaint(
       canvasRef,
       socketRef,
@@ -138,11 +138,6 @@ const Game = () => {
     });
   };
 
-  // const { data: allGames } = useGetAllGames();
-  // console.log('allgames', allGames);
-
-  // console.log('aa');
-
   return (
     <div>
       <div>
@@ -155,35 +150,52 @@ const Game = () => {
           setGameId={setGameId}
         />
       </div>
-      <div className={c.canvasWrapper}>
-        {' '}
-        <canvas
-          ref={canvasRef}
-          onClick={handleCanvasClick}
-          onMouseEnter={() => setIsCanvasHovered(true)}
-          onMouseLeave={() => setIsCanvasHovered(false)}
-        />
+      <div className={c.rel}>
         <div>
-          <button
-            disabled={madeMove || !gameState}
-            className={c.button}
-            onClick={() => {
-              if (!madeMove) setIsShooting((prev) => !prev);
-            }}>
-            {isShooting ? 'Cancel Shooting' : 'Shoot'}
-          </button>
-          {gameState?.players.some((p) => p.won) && (
+          {allGames?.map((g) => (
+            <div className={c.gameContentWrapper} key={g}>
+              <span>{g}</span>
+              <button
+                onClick={() => {
+                  setGameId(g);
+                  socketRef.current?.emit('joinGame', { gameId: g });
+                  mutate();
+                }}>
+                join
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className={c.canvasWrapper}>
+          {' '}
+          <canvas
+            ref={canvasRef}
+            onClick={handleCanvasClick}
+            onMouseEnter={() => setIsCanvasHovered(true)}
+            onMouseLeave={() => setIsCanvasHovered(false)}
+          />
+          <div>
             <button
+              disabled={madeMove || !gameState}
+              className={c.button}
               onClick={() => {
-                console.log('gameState on restart', gameState);
-                console.log('timeRemaining on restart', timeRemaining);
-                socketRef.current?.emit('restartGame', {
-                  gameId,
-                });
+                if (!madeMove) setIsShooting((prev) => !prev);
               }}>
-              Restart
+              {isShooting ? 'Cancel Shooting' : 'Shoot'}
             </button>
-          )}
+            {gameState?.players.some((p) => p.won) && (
+              <button
+                onClick={() => {
+                  console.log('gameState on restart', gameState);
+                  console.log('timeRemaining on restart', timeRemaining);
+                  socketRef.current?.emit('restartGame', {
+                    gameId,
+                  });
+                }}>
+                Restart
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

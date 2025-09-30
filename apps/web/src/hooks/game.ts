@@ -9,6 +9,7 @@ import {
 } from '../utils/calculation-utils';
 import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
+import toast from 'react-hot-toast';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -59,9 +60,10 @@ export const useInitializeSockets = (
     socketRef.current = io(import.meta.env.VITE_API_URL, {
       transports: ['websocket'],
     });
-    socketRef.current.on('gameFull', () =>
-      console.log('This game already started'),
-    );
+    socketRef.current.on('gameFull', () => {
+      console.log('This game already started');
+      toast.error('Game already started');
+    });
 
     socketRef.current.on('gameStart', (data) => {
       console.log('Game started! Data:', socketRef.current?.id, data);
@@ -72,9 +74,14 @@ export const useInitializeSockets = (
       setRanOutOfTime(false);
     });
 
-    socketRef.current.on('playerJoined', (data) =>
-      console.log('Player joined:', data),
-    );
+    socketRef.current.on('alreadyHasRoom', () => {
+      toast.error('You are already in another room');
+    });
+
+    socketRef.current.on('playerJoined', (data) => {
+      console.log('Player joined:', data);
+      toast.success('Joined!');
+    });
     socketRef.current.on('gameState', (data) => {
       setGameState(data);
       setIsShooting(false);

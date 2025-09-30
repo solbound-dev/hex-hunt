@@ -82,3 +82,12 @@
 .input:disabled {
   background: #ddd;
 }
+
+.rel {
+  position: relative;
+}
+.gameContentWrapper {
+  width: 130px;
+  display: flex;
+  justify-content: space-between;
+}

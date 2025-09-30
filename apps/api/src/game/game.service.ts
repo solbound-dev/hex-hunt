@@ -13,9 +13,16 @@ import { Hex } from './Hex';
 export class GameService {
   private games: Record<string, Game> = {};
 
-  getGames() {
-    console.log('service', this.games);
-    return Object.keys(this.games);
+  getAvailableGames() {
+    const availableGames: string[] = [];
+
+    for (const key in this.games) {
+      if (!this.games[key].started) {
+        availableGames.push(key);
+      }
+    }
+
+    return availableGames;
   }
 
   getGame(id: string) {
@@ -32,7 +39,7 @@ export class GameService {
 
   startGame(gameId: string) {
     const game = this.games[gameId];
-    console.log('games', this.games);
+    console.log('games', Object.keys(this.games));
     if (!game || game.started) return;
 
     game.started = true;
@@ -75,8 +82,6 @@ export class GameService {
       game.players.forEach((p) => (p.pendingMove = null));
       game.started = true;
     }
-
-    console.log('games', this.games);
     return { game, newPlayer };
   }
 

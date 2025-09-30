@@ -46,11 +46,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { gameId: string },
   ) {
     const { gameId } = data;
+
+    if (!gameId) return;
+
     const currentGameRoom = Array.from(client.rooms).find(
       (room) => room !== client.id,
     );
     if (currentGameRoom) {
       console.log("Client already has room, you can't join another one ");
+      client.emit('alreadyHasRoom');
       return;
     }
     const result = this.gameService.joinGame(client.id, gameId);

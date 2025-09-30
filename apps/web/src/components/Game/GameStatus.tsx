@@ -3,6 +3,7 @@ import c from './style.module.css';
 import type { Socket } from 'socket.io-client';
 import type { GameData } from '../../utils/calculation-utils';
 import { colors } from '../../utils/draw-utils';
+import { useJoinGame } from '../../api/game/useJoinGame';
 
 type GameStatusProps = {
   gameId: string;
@@ -11,6 +12,7 @@ type GameStatusProps = {
   madeMove: boolean;
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
   setGameId: (gameId: string) => void;
+  // mutate: UseMutateFunction<string[], Error, void, unknown>;
 };
 
 export const GameStatus: React.FC<GameStatusProps> = ({
@@ -20,7 +22,10 @@ export const GameStatus: React.FC<GameStatusProps> = ({
   madeMove,
   socketRef,
   setGameId,
+  // mutate,
 }) => {
+  const { mutate } = useJoinGame();
+
   return (
     <div className={c.statusWrapper}>
       <div className={c.gameInfoContainer}>
@@ -36,13 +41,16 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           className={c.button}
           onClick={() => {
             socketRef.current?.emit('joinGame', { gameId: gameId });
-          }}>
+            mutate();
+          }}
+          disabled={!gameId}>
           Enter game{' '}
         </button>{' '}
         <button
           className={c.button}
           onClick={() => {
             socketRef.current?.emit('start', { gameId: gameId });
+            mutate();
           }}
           disabled={gameState?.started || !gameId}>
           Start game
