@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  username String @id
-  password String
+model Wallet {
+  id         String  @id
+  loginNonce String?
 }

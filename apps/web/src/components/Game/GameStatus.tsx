@@ -3,7 +3,7 @@ import c from './style.module.css';
 import type { Socket } from 'socket.io-client';
 import type { GameData } from '../../utils/calculation-utils';
 import { colors } from '../../utils/draw-utils';
-import { useJoinGame } from '../../api/game/useJoinGame';
+import { useQueryClient } from '@tanstack/react-query';
 
 type GameStatusProps = {
   gameId: string;
@@ -24,7 +24,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
   setGameId,
   // mutate,
 }) => {
-  const { mutate } = useJoinGame();
+  const queryClient = useQueryClient();
 
   return (
     <div className={c.statusWrapper}>
@@ -41,7 +41,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           className={c.button}
           onClick={() => {
             socketRef.current?.emit('joinGame', { gameId: gameId });
-            mutate();
+            queryClient.invalidateQueries({ queryKey: ['games'] });
           }}
           disabled={!gameId}>
           Enter game{' '}
@@ -50,7 +50,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           className={c.button}
           onClick={() => {
             socketRef.current?.emit('start', { gameId: gameId });
-            mutate();
+            queryClient.invalidateQueries({ queryKey: ['games'] });
           }}
           disabled={gameState?.started || !gameId}>
           Start game

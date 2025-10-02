@@ -51,7 +51,14 @@ export class GameService {
     return game;
   }
 
-  joinGame(clientId: string, gameId: string) {
+  joinGame(clientId: string, gameId: string, tokenString: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const token = JSON.parse(
+      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    console.log('SERVICE TOKEN', token, '\ntoken.walletId', token.walletId);
+
     if (!this.games[gameId]) {
       this.games[gameId] = new Game();
       this.games[gameId].generateGrid();
@@ -108,6 +115,8 @@ export class GameService {
 
     const gameContainsWinner = game.players.some((p) => p.won);
     if (gameContainsWinner) return null;
+
+    if (game.draw) return null;
 
     game.players.forEach((p) => {
       if (clientId === p.id) {

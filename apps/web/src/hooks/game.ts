@@ -53,6 +53,7 @@ export const useInitializeSockets = (
   setMadeMove: (madeMove: boolean) => void,
   setTimeRemaining: (time: number) => void,
   setRanOutOfTime: (ranOutOfTime: boolean) => void,
+  setAvailableGames: (games: string[]) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
 
@@ -60,9 +61,14 @@ export const useInitializeSockets = (
     socketRef.current = io(import.meta.env.VITE_API_URL, {
       transports: ['websocket'],
     });
+
+    socketRef.current.on('availableGames', (data) => {
+      setAvailableGames(data);
+    });
+
     socketRef.current.on('gameFull', () => {
       console.log('This game already started');
-      toast.error('Game already started');
+      toast.error('Game id unavailable');
     });
 
     socketRef.current.on('gameStart', (data) => {
@@ -94,6 +100,7 @@ export const useInitializeSockets = (
     setMadeMove,
     setTimeRemaining,
     setRanOutOfTime,
+    setAvailableGames,
   ]);
 
   return socketRef;

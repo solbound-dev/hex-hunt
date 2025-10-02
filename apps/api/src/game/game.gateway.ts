@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Hex } from './Hex';
 import { GameService } from './game.service';
+import { parse } from 'cookie';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -18,6 +19,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(client: Socket) {
     console.log('Client connected:', client.id);
+    const availableGames = this.gameService.getAvailableGames();
+    console.log('connection', availableGames);
+    this.server.to(client.id).emit('availableGames', availableGames);
   }
   handleDisconnect(client: Socket) {
     console.log('Client disconnected:', client.id);
@@ -38,6 +42,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.server.to(gameId).emit('gameStart', game);
     console.log(`GAME ${gameId} STARTED===============================`);
+    const availableGames = this.gameService.getAvailableGames();
+    this.server.emit('availableGames', availableGames);
   }
 
   @SubscribeMessage('joinGame')
@@ -45,6 +51,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { gameId: string },
   ) {
+    const cookie = client.handshake.headers.cookie;
+    console.log('cookie', cookie);
+    const token = parse(cookie || '')?.accessToken;
+    console.log('token', token);
+    if (!token) {
+      //TODO: nekako hendlat neki emit il nesto
+      return;
+    }
+
     const { gameId } = data;
 
     if (!gameId) return;
@@ -53,18 +68,26 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       (room) => room !== client.id,
     );
     if (currentGameRoom) {
-      console.log("Client already has room, you can't join another one ");
+      console.log(
+        "Client (socket) already has room, you can't join another one ",
+      );
       client.emit('alreadyHasRoom');
       return;
     }
-    const result = this.gameService.joinGame(client.id, gameId);
+    const result = this.gameService.joinGame(client.id, gameId, token);
     if (!result) {
       client.emit('gameFull');
       return;
     }
     const { game, newPlayer } = result;
     await client.join(gameId);
-    this.server.to(gameId).emit('playerJoined', { playerId: newPlayer.id });
+    const availableGames = this.gameService.getAvailableGames();
+    console.log('availableGames', availableGames);
+    this.server.to(gameId).emit('playerJoined', {
+      playerId: newPlayer.id,
+    });
+    this.server.emit('availableGames', availableGames);
+
     if (game.started) {
       this.server.to(gameId).emit('gameStart', game);
       console.log('GAME STARTED===============================');
@@ -84,6 +107,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const game = this.gameService.updateGame(client.id, data);
     if (!game) return;
+
     this.server.to(data.gameId).emit('gameState', game);
   }
 

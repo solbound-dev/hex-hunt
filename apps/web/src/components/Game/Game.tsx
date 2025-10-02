@@ -20,8 +20,7 @@ import {
 } from '../../hooks/game';
 import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
-import { useGetAvailableGameIds } from '../../api/game/useGetAllGames';
-import { useJoinGame } from '../../api/game/useJoinGame';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Game = () => {
   const [gameId, setGameId] = useState('');
@@ -33,17 +32,19 @@ const Game = () => {
   const [timeRemaining, setTimeRemaining] = useState<number>(
     MOVE_DURATION_IN_SECONDS,
   );
+  const [availableGames, setAvailableGames] = useState<string[]>([]);
   const [ranOutOfTime, setRanOutOfTime] = useState(false);
   const { imgRef, canvasRef } = useInitializeGame();
-  const { data: allGames } = useGetAvailableGameIds();
 
-  const { mutate } = useJoinGame();
+  const queryClient = useQueryClient();
+
   const socketRef = useInitializeSockets(
     setGameState,
     setIsShooting,
     setMadeMove,
     setTimeRemaining,
     setRanOutOfTime,
+    setAvailableGames,
   );
   useTimer(
     gameState,
@@ -58,9 +59,9 @@ const Game = () => {
 
   useEffect(() => {
     const winner = gameState?.players.find((p) => p.won);
-    if (winner) {
-      toast.success(`${winner.playerType} WON!`);
-    }
+    if (winner) toast.success(`${winner.playerType} WON!`);
+
+    if (gameState?.draw) toast.success('Draw - all players died');
   }, [gameState]);
 
   //canvas click
@@ -152,14 +153,15 @@ const Game = () => {
       </div>
       <div className={c.rel}>
         <div>
-          {allGames?.map((g) => (
+          <h3>Available games</h3>
+          {availableGames.map((g) => (
             <div className={c.gameContentWrapper} key={g}>
               <span>{g}</span>
               <button
                 onClick={() => {
                   setGameId(g);
                   socketRef.current?.emit('joinGame', { gameId: g });
-                  mutate();
+                  queryClient.invalidateQueries({ queryKey: ['games'] });
                 }}>
                 join
               </button>

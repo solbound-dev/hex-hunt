@@ -13,6 +13,7 @@ export type GameData = {
   currentRadius: number;
   started: boolean;
   won: boolean;
+  draw: boolean;
   //this should not get sent to both players:
   players: Player[];
 };

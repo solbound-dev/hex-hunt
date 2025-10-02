@@ -12,6 +12,7 @@ export class Game {
     public cardPos: Hex | null = null,
     public currentRadius: number = START_GRID_RADIUS,
     public started: boolean = false,
+    public draw: boolean = false,
     //this should not get sent to both players:
     public players: Player[] = [], //we currently send position of every player to every player
   ) {}
@@ -192,6 +193,10 @@ export class Game {
           p.wins++;
         }
       });
+    }
+
+    if (numberOfDeadPlayers === this.players.length) {
+      this.draw = true;
     }
 
     //emit was here

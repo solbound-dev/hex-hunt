@@ -1,31 +1,69 @@
-import {
-  Body,
-  Controller,
-  Post,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-  Request,
-  Get,
-} from '@nestjs/common';
+import { Controller, Response, Get, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { User } from 'src/user/user.service';
-import { AuthGuard } from './auth.guard';
+
+class GetMessageResponse {
+  message: string;
+}
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @HttpCode(HttpStatus.OK)
-  @Post('login')
-  signIn(@Body() signInDto: User) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  @Get('request-message/:walletAddress')
+  async getMessage(
+    @Param('walletAddress') walletAddress: string,
+  ): Promise<GetMessageResponse> {
+    const nonce = await this.authService.updateNonce(walletAddress);
+    return { message: `${process.env.JWT_SIGN_MESSAGE}${nonce}` };
   }
 
-  @UseGuards(AuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-    return req.user;
+  @Get('message-login/:walletAddress/:signedMessage')
+  async loginWithMessage(
+    @Response()
+    res: {
+      cookie: (
+        key: string,
+        token: string,
+        params: {
+          expires: Date;
+          sameSite: string;
+          secure: boolean;
+          httpOnly: boolean;
+        },
+      ) => void;
+      send: () => void;
+    },
+    @Param('walletAddress') walletAddress: string,
+    @Param('signedMessage') signedMessage: string,
+  ) {
+    const { token, exp } = await this.authService.loginWithMessage(
+      walletAddress,
+      signedMessage,
+    );
+
+    console.log('accessToken', token);
+
+    res.cookie('accessToken', token, {
+      expires: new Date(exp * 1000),
+      // sameSite: process.env.NODE_ENV !== 'production' ? 'none' : 'strict',
+      sameSite: 'none',
+      secure: true,
+      httpOnly: true,
+    });
+
+    return res.send();
   }
+
+  //   @HttpCode(HttpStatus.OK)
+  //   @Post('login')
+  //   signIn(@Body() signInDto: User) {
+  //     return this.authService.signIn(signInDto.username, signInDto.password);
+  //   }
+
+  //   @UseGuards(AuthGuard)
+  //   @Get('profile')
+  //   getProfile(@Request() req) {
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+  //     return req.user;
+  //   }
 }
