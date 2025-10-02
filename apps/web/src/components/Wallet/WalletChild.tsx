@@ -14,8 +14,10 @@ const WalletChild = () => {
 
   React.useEffect(() => {
     const getInfo = async () => {
+      console.log('walletProviderPublicKey', walletProviderPublicKey);
       if (connection && walletProviderPublicKey) {
         const info = await connection.getAccountInfo(walletProviderPublicKey);
+        console.log('info', info);
         setBalance(info!.lamports / LAMPORTS_PER_SOL);
       } else {
         setBalance(0);

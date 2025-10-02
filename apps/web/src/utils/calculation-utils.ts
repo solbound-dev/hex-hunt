@@ -29,6 +29,7 @@ export class Player {
   constructor(
     public playerType: PlayerType,
     public id: string | null = null,
+    public walletId: string | null = null,
     public lastSeenPos: Hex | null = null,
     public cards: number = 0,
     public pendingMove: Hex | null = null,

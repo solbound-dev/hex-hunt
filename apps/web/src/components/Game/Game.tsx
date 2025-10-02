@@ -21,6 +21,7 @@ import {
 import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 const Game = () => {
   const [gameId, setGameId] = useState('');
@@ -35,6 +36,8 @@ const Game = () => {
   const [availableGames, setAvailableGames] = useState<string[]>([]);
   const [ranOutOfTime, setRanOutOfTime] = useState(false);
   const { imgRef, canvasRef } = useInitializeGame();
+
+  const { publicKey: walletProviderPublicKey } = useWallet();
 
   const queryClient = useQueryClient();
 
@@ -64,6 +67,8 @@ const Game = () => {
     if (gameState?.draw) toast.success('Draw - all players died');
   }, [gameState]);
 
+  // console.log('AAAA', gameState);
+
   //canvas click
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -78,6 +83,10 @@ const Game = () => {
       setHoveredHex(nearest);
     };
     canvas.addEventListener('mousemove', handleMouseMove);
+
+    console.log('rendering canvas', gameState);
+
+    if (!gameState || !imgRef.current) return;
     repaint(
       canvasRef,
       socketRef,
@@ -86,6 +95,7 @@ const Game = () => {
       isCanvasHovered,
       isShooting,
       hoveredHex,
+      walletProviderPublicKey?.toString(),
     );
 
     return () => {
@@ -99,6 +109,7 @@ const Game = () => {
     canvasRef,
     imgRef,
     socketRef,
+    walletProviderPublicKey,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -119,7 +130,7 @@ const Game = () => {
     const move = pixelToHex(x, y);
 
     const currentPlayer = gameState.players.find(
-      (p) => p.id === socketRef.current?.id,
+      (p) => p.walletId === walletProviderPublicKey?.toString(),
     )!;
 
     if (

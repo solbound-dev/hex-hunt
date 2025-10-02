@@ -8,7 +8,6 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import {
   WalletModalProvider,
-  WalletDisconnectButton,
   WalletMultiButton,
 } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
@@ -25,7 +24,7 @@ const WalletWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
           <WalletMultiButton />
-          <WalletDisconnectButton />
+          {/* <WalletDisconnectButton /> */}
           <WalletChild />
           {children}
         </WalletModalProvider>

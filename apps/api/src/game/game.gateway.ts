@@ -20,8 +20,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(client: Socket) {
     console.log('Client connected:', client.id);
     const availableGames = this.gameService.getAvailableGames();
-    console.log('connection', availableGames);
+
+    const cookie = client.handshake.headers.cookie;
+    const token = parse(cookie || '')?.accessToken;
+    if (!token) {
+      //TODO: nekako hendlat neki emit il nesto
+      return;
+    }
+
+    const game = this.gameService.checkIfWalletIsInGame(token);
+
     this.server.to(client.id).emit('availableGames', availableGames);
+    console.log('re-connection', game);
+    this.server.to(client.id).emit('gameState', game);
   }
   handleDisconnect(client: Socket) {
     console.log('Client disconnected:', client.id);
@@ -52,9 +63,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { gameId: string },
   ) {
     const cookie = client.handshake.headers.cookie;
-    console.log('cookie', cookie);
     const token = parse(cookie || '')?.accessToken;
-    console.log('token', token);
     if (!token) {
       //TODO: nekako hendlat neki emit il nesto
       return;

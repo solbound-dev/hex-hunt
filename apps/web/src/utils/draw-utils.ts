@@ -324,8 +324,12 @@ export function repaint(
   isCanvasHovered: boolean,
   isShooting: boolean,
   hoveredHex: Hex | null,
+  walletId?: string,
 ) {
   if (!gameState) return;
+  if (!walletId) return;
+
+  console.log('repaint', gameState);
 
   const context = canvasRef.current?.getContext('2d');
   if (!context) return;
@@ -340,9 +344,8 @@ export function repaint(
     blur: true,
   });
 
-  const currentPlayer = gameState.players.find(
-    (p) => p.id === socketRef.current?.id,
-  )!;
+  const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
+  if (!currentPlayer) return;
 
   const otherPlayers = gameState.players.filter(
     (p) => p.id !== socketRef.current?.id,
@@ -407,6 +410,7 @@ function paintInOrder(
   otherPlayers.forEach((p) =>
     assets.push({ pos: p.lastSeenPos!, type: p.playerType }),
   );
+
   assets.push(
     { pos: currentPlayer.pos!, type: currentPlayer.playerType },
     { pos: gameState.cardPos!, type: 'card' },

@@ -9,6 +9,13 @@ import {
 import { Player, PlayerType } from './Player';
 import { Hex } from './Hex';
 
+type Token = {
+  walletId: string;
+  sub: string;
+  iat: number;
+  exp: number;
+};
+
 @Injectable()
 export class GameService {
   private games: Record<string, Game> = {};
@@ -51,13 +58,25 @@ export class GameService {
     return game;
   }
 
-  joinGame(clientId: string, gameId: string, tokenString: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  checkIfWalletIsInGame(tokenString: string) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    console.log('SERVICE TOKEN', token, '\ntoken.walletId', token.walletId);
+    ) as Token;
+
+    // const gameWithWallet: string | null = null;
+    for (const game in this.games) {
+      const gameContainsWallet = this.games[game].players.find(
+        (p) => (p.walletId = token.walletId),
+      );
+
+      if (gameContainsWallet) return this.games[game];
+    }
+  }
+
+  joinGame(clientId: string, gameId: string, tokenString: string) {
+    const token = JSON.parse(
+      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+    ) as Token;
 
     if (!this.games[gameId]) {
       this.games[gameId] = new Game();
@@ -78,7 +97,13 @@ export class GameService {
     ];
     const newPlayerType = playerTypeOrder[game.players.length];
     const pos = game.getAvailablePlayerPos();
-    const newPlayer = new Player(newPlayerType, clientId, pos, pos);
+    const newPlayer = new Player(
+      newPlayerType,
+      clientId,
+      token.walletId,
+      pos,
+      pos,
+    );
     game.players.push(newPlayer);
 
     if (game.players.length === MAX_PLAYERS) {
