@@ -58,18 +58,26 @@ export class GameService {
     return game;
   }
 
-  checkIfWalletIsInGame(tokenString: string) {
+  getGameByToken(tokenString: string, clientId: string) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
     ) as Token;
+    console.log('getGameByToken walletId', token.walletId);
 
-    // const gameWithWallet: string | null = null;
     for (const game in this.games) {
       const gameContainsWallet = this.games[game].players.find(
-        (p) => (p.walletId = token.walletId),
+        (p) => p.walletId === token.walletId,
       );
 
-      if (gameContainsWallet) return this.games[game];
+      if (gameContainsWallet) {
+        this.games[game].players.forEach((p) => {
+          if (p.walletId === token.walletId) {
+            p.id = clientId;
+          }
+        });
+      }
+
+      return { gameId: game, gameObject: this.games[game] };
     }
   }
 
@@ -118,18 +126,26 @@ export class GameService {
   }
 
   updateGame(
-    clientId: string,
     data: {
       gameId: string;
       move: Hex | null;
       isShooting: boolean;
       didRunOutOfTime: boolean;
     },
+    tokenString: string,
   ) {
+    const token = JSON.parse(
+      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+    ) as Token;
+
+    if (!token) return;
+
     const game = this.games[data.gameId];
     if (!game) return null;
 
-    const gameContainsClient = game.players.some((p) => p.id === clientId);
+    const gameContainsClient = game.players.some(
+      (p) => p.walletId === token.walletId,
+    );
     if (!gameContainsClient) return null;
 
     if (data.move) {
@@ -144,7 +160,7 @@ export class GameService {
     if (game.draw) return null;
 
     game.players.forEach((p) => {
-      if (clientId === p.id) {
+      if (token.walletId === p.walletId) {
         const moveTooLate = new Date() > new Date(game.moveExpiryDate);
         if (data.didRunOutOfTime || moveTooLate) {
           p.isDead = true;
@@ -153,7 +169,7 @@ export class GameService {
     });
 
     game.players.forEach((p) => {
-      if (clientId === p.id) {
+      if (token.walletId === p.walletId) {
         if (p.isShooting === null) {
           p.isShooting = data.isShooting;
         }
@@ -173,6 +189,7 @@ export class GameService {
     const waitingForMoves = game.players.some(
       (p) => p.pendingMove === null && !p.isDead,
     );
+
     if (!waitingForMoves) {
       game.players.forEach((p) => {
         if (p.isShooting) {
@@ -197,11 +214,18 @@ export class GameService {
     }
   }
 
-  restartGame(clientId: string, gameId: string) {
+  restartGame(clientId: string, gameId: string, tokenString: string) {
+    const token = JSON.parse(
+      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+    ) as Token;
+    if (!token) return;
+
     const game = this.games[gameId];
     if (!game) return null;
 
-    const gameContainsClient = game.players.some((p) => p.id === clientId);
+    const gameContainsClient = game.players.some(
+      (p) => p.walletId === token.walletId,
+    );
     if (!gameContainsClient) return null;
 
     const gameContainsWinner = game.players.some((p) => p.won);

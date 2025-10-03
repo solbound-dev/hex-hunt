@@ -37,7 +37,7 @@ const Game = () => {
   const [ranOutOfTime, setRanOutOfTime] = useState(false);
   const { imgRef, canvasRef } = useInitializeGame();
 
-  const { publicKey: walletProviderPublicKey } = useWallet();
+  const { publicKey: walletId } = useWallet();
 
   const queryClient = useQueryClient();
 
@@ -48,6 +48,7 @@ const Game = () => {
     setTimeRemaining,
     setRanOutOfTime,
     setAvailableGames,
+    setGameId,
   );
   useTimer(
     gameState,
@@ -67,8 +68,6 @@ const Game = () => {
     if (gameState?.draw) toast.success('Draw - all players died');
   }, [gameState]);
 
-  // console.log('AAAA', gameState);
-
   //canvas click
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -84,9 +83,6 @@ const Game = () => {
     };
     canvas.addEventListener('mousemove', handleMouseMove);
 
-    console.log('rendering canvas', gameState);
-
-    if (!gameState || !imgRef.current) return;
     repaint(
       canvasRef,
       socketRef,
@@ -95,7 +91,7 @@ const Game = () => {
       isCanvasHovered,
       isShooting,
       hoveredHex,
-      walletProviderPublicKey?.toString(),
+      walletId?.toString(),
     );
 
     return () => {
@@ -109,7 +105,7 @@ const Game = () => {
     canvasRef,
     imgRef,
     socketRef,
-    walletProviderPublicKey,
+    walletId,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -120,7 +116,7 @@ const Game = () => {
     if (gameHasWinner) return;
 
     const playerIsDead = gameState.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
+      (p) => p.walletId === walletId && p.isDead,
     );
     if (playerIsDead) return;
 
@@ -130,7 +126,7 @@ const Game = () => {
     const move = pixelToHex(x, y);
 
     const currentPlayer = gameState.players.find(
-      (p) => p.walletId === walletProviderPublicKey?.toString(),
+      (p) => p.walletId === walletId?.toString(),
     )!;
 
     if (

@@ -54,6 +54,7 @@ export const useInitializeSockets = (
   setTimeRemaining: (time: number) => void,
   setRanOutOfTime: (ranOutOfTime: boolean) => void,
   setAvailableGames: (games: string[]) => void,
+  setGameId: (gameId: string) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
 
@@ -68,11 +69,11 @@ export const useInitializeSockets = (
 
     socketRef.current.on('gameFull', () => {
       console.log('This game already started');
-      toast.error('Game id unavailable');
+      toast.error('Game unavailable');
     });
 
     socketRef.current.on('gameStart', (data) => {
-      console.log('Game started! Data:', socketRef.current?.id, data);
+      console.log('Game started! Data:', data);
       setGameState(data);
       setTimeRemaining(MOVE_DURATION_IN_SECONDS * 1000);
       setIsShooting(false);
@@ -94,6 +95,11 @@ export const useInitializeSockets = (
       setMadeMove(false);
       setRanOutOfTime(false);
     });
+
+    socketRef.current.on('reconnect', (data) => {
+      setGameId(data.gameId);
+      setGameState(data.game);
+    });
   }, [
     setGameState,
     setIsShooting,
@@ -101,6 +107,7 @@ export const useInitializeSockets = (
     setTimeRemaining,
     setRanOutOfTime,
     setAvailableGames,
+    setGameId,
   ]);
 
   return socketRef;
@@ -115,6 +122,7 @@ export const useTimer = (
   setTimeRemaining: (time: number) => void,
   ranOutOfTime: boolean,
   setRanOutOfTime: (ranOutOfTime: boolean) => void,
+  walletId?: string,
 ) => {
   const [eventDate, setEventDate] = useState('');
   const [countdownStarted, setCountdownStarted] = useState(false);
@@ -122,7 +130,7 @@ export const useTimer = (
   //reset timer
   useEffect(() => {
     const playerIsDead = gameState?.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
+      (p) => p.walletId === walletId && p.isDead,
     );
 
     if (playerIsDead) {
@@ -137,7 +145,7 @@ export const useTimer = (
     if (gameState) {
       setCountdownStarted(true);
     }
-  }, [gameState, socketRef]);
+  }, [gameState, socketRef, walletId]);
 
   //timer logic
   useEffect(() => {
@@ -175,7 +183,7 @@ export const useTimer = (
     if (winner) return;
 
     const playerIsDead = gameState?.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
+      (p) => p.walletId === walletId && p.isDead,
     );
     const gameHasWinner = gameState?.players.some((p) => p.won);
     if (ranOutOfTime && !madeMove && !playerIsDead && !gameHasWinner) {
@@ -193,6 +201,7 @@ export const useTimer = (
     gameState?.players,
     socketRef,
     gameState,
+    walletId,
   ]);
 
   return { timeRemaining, setTimeRemaining };

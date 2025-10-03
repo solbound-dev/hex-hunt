@@ -17,7 +17,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   constructor(private readonly gameService: GameService) {}
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     console.log('Client connected:', client.id);
     const availableGames = this.gameService.getAvailableGames();
 
@@ -28,21 +28,34 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const game = this.gameService.checkIfWalletIsInGame(token);
-
-    this.server.to(client.id).emit('availableGames', availableGames);
-    console.log('re-connection', game);
-    this.server.to(client.id).emit('gameState', game);
+    const gameData = this.gameService.getGameByToken(token, client.id);
+    if (!gameData) {
+      this.server.to(client.id).emit('availableGames', availableGames);
+    } else {
+      const { gameId, gameObject: game } = gameData;
+      await client.join(gameId);
+      console.log(game.players);
+      this.server.to(client.id).emit('reconnect', { gameId, game });
+    }
   }
   handleDisconnect(client: Socket) {
+    console.log('+++++++++++++++++++++++++++++++++++');
     console.log('Client disconnected:', client.id);
+    // const rooms = this.server.sockets.adapter.rooms; ALL ROOMS
+    const roomName = '1';
+    const clients = this.server.sockets.adapter.rooms.get(roomName);
+
+    if (clients) {
+      console.log(`Clients in ${roomName}:`, Array.from(clients));
+    } else {
+      console.log(`Room ${roomName} is empty or does not exist.`);
+    }
+
+    //TODO: izbacit ga iz rooma
   }
 
   @SubscribeMessage('start')
-  handleStart(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { gameId: string },
-  ) {
+  handleStart(@MessageBody() data: { gameId: string }) {
     const { gameId } = data;
 
     const game = this.gameService.startGame(gameId);
@@ -70,7 +83,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const { gameId } = data;
-
     if (!gameId) return;
 
     const currentGameRoom = Array.from(client.rooms).find(
@@ -91,7 +103,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { game, newPlayer } = result;
     await client.join(gameId);
     const availableGames = this.gameService.getAvailableGames();
-    console.log('availableGames', availableGames);
     this.server.to(gameId).emit('playerJoined', {
       playerId: newPlayer.id,
     });
@@ -114,7 +125,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       didRunOutOfTime: boolean;
     },
   ) {
-    const game = this.gameService.updateGame(client.id, data);
+    const cookie = client.handshake.headers.cookie;
+    const token = parse(cookie || '')?.accessToken;
+    if (!token) {
+      //TODO: nekako hendlat neki emit il nesto
+      return;
+    }
+
+    const game = this.gameService.updateGame(data, token);
     if (!game) return;
 
     this.server.to(data.gameId).emit('gameState', game);
@@ -125,7 +143,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { gameId: string },
   ) {
-    const game = this.gameService.restartGame(client.id, data.gameId);
+    const cookie = client.handshake.headers.cookie;
+    const token = parse(cookie || '')?.accessToken;
+    if (!token) {
+      //TODO: nekako hendlat neki emit il nesto
+      return;
+    }
+    const game = this.gameService.restartGame(client.id, data.gameId, token);
 
     if (!game) return;
 

@@ -46,7 +46,7 @@ export function updateAndEmitGameState(
   game.players.forEach((p) => {
     if (p.cards === 3 && p.pos?.equals(new Hex(0, 0))) {
       game.players.forEach((op) => {
-        if (op.id !== p.id) {
+        if (op.walletId !== p.walletId) {
           op.isDead = true;
         }
       });

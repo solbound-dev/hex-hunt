@@ -67,7 +67,7 @@ export class Game {
 
   shootInDirection(directionHex: Hex, shooter: Player) {
     this.players.forEach((p) => {
-      if (p.id === shooter.id) return;
+      if (p.walletId === shooter.walletId) return;
 
       let targetPos: Hex;
       if (p.isShooting) {
@@ -120,7 +120,7 @@ export class Game {
     }
 
     this.players.forEach((p) => {
-      if (p.id === currentPlayer.id) return;
+      if (p.walletId === currentPlayer.walletId) return;
       if (p.isDead) return;
       let otherPlayerNextPosition: Hex;
       if (p.isShooting) {
@@ -174,7 +174,7 @@ export class Game {
     this.players.forEach((p) => {
       if (p.cards === 3 && p.pos?.equals(new Hex(0, 0))) {
         this.players.forEach((op) => {
-          if (op.id !== p.id) {
+          if (op.walletId !== p.walletId) {
             op.isDead = true;
           }
         });

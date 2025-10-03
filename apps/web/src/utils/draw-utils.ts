@@ -329,8 +329,6 @@ export function repaint(
   if (!gameState) return;
   if (!walletId) return;
 
-  console.log('repaint', gameState);
-
   const context = canvasRef.current?.getContext('2d');
   if (!context) return;
 
@@ -347,9 +345,7 @@ export function repaint(
   const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
   if (!currentPlayer) return;
 
-  const otherPlayers = gameState.players.filter(
-    (p) => p.id !== socketRef.current?.id,
-  );
+  const otherPlayers = gameState.players.filter((p) => p.walletId !== walletId);
 
   if (isShooting) {
     const pos = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);

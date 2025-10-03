@@ -12,7 +12,7 @@ type GameStatusProps = {
   madeMove: boolean;
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
   setGameId: (gameId: string) => void;
-  // mutate: UseMutateFunction<string[], Error, void, unknown>;
+  walletId?: string;
 };
 
 export const GameStatus: React.FC<GameStatusProps> = ({
@@ -22,7 +22,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
   madeMove,
   socketRef,
   setGameId,
-  // mutate,
+  walletId,
 }) => {
   const queryClient = useQueryClient();
 
@@ -69,16 +69,15 @@ export const GameStatus: React.FC<GameStatusProps> = ({
       <div className={c.gameInfoContainer}>
         {gameState?.players.map((p) => (
           <div
-            key={p.id}
+            key={p.walletId}
             style={{
               color: colors[p.playerType],
               textDecoration: p.isDead ? 'line-through' : 'none',
-              fontWeight: p.id === socketRef.current?.id ? 'bold' : 'normal',
-              fontSize: p.id === socketRef.current?.id ? '24px' : '20px',
+              fontWeight: p.walletId === walletId ? 'bold' : 'normal',
+              fontSize: p.walletId === walletId ? '24px' : '20px',
             }}>
-            {p.playerType} ({p.wins})
-            {p.id === socketRef.current?.id ? ' (you)' : ''} | {p.cards} / 3
-            {p.won && ' WON!'}
+            {p.playerType} ({p.wins}){p.walletId === walletId ? ' (you)' : ''} |{' '}
+            {p.cards} / 3{p.won && ' WON!'}
           </div>
         ))}
       </div>
