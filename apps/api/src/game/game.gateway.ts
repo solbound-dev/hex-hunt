@@ -34,7 +34,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } else {
       const { gameId, gameObject: game } = gameData;
       await client.join(gameId);
-      console.log(game.players);
       this.server.to(client.id).emit('reconnect', { gameId, game });
     }
   }
@@ -70,20 +69,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('availableGames', availableGames);
   }
 
-  @SubscribeMessage('joinGame')
-  async handleJoinGame(
+  @SubscribeMessage('quickJoin')
+  async handleQuickJoin(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { gameId: string },
+    @MessageBody() data: { tier: number },
   ) {
     const cookie = client.handshake.headers.cookie;
     const token = parse(cookie || '')?.accessToken;
     if (!token) {
-      //TODO: nekako hendlat neki emit il nesto
       return;
     }
 
-    const { gameId } = data;
-    if (!gameId) return;
+    const { tier } = data;
+    if (typeof tier !== 'number') return;
 
     const currentGameRoom = Array.from(client.rooms).find(
       (room) => room !== client.id,
@@ -95,7 +93,53 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('alreadyHasRoom');
       return;
     }
-    const result = this.gameService.joinGame(client.id, gameId, token);
+
+    const result = this.gameService.quickJoinGame(client.id, tier, token);
+
+    if (!result) {
+      console.log('No available game found and failed to create a new one.');
+      return;
+    }
+
+    const { gameId, game, newPlayer } = result;
+    await client.join(gameId);
+
+    this.server.to(gameId).emit('playerJoined', {
+      playerId: newPlayer.id,
+    });
+
+    if (game.started) {
+      this.server.to(gameId).emit('gameStart', game);
+      console.log('GAME STARTED===============================');
+    }
+  }
+
+  @SubscribeMessage('joinGame')
+  async handleJoinGame(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { gameId: string; tier: number },
+  ) {
+    const cookie = client.handshake.headers.cookie;
+    const token = parse(cookie || '')?.accessToken;
+    if (!token) {
+      //TODO: nekako hendlat neki emit il nesto
+      return;
+    }
+
+    const { gameId, tier } = data;
+    if (!gameId || !tier) return;
+
+    const currentGameRoom = Array.from(client.rooms).find(
+      (room) => room !== client.id,
+    );
+    if (currentGameRoom) {
+      console.log(
+        "Client (socket) already has room, you can't join another one ",
+      );
+      client.emit('alreadyHasRoom');
+      return;
+    }
+    const result = this.gameService.joinGame(client.id, gameId, token, tier);
     if (!result) {
       client.emit('gameFull');
       return;

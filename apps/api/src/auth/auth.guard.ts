@@ -21,13 +21,10 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     try {
-      console.log('try token', token);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const payload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
-
-      console.log('payload', typeof payload);
 
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers

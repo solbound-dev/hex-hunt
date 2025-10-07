@@ -1,0 +1,21 @@
+.infoWrapper {
+  width: 600px;
+  margin-left: 400px;
+  margin-bottom: 400px;
+}
+.winnersSection {
+  max-width: 800px;
+  overflow-x: hidden;
+}
+.winnersWrapper {
+  display: flex;
+  gap: 10px;
+}
+.walletMultiButton {
+  position: fixed;
+  top: 70px;
+  right: 0px;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+}

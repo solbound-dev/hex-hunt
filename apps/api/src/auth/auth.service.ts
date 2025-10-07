@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from 'src/password/password.service';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Wallet } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,20 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
   ) {}
+
+  async validateWallet(id: string): Promise<Wallet> {
+    if (!id) {
+      throw new NotFoundException(`No wallet found`);
+    }
+
+    const wallet = await this.prisma.wallet.findUnique({ where: { id: id } });
+
+    if (!wallet) {
+      throw new NotFoundException(`No wallet found with address: ${id}`);
+    }
+
+    return wallet;
+  }
 
   async loginWithMessage(id: string, signedMessage: string) {
     const wallet = await this.prisma.wallet.findUnique({
@@ -56,6 +71,19 @@ export class AuthService {
     });
 
     return loginNonce;
+  }
+
+  async me(req: Request & { user: { id: string } }): Promise<Partial<Wallet>> {
+    const result = this.prisma.wallet.findFirstOrThrow({
+      where: {
+        id: req.user.id,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return result;
   }
 
   // async signIn(

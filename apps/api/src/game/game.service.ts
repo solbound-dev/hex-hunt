@@ -81,13 +81,40 @@ export class GameService {
     }
   }
 
-  joinGame(clientId: string, gameId: string, tokenString: string) {
+  quickJoinGame(clientId: string, tier: number, tokenString: string) {
+    const token = JSON.parse(
+      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+    ) as Token;
+    if (!token) return;
+
+    let availableGameId = '';
+
+    for (const gameId in this.games) {
+      if (this.games[gameId].started) continue;
+      if (this.games[gameId].tier !== tier) continue;
+      if (this.games[gameId].players.length >= MAX_PLAYERS) continue;
+      availableGameId = gameId;
+    }
+    if (availableGameId) {
+      return this.joinGame(clientId, availableGameId, tokenString, tier);
+    }
+    //generate random 5 char string
+    const newGameId = Math.random().toString(36).substring(2, 7);
+    return this.joinGame(clientId, newGameId, tokenString, tier);
+  }
+
+  joinGame(
+    clientId: string,
+    gameId: string,
+    tokenString: string,
+    tier: number,
+  ) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
     ) as Token;
 
     if (!this.games[gameId]) {
-      this.games[gameId] = new Game();
+      this.games[gameId] = new Game(tier);
       this.games[gameId].generateGrid();
     }
 
@@ -122,7 +149,7 @@ export class GameService {
       game.players.forEach((p) => (p.pendingMove = null));
       game.started = true;
     }
-    return { game, newPlayer };
+    return { gameId, game, newPlayer };
   }
 
   updateGame(

@@ -1,9 +1,23 @@
-import { Controller, Response, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Response,
+  Get,
+  Param,
+  UseGuards,
+  Request,
+  Post,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 class GetMessageResponse {
   message: string;
 }
+
+type Wallet = {
+  id: string;
+  loginNonce?: string | null;
+};
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +28,7 @@ export class AuthController {
     @Param('walletAddress') walletAddress: string,
   ): Promise<GetMessageResponse> {
     const nonce = await this.authService.updateNonce(walletAddress);
+
     return { message: `${process.env.JWT_SIGN_MESSAGE}${nonce}` };
   }
 
@@ -41,8 +56,6 @@ export class AuthController {
       signedMessage,
     );
 
-    console.log('accessToken', token);
-
     res.cookie('accessToken', token, {
       expires: new Date(exp * 1000),
       // sameSite: process.env.NODE_ENV !== 'production' ? 'none' : 'strict',
@@ -52,6 +65,28 @@ export class AuthController {
     });
 
     return res.send();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async me(
+    @Request() req: Request & { user: { id: string } },
+  ): Promise<Partial<Wallet>> {
+    const result = this.authService.me(req);
+
+    return result;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  logout(@Response({ passthrough: true }) res) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      // sameSite: process.env.NODE_ENV !== 'production' ? 'none' : 'strict',
+      sameSite: 'none',
+      secure: true,
+    });
   }
 
   //   @HttpCode(HttpStatus.OK)

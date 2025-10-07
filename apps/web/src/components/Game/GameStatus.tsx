@@ -40,7 +40,8 @@ export const GameStatus: React.FC<GameStatusProps> = ({
         <button
           className={c.button}
           onClick={() => {
-            socketRef.current?.emit('joinGame', { gameId: gameId });
+            console.log('joingame');
+            socketRef.current?.emit('joinGame', { gameId: gameId, tier: 1 });
             queryClient.invalidateQueries({ queryKey: ['games'] });
           }}
           disabled={!gameId}>

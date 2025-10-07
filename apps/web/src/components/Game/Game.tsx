@@ -1,65 +1,85 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import c from './style.module.css';
 import {
   getMousePosition,
   getNearestHex,
-  Hex,
   isInGrid,
   isSameMove,
-  MOVE_DURATION_IN_SECONDS,
   pixelToHex,
-  type GameData,
 } from '../../utils/calculation-utils';
 import { repaint } from '../../utils/draw-utils';
 
 import { isNeighbor } from '../../utils/utils';
-import {
-  useInitializeGame,
-  useInitializeSockets,
-  useTimer,
-} from '../../hooks/game';
 import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useAuth } from '../../providers/AuthProvider';
+import { useLocation } from 'wouter';
+import { useGame } from '../../providers/GameProvider';
+import { useInitializeGame } from '../../hooks/game';
 
 const Game = () => {
-  const [gameId, setGameId] = useState('');
-  const [gameState, setGameState] = useState<GameData>();
-  const [isShooting, setIsShooting] = useState(false);
-  const [madeMove, setMadeMove] = useState(false);
-  const [isCanvasHovered, setIsCanvasHovered] = useState(false);
-  const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<number>(
-    MOVE_DURATION_IN_SECONDS,
-  );
-  const [availableGames, setAvailableGames] = useState<string[]>([]);
-  const [ranOutOfTime, setRanOutOfTime] = useState(false);
-  const { imgRef, canvasRef } = useInitializeGame();
+  const { isAuthenticated, isCheckingAuth } = useAuth();
+  const [, navigate] = useLocation();
+  if (!isAuthenticated && !isCheckingAuth) {
+    navigate('/login');
+  }
+
+  // const [gameId, setGameId] = useState('');
+  // const [gameState, setGameState] = useState<GameData>();
+  // const [isShooting, setIsShooting] = useState(false);
+  // const [madeMove, setMadeMove] = useState(false);
+  // const [isCanvasHovered, setIsCanvasHovered] = useState(false);
+  // const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
+  // const [timeRemaining, setTimeRemaining] = useState<number>(
+  //   MOVE_DURATION_IN_SECONDS,
+  // );
+  // const [availableGames, setAvailableGames] = useState<string[]>([]);
+  // const [ranOutOfTime, setRanOutOfTime] = useState(false);
 
   const { publicKey: walletId } = useWallet();
 
   const queryClient = useQueryClient();
 
-  const socketRef = useInitializeSockets(
-    setGameState,
-    setIsShooting,
-    setMadeMove,
-    setTimeRemaining,
-    setRanOutOfTime,
-    setAvailableGames,
-    setGameId,
-  );
-  useTimer(
-    gameState,
-    socketRef,
-    madeMove,
+  // const socketRef = useInitializeSockets(
+  //   setGameState,
+  //   setIsShooting,
+  //   setMadeMove,
+  //   setTimeRemaining,
+  //   setRanOutOfTime,
+  //   setAvailableGames,
+  //   setGameId,
+  // );
+  // useTimer(
+  //   gameState,
+  //   socketRef,
+  //   madeMove,
+  //   gameId,
+  //   timeRemaining,
+  //   setTimeRemaining,
+  //   ranOutOfTime,
+  //   setRanOutOfTime,
+  // );
+
+  const {
     gameId,
+    setGameId,
+    gameState,
+    isShooting,
+    setIsShooting,
+    madeMove,
+    setMadeMove,
+    isCanvasHovered,
+    setIsCanvasHovered,
+    hoveredHex,
+    setHoveredHex,
     timeRemaining,
-    setTimeRemaining,
-    ranOutOfTime,
-    setRanOutOfTime,
-  );
+    availableGames,
+    socketRef,
+  } = useGame();
+
+  const { imgRef, canvasRef } = useInitializeGame();
 
   useEffect(() => {
     const winner = gameState?.players.find((p) => p.won);
@@ -106,6 +126,7 @@ const Game = () => {
     imgRef,
     socketRef,
     walletId,
+    setHoveredHex,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -188,7 +209,7 @@ const Game = () => {
               disabled={madeMove || !gameState}
               className={c.button}
               onClick={() => {
-                if (!madeMove) setIsShooting((prev) => !prev);
+                if (!madeMove) setIsShooting(!isShooting);
               }}>
               {isShooting ? 'Cancel Shooting' : 'Shoot'}
             </button>
