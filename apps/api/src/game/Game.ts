@@ -5,6 +5,7 @@ import { Player } from './Player';
 export class Game {
   constructor(
     public tier: number,
+    public isPrivate: boolean,
     public createdAt: string = new Date().toISOString(),
     public moveExpiryDate: string = '',
     public disappearedHexes: Hex[] = [],

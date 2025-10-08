@@ -12,7 +12,6 @@ import { repaint } from '../../utils/draw-utils';
 import { isNeighbor } from '../../utils/utils';
 import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
-import { useQueryClient } from '@tanstack/react-query';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAuth } from '../../providers/AuthProvider';
 import { useLocation } from 'wouter';
@@ -26,46 +25,13 @@ const Game = () => {
     navigate('/login');
   }
 
-  // const [gameId, setGameId] = useState('');
-  // const [gameState, setGameState] = useState<GameData>();
-  // const [isShooting, setIsShooting] = useState(false);
-  // const [madeMove, setMadeMove] = useState(false);
-  // const [isCanvasHovered, setIsCanvasHovered] = useState(false);
-  // const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
-  // const [timeRemaining, setTimeRemaining] = useState<number>(
-  //   MOVE_DURATION_IN_SECONDS,
-  // );
-  // const [availableGames, setAvailableGames] = useState<string[]>([]);
-  // const [ranOutOfTime, setRanOutOfTime] = useState(false);
-
   const { publicKey: walletId } = useWallet();
-
-  const queryClient = useQueryClient();
-
-  // const socketRef = useInitializeSockets(
-  //   setGameState,
-  //   setIsShooting,
-  //   setMadeMove,
-  //   setTimeRemaining,
-  //   setRanOutOfTime,
-  //   setAvailableGames,
-  //   setGameId,
-  // );
-  // useTimer(
-  //   gameState,
-  //   socketRef,
-  //   madeMove,
-  //   gameId,
-  //   timeRemaining,
-  //   setTimeRemaining,
-  //   ranOutOfTime,
-  //   setRanOutOfTime,
-  // );
 
   const {
     gameId,
     setGameId,
     gameState,
+    setGameState,
     isShooting,
     setIsShooting,
     madeMove,
@@ -75,7 +41,6 @@ const Game = () => {
     hoveredHex,
     setHoveredHex,
     timeRemaining,
-    availableGames,
     socketRef,
   } = useGame();
 
@@ -105,7 +70,6 @@ const Game = () => {
 
     repaint(
       canvasRef,
-      socketRef,
       imgRef,
       gameState,
       isCanvasHovered,
@@ -179,23 +143,15 @@ const Game = () => {
           setGameId={setGameId}
         />
       </div>
+      <button
+        onClick={() => {
+          socketRef.current?.emit('leaveGame', { gameId });
+          setGameState(null);
+          navigate('/find-game');
+        }}>
+        Leave
+      </button>
       <div className={c.rel}>
-        <div>
-          <h3>Available games</h3>
-          {availableGames.map((g) => (
-            <div className={c.gameContentWrapper} key={g}>
-              <span>{g}</span>
-              <button
-                onClick={() => {
-                  setGameId(g);
-                  socketRef.current?.emit('joinGame', { gameId: g });
-                  queryClient.invalidateQueries({ queryKey: ['games'] });
-                }}>
-                join
-              </button>
-            </div>
-          ))}
-        </div>
         <div className={c.canvasWrapper}>
           {' '}
           <canvas

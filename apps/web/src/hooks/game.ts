@@ -63,6 +63,10 @@ export const useInitializeSockets = (
       transports: ['websocket'],
     });
 
+    socketRef.current.on('playerLeft', () => {
+      toast.error('Player left');
+    });
+
     socketRef.current.on('availableGames', (data) => {
       setAvailableGames(data);
     });
@@ -88,6 +92,7 @@ export const useInitializeSockets = (
     socketRef.current.on('playerJoined', (data) => {
       console.log('Player joined:', data);
       toast.success('Joined!');
+      setGameId(data.gameId);
     });
     socketRef.current.on('gameState', (data) => {
       setGameState(data);

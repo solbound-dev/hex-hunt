@@ -318,9 +318,8 @@ export function drawGridIsometric(ctx: CanvasRenderingContext2D, grid: Hex[]) {
 
 export function repaint(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
   imgRef: React.RefObject<ImgRef>,
-  gameState: GameData | undefined,
+  gameState: GameData | undefined | null,
   isCanvasHovered: boolean,
   isShooting: boolean,
   hoveredHex: Hex | null,

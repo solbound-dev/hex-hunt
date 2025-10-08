@@ -32,6 +32,7 @@ function App() {
                     component={() => <FindGamePage />}
                   />
                   <Route path={'/'} component={() => <Game />} />
+                  <Route path={'*'} component={() => <div>Error page</div>} />
                 </Switch>{' '}
               </GameProvider>
             </AuthProvider>

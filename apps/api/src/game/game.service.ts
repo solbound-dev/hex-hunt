@@ -81,6 +81,26 @@ export class GameService {
     }
   }
 
+  leaveGame(gameId: string, tokenString: string) {
+    const token = JSON.parse(
+      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+    ) as Token;
+    if (!token) return;
+
+    const game = this.games[gameId];
+    if (!game) return;
+    console.log('walletId to leave', token.walletId);
+    game.players = game.players.filter((p) => {
+      // console.log('p.walletId', p.walletId);
+      // console.log('token.walletId', token.walletId);
+      // console.log('!==', p.walletId !== token.walletId);
+
+      return p.walletId !== token.walletId;
+    });
+    console.log('players after leaving', game.players);
+    return game;
+  }
+
   quickJoinGame(clientId: string, tier: number, tokenString: string) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
@@ -93,14 +113,33 @@ export class GameService {
       if (this.games[gameId].started) continue;
       if (this.games[gameId].tier !== tier) continue;
       if (this.games[gameId].players.length >= MAX_PLAYERS) continue;
+      if (this.games[gameId].isPrivate) continue;
       availableGameId = gameId;
     }
     if (availableGameId) {
-      return this.joinGame(clientId, availableGameId, tokenString, tier);
+      return this.joinGame(clientId, availableGameId, tokenString, tier, false);
     }
-    //generate random 5 char string
+
     const newGameId = Math.random().toString(36).substring(2, 7);
-    return this.joinGame(clientId, newGameId, tokenString, tier);
+    return this.joinGame(clientId, newGameId, tokenString, tier, false);
+  }
+
+  hostPrivateGame(clientId: string, tier: number, tokenString: string) {
+    const token = JSON.parse(
+      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+    ) as Token;
+    if (!token) return;
+
+    //possible that that gameId already exists but there is a lot of combinations
+    const newGameId = Math.random().toString(36).substring(2, 7);
+    return this.joinGame(clientId, newGameId, tokenString, tier, true);
+  }
+
+  joinPrivateGame(clientId: string, gameId: string, tokenString: string) {
+    const game = this.games[gameId];
+    if (!game) return;
+
+    return this.joinGame(clientId, gameId, tokenString, game.tier, true);
   }
 
   joinGame(
@@ -108,13 +147,14 @@ export class GameService {
     gameId: string,
     tokenString: string,
     tier: number,
+    isPrivate: boolean,
   ) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
     ) as Token;
 
     if (!this.games[gameId]) {
-      this.games[gameId] = new Game(tier);
+      this.games[gameId] = new Game(tier, isPrivate);
       this.games[gameId].generateGrid();
     }
 

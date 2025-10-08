@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 type GameStatusProps = {
   gameId: string;
-  gameState: GameData | undefined;
+  gameState: GameData | undefined | null;
   timeRemaining: number;
   madeMove: boolean;
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
@@ -21,7 +21,6 @@ export const GameStatus: React.FC<GameStatusProps> = ({
   timeRemaining,
   madeMove,
   socketRef,
-  setGameId,
   walletId,
 }) => {
   const queryClient = useQueryClient();
@@ -29,15 +28,16 @@ export const GameStatus: React.FC<GameStatusProps> = ({
   return (
     <div className={c.statusWrapper}>
       <div className={c.gameInfoContainer}>
-        <input
+        {/* <input
           disabled={!!gameState?.started}
           className={c.input}
           type='text'
           placeholder='gameId'
           value={gameId}
           onChange={(e) => setGameId(e.target.value)}
-        />
-        <button
+        /> */}
+        <h3>gameId: {gameId}</h3>
+        {/* <button
           className={c.button}
           onClick={() => {
             console.log('joingame');
@@ -46,7 +46,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           }}
           disabled={!gameId}>
           Enter game{' '}
-        </button>{' '}
+        </button>{' '} */}
         <button
           className={c.button}
           onClick={() => {
@@ -65,7 +65,6 @@ export const GameStatus: React.FC<GameStatusProps> = ({
             backgroundColor: madeMove ? 'lightgreen' : 'grey',
           }}></div>
         <h3>my id: {socketRef.current?.id}</h3>
-        <h3>Game: {gameId}</h3>
       </div>
       <div className={c.gameInfoContainer}>
         {gameState?.players.map((p) => (

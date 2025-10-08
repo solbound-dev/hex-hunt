@@ -11,8 +11,8 @@ import type { Socket } from 'socket.io-client';
 interface GameContext {
   gameId: string;
   setGameId: (gameId: string) => void;
-  gameState?: GameData;
-  setGameState: (gameState: GameData) => void;
+  gameState?: GameData | null;
+  setGameState: (gameState: GameData | null) => void;
   isShooting: boolean;
   setIsShooting: (isShooting: boolean) => void;
   madeMove: boolean;
@@ -31,7 +31,7 @@ interface GameContext {
 const initialContextValue = {
   gameId: '',
   setGameId: () => {},
-  gameState: undefined,
+  gameState: null,
   setGameState: () => {},
   isShooting: false,
   setIsShooting: () => {},
@@ -41,7 +41,7 @@ const initialContextValue = {
   setIsCanvasHovered: () => {},
   hoveredHex: null,
   setHoveredHex: () => {},
-  timeRemaining: MOVE_DURATION_IN_SECONDS,
+  timeRemaining: MOVE_DURATION_IN_SECONDS * 1000,
   setTimeRemaining: () => {},
   availableGames: [],
   setAvailableGames: () => {},
@@ -57,7 +57,7 @@ type Props = {
 
 const GameProvider: React.FC<Props> = ({ children }) => {
   const [gameId, setGameId] = useState('');
-  const [gameState, setGameState] = useState<GameData>();
+  const [gameState, setGameState] = useState<GameData | null>(null);
   const [isShooting, setIsShooting] = useState(false);
   const [madeMove, setMadeMove] = useState(false);
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
@@ -79,7 +79,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setGameId,
   );
   useTimer(
-    gameState,
+    gameState!,
     socketRef,
     madeMove,
     gameId,
