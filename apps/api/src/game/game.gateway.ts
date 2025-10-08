@@ -18,9 +18,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly gameService: GameService) {}
 
   async handleConnection(client: Socket) {
-    console.log('Client connected:', client.id);
-    const availableGames = this.gameService.getAvailableGames();
-
     const cookie = client.handshake.headers.cookie;
     const token = parse(cookie || '')?.accessToken;
     if (!token) {
@@ -30,16 +27,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const gameData = this.gameService.getGameByToken(token, client.id);
     if (!gameData) {
-      this.server.to(client.id).emit('availableGames', availableGames);
-    } else {
-      const { gameId, gameObject: game } = gameData;
-      await client.join(gameId);
-      this.server.to(client.id).emit('reconnect', { gameId, game });
+      return;
     }
+    const { gameId, gameObject: game } = gameData;
+    await client.join(gameId);
+    this.server.to(client.id).emit('reconnect', { gameId, game });
   }
   handleDisconnect(client: Socket) {
-    console.log('+++++++++++++++++++++++++++++++++++');
-    console.log('Client disconnected:', client.id);
+    console.log('CLIENT DISCONNECT FIRED', client.id);
     // const rooms = this.server.sockets.adapter.rooms; ALL ROOMS
     const roomName = '1';
     const clients = this.server.sockets.adapter.rooms.get(roomName);

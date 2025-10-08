@@ -68,6 +68,8 @@ const Game = () => {
     };
     canvas.addEventListener('mousemove', handleMouseMove);
 
+    if (!gameId || !gameState?.started) return;
+
     repaint(
       canvasRef,
       imgRef,
@@ -91,6 +93,7 @@ const Game = () => {
     socketRef,
     walletId,
     setHoveredHex,
+    gameId,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {

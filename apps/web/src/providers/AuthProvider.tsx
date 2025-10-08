@@ -57,7 +57,7 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
 
   const logoutAndDisconnect = useCallback(async () => {
     await logout();
-    localStorage.removeItem('isMobileAuth');
+    // localStorage.removeItem('isMobileAuth');
     await disconnect();
     queryClient.clear();
 
@@ -71,6 +71,8 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
 
     try {
       const me = await fetchMe();
+
+      console.log('me', me);
 
       if (me.id === walletProviderPublicKey.toBase58()) {
         setIsCheckingAuth(false);

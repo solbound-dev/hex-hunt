@@ -18,7 +18,7 @@ type Token = {
 
 @Injectable()
 export class GameService {
-  private games: Record<string, Game> = {};
+  public games: Record<string, Game> = {};
 
   getAvailableGames() {
     const availableGames: string[] = [];
@@ -62,22 +62,19 @@ export class GameService {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
     ) as Token;
-    console.log('getGameByToken walletId', token.walletId);
 
     for (const game in this.games) {
-      const gameContainsWallet = this.games[game].players.find(
+      const gameContainsWallet = this.games[game].players.some(
         (p) => p.walletId === token.walletId,
       );
-
       if (gameContainsWallet) {
         this.games[game].players.forEach((p) => {
           if (p.walletId === token.walletId) {
             p.id = clientId;
           }
         });
+        return { gameId: game, gameObject: this.games[game] };
       }
-
-      return { gameId: game, gameObject: this.games[game] };
     }
   }
 
@@ -89,15 +86,9 @@ export class GameService {
 
     const game = this.games[gameId];
     if (!game) return;
-    console.log('walletId to leave', token.walletId);
     game.players = game.players.filter((p) => {
-      // console.log('p.walletId', p.walletId);
-      // console.log('token.walletId', token.walletId);
-      // console.log('!==', p.walletId !== token.walletId);
-
       return p.walletId !== token.walletId;
     });
-    console.log('players after leaving', game.players);
     return game;
   }
 

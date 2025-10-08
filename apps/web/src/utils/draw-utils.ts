@@ -1,4 +1,3 @@
-import type { Socket } from 'socket.io-client';
 import {
   generateGrid,
   GRID_RADIUS,
@@ -11,7 +10,6 @@ import {
   PlayerType,
   type GameData,
 } from './calculation-utils';
-import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import type { ImgRef } from '../hooks/game';
 
 export const colors = {
