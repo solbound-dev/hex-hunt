@@ -31,7 +31,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     const { gameId, gameObject: game } = gameData;
     await client.join(gameId);
-    this.server.to(client.id).emit('reconnect', { gameId, game });
+    this.server
+      .to(client.id)
+      .emit('reconnect', { gameId, game: game.serialize() });
   }
   handleDisconnect(client: Socket) {
     console.log('CLIENT DISCONNECT FIRED', client.id);
@@ -67,7 +69,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('gamestate on leavegame', game);
     console.log('rooms on leavegame', this.server.sockets.adapter.rooms);
     if (game.started) {
-      this.server.to(data.gameId).emit('gameState', game);
+      this.server.to(data.gameId).emit('gameState', game.serialize());
     }
   }
 
@@ -75,13 +77,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleStart(@MessageBody() data: { gameId: string }) {
     const { gameId } = data;
 
-    const game = this.gameService.startGame(gameId);
+    const game = this.gameService.startGame(gameId, this.server);
     if (!game) {
       console.log(`Game ${gameId} does not exist or is already started`);
       return;
     }
 
-    this.server.to(gameId).emit('gameStart', game);
+    this.server.to(gameId).emit('gameStart', game.serialize());
     console.log(`GAME ${gameId} STARTED===============================`);
     const availableGames = this.gameService.getAvailableGames();
     this.server.emit('availableGames', availableGames);
@@ -127,7 +129,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     if (game.started) {
-      this.server.to(gameId).emit('gameStart', game);
+      this.server.to(gameId).emit('gameStart', game.serialize());
       console.log('GAME STARTED===============================');
     }
   }
@@ -174,7 +176,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     if (game.started) {
-      this.server.to(gameId).emit('gameStart', game);
+      this.server.to(gameId).emit('gameStart', game.serialize());
       console.log('GAME STARTED===============================');
     }
   }
@@ -220,7 +222,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('availableGames', availableGames);
 
     if (game.started) {
-      this.server.to(gameId).emit('gameStart', game);
+      this.server.to(gameId).emit('gameStart', game.serialize());
       console.log('GAME STARTED===============================');
     }
   }
@@ -246,7 +248,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const game = this.gameService.updateGame(data, token);
     if (!game) return;
 
-    this.server.to(data.gameId).emit('gameState', game);
+    // this.server.to(data.gameId).emit('gameState', game);
   }
 
   @SubscribeMessage('restartGame')
@@ -264,6 +266,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (!game) return;
 
-    this.server.to(data.gameId).emit('gameStart', game);
+    this.server.to(data.gameId).emit('gameStart', game.serialize());
   }
 }

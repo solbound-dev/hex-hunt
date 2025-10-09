@@ -72,8 +72,6 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
     try {
       const me = await fetchMe();
 
-      console.log('me', me);
-
       if (me.id === walletProviderPublicKey.toBase58()) {
         setIsCheckingAuth(false);
         setIsAuthenticated(true);

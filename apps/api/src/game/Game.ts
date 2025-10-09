@@ -6,6 +6,7 @@ export class Game {
   constructor(
     public tier: number,
     public isPrivate: boolean,
+    public interval: NodeJS.Timeout | null = null,
     public createdAt: string = new Date().toISOString(),
     public moveExpiryDate: string = '',
     public disappearedHexes: Hex[] = [],
@@ -19,6 +20,12 @@ export class Game {
     //this should not get sent to both players:
     public players: Player[] = [], //we currently send position of every player to every player
   ) {}
+
+  serialize() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { interval, ...rest } = this;
+    return rest;
+  }
 
   getAvailablePlayerPos(): Hex {
     if (this.grid.length === 0) {

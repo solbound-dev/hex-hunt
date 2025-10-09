@@ -95,6 +95,7 @@ export const useInitializeSockets = (
       setGameId(data.gameId);
     });
     socketRef.current.on('gameState', (data) => {
+      console.log('gamestate', data);
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
@@ -181,33 +182,6 @@ export const useTimer = (
     madeMove,
     setRanOutOfTime,
     setTimeRemaining,
-  ]);
-
-  //ran out of time
-  useEffect(() => {
-    const winner = gameState?.players.find((p) => p.won);
-    if (winner) return;
-
-    const playerIsDead = gameState?.players.some(
-      (p) => p.walletId === walletId && p.isDead,
-    );
-    const gameHasWinner = gameState?.players.some((p) => p.won);
-    if (ranOutOfTime && !madeMove && !playerIsDead && !gameHasWinner) {
-      socketRef.current?.emit('updateGame', {
-        gameId,
-        move: null,
-        isShooting: false,
-        didRunOutOfTime: true,
-      });
-    }
-  }, [
-    ranOutOfTime,
-    gameId,
-    madeMove,
-    gameState?.players,
-    socketRef,
-    gameState,
-    walletId,
   ]);
 
   return { timeRemaining, setTimeRemaining };

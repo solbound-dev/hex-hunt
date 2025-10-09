@@ -8,7 +8,7 @@ const useCheckAuth = () => {
 
   useEffect(() => {
     if (isAuthenticated && !isCheckingAuth) {
-      navigate('/find-game');
+      navigate('/');
     }
   }, [isAuthenticated, isCheckingAuth, navigate]);
 };

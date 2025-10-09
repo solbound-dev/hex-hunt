@@ -27,11 +27,8 @@ function App() {
                     path={'/select-game'}
                     component={() => <div>Select Game</div>}
                   />
-                  <Route
-                    path={'find-game'}
-                    component={() => <FindGamePage />}
-                  />
-                  <Route path={'/'} component={() => <Game />} />
+                  <Route path={'/'} component={() => <FindGamePage />} />
+                  <Route path={'/game'} component={() => <Game />} />
                   <Route path={'*'} component={() => <div>Error page</div>} />
                 </Switch>{' '}
               </GameProvider>

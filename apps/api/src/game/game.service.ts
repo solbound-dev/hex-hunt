@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Server } from 'socket.io';
+
 import { Game } from './Game';
 import {
   isNeighbor,
@@ -44,7 +46,7 @@ export class GameService {
     delete this.games[id];
   }
 
-  startGame(gameId: string) {
+  startGame(gameId: string, server: Server) {
     const game = this.games[gameId];
     console.log('games', Object.keys(this.games));
     if (!game || game.started) return;
@@ -55,6 +57,47 @@ export class GameService {
       new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
     ).toISOString();
     game.players.forEach((p) => (p.pendingMove = null));
+
+    const interval = setInterval(() => {
+      console.log('interval fired');
+
+      game.players.forEach((p) => {
+        if (!p.pendingMove) {
+          console.log('player dead', p.playerType);
+
+          p.isDead = true;
+        }
+      });
+
+      game.players.forEach((p) => {
+        if (p.isShooting) {
+          p.lastSeenPos = p.pos;
+          game.shootInDirection(p.pendingMove!, p);
+        }
+      });
+
+      game.players.forEach((p) => game.checkCollisionAndUpdate(p));
+
+      game.players.forEach((p) => {
+        if (!p.isShooting && !p.didJustCollide && !p.isDead) {
+          p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
+        }
+      });
+
+      game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
+
+      game.updateState();
+
+      const gameHasWinner = game.players.some((p) => p.won);
+
+      if (game.draw || gameHasWinner) {
+        clearInterval(interval);
+      }
+      server.to(gameId).emit('gameState', game.serialize());
+    }, MOVE_DURATION_IN_SECONDS * 1000);
+
+    game.interval = interval;
+
     return game;
   }
 
@@ -217,14 +260,14 @@ export class GameService {
 
     if (game.draw) return null;
 
-    game.players.forEach((p) => {
-      if (token.walletId === p.walletId) {
-        const moveTooLate = new Date() > new Date(game.moveExpiryDate);
-        if (data.didRunOutOfTime || moveTooLate) {
-          p.isDead = true;
-        }
-      }
-    });
+    // game.players.forEach((p) => {
+    //   if (token.walletId === p.walletId) {
+    //     const moveTooLate = new Date() > new Date(game.moveExpiryDate);
+    //     if (data.didRunOutOfTime || moveTooLate) {
+    //       p.isDead = true;
+    //     }
+    //   }
+    // });
 
     game.players.forEach((p) => {
       if (token.walletId === p.walletId) {
@@ -244,32 +287,33 @@ export class GameService {
 
     game.players.forEach((p) => (p.justPickedCard = false));
 
-    const waitingForMoves = game.players.some(
-      (p) => p.pendingMove === null && !p.isDead,
-    );
+    // const waitingForMoves = game.players.some(
+    //   (p) => p.pendingMove === null && !p.isDead,
+    // );
 
-    if (!waitingForMoves) {
-      game.players.forEach((p) => {
-        if (p.isShooting) {
-          p.lastSeenPos = p.pos;
-          game.shootInDirection(p.pendingMove!, p);
-        }
-      });
+    //do this part at the end of interval
+    // if (!waitingForMoves) {
+    //   game.players.forEach((p) => {
+    //     if (p.isShooting) {
+    //       p.lastSeenPos = p.pos;
+    //       game.shootInDirection(p.pendingMove!, p);
+    //     }
+    //   });
 
-      game.players.forEach((p) => game.checkCollisionAndUpdate(p));
+    //   game.players.forEach((p) => game.checkCollisionAndUpdate(p));
 
-      game.players.forEach((p) => {
-        if (!p.isShooting && !p.didJustCollide && !p.isDead) {
-          p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
-        }
-      });
+    //   game.players.forEach((p) => {
+    //     if (!p.isShooting && !p.didJustCollide && !p.isDead) {
+    //       p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
+    //     }
+    //   });
 
-      game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
+    //   game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
 
-      game.updateState();
+    //   game.updateState();
 
-      return game;
-    }
+    //   return game;
+    // }
   }
 
   restartGame(clientId: string, gameId: string, tokenString: string) {

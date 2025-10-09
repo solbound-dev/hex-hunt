@@ -20,14 +20,14 @@ const FindGamePage = () => {
       <button
         onClick={() => {
           socketRef.current?.emit('quickJoin', { tier: 1 });
-          navigate('/');
+          navigate('/game');
         }}>
         Quick match
       </button>
       <button
         onClick={() => {
           socketRef.current?.emit('hostPrivateGame', { tier: 1 });
-          navigate('/');
+          navigate('/game');
         }}>
         Host private game
       </button>
@@ -48,7 +48,7 @@ const FindGamePage = () => {
                 tier: 1,
                 isPrivate: true,
               });
-              navigate('/');
+              navigate('/game');
             }}>
             Join
           </button>

@@ -150,7 +150,7 @@ const Game = () => {
         onClick={() => {
           socketRef.current?.emit('leaveGame', { gameId });
           setGameState(null);
-          navigate('/find-game');
+          navigate('/');
         }}>
         Leave
       </button>
@@ -172,7 +172,7 @@ const Game = () => {
               }}>
               {isShooting ? 'Cancel Shooting' : 'Shoot'}
             </button>
-            {gameState?.players.some((p) => p.won) && (
+            {/* {gameState?.players.some((p) => p.won) && (
               <button
                 onClick={() => {
                   console.log('gameState on restart', gameState);
@@ -183,7 +183,7 @@ const Game = () => {
                 }}>
                 Restart
               </button>
-            )}
+            )} */}
           </div>
         </div>
       </div>

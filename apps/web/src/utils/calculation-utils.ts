@@ -2,7 +2,7 @@ export const CANVAS_SIZE = window.innerHeight / 1.6;
 export const HEX_SIZE = (CANVAS_SIZE / 70) * 5;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
-export const MOVE_DURATION_IN_SECONDS = 100;
+export const MOVE_DURATION_IN_SECONDS = 5;
 
 export type GameData = {
   grid: Hex[];
