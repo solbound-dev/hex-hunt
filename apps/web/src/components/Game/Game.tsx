@@ -17,6 +17,7 @@ import { useAuth } from '../../providers/AuthProvider';
 import { useLocation } from 'wouter';
 import { useGame } from '../../providers/GameProvider';
 import { useInitializeGame } from '../../hooks/game';
+import Button from '../Button';
 
 const Game = () => {
   const { isAuthenticated, isCheckingAuth } = useAuth();
@@ -135,28 +136,26 @@ const Game = () => {
   };
 
   return (
-    <div>
-      <div>
-        <GameStatus
-          gameId={gameId}
-          gameState={gameState}
-          timeRemaining={timeRemaining}
-          madeMove={madeMove}
-          socketRef={socketRef}
-          setGameId={setGameId}
-        />
-      </div>
-      <button
+    <div className={c.gameWrapper}>
+      <GameStatus
+        gameId={gameId}
+        gameState={gameState}
+        timeRemaining={timeRemaining}
+        madeMove={madeMove}
+        socketRef={socketRef}
+        setGameId={setGameId}
+      />
+      <Button
         onClick={() => {
           socketRef.current?.emit('leaveGame', { gameId });
+          setGameId('');
           setGameState(null);
           navigate('/');
         }}>
         Leave
-      </button>
+      </Button>
       <div className={c.rel}>
-        <div className={c.canvasWrapper}>
-          {' '}
+        <div className={c.canvasContainer}>
           <canvas
             ref={canvasRef}
             onClick={handleCanvasClick}
@@ -164,26 +163,14 @@ const Game = () => {
             onMouseLeave={() => setIsCanvasHovered(false)}
           />
           <div>
-            <button
+            <Button
               disabled={madeMove || !gameState}
               className={c.button}
               onClick={() => {
                 if (!madeMove) setIsShooting(!isShooting);
               }}>
               {isShooting ? 'Cancel Shooting' : 'Shoot'}
-            </button>
-            {/* {gameState?.players.some((p) => p.won) && (
-              <button
-                onClick={() => {
-                  console.log('gameState on restart', gameState);
-                  console.log('timeRemaining on restart', timeRemaining);
-                  socketRef.current?.emit('restartGame', {
-                    gameId,
-                  });
-                }}>
-                Restart
-              </button>
-            )} */}
+            </Button>
           </div>
         </div>
       </div>

@@ -1,93 +1,93 @@
-.astronautScore {
-  margin-bottom: 5px;
-  background: rgba(0, 0, 255, 0.7);
-  padding: 20px;
-  border-radius: 6px;
-}
-.alienScore {
-  margin-bottom: 5px;
-  background: rgba(255, 0, 0, 0.7);
-  padding: 20px;
-  border-radius: 6px;
-}
-.normalText {
-  font-size: 20px;
-}
-.gameInfoContainer {
-  background-color: rgba(200, 200, 200, 0.6);
-  padding: 20px;
-  margin-bottom: 5px;
-  border-radius: 6px;
-  position: relative;
-  min-width: 300px;
-}
 .statusWrapper {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  justify-content: space-between;
-  background-color: rgba(200, 200, 200, 0.2);
-  margin-bottom: 20px;
-}
-.madeMoveIndicator {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-}
-.canvasWrapper {
+  position: fixed;
+  top: 32px;
+  left: 32px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 32px;
+  z-index: 100;
 }
-.gameEndPopup {
-  position: fixed;
-  top: 50vh;
-  left: 50vw;
-  z-index: 10;
-  width: calc(100vw - 1vw);
-  height: calc(100vh - 1vh);
-  transform: translateX(-50%) translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.8);
+
+.gameInfoContainer {
+  background: #2e3a3a;
+  border: 2px solid #7fa7a6;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px #232b2b33;
+  padding: 20px 28px;
+  margin-bottom: 0;
+  min-width: 260px;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.normalText {
+  font-size: 1.2rem;
+  color: #e0e7c3;
+  font-family: 'VT323', 'monospace', sans-serif;
+}
+
+.madeMoveIndicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #7fa7a6;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 700px) {
+  .statusWrapper {
+    top: 12px;
+    left: 12px;
+    gap: 18px;
+  }
+  .gameInfoContainer {
+    padding: 12px 10px;
+    min-width: 160px;
+    max-width: 90vw;
+  }
+}
+
+.gameWrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 100px;
-}
-.button {
-  background: #333;
-  color: #fff;
-  border: 1px solid #555;
-  padding: 10px 20px;
-  margin: 5px;
-  cursor: pointer;
-  font-size: 20px;
-}
-
-.button:disabled {
-  background: #555;
-  color: #ccc;
-  cursor: not-allowed;
-}
-
-.input {
-  font-size: 20px;
-  padding: 10px;
-  margin: 5px;
-  border-radius: 6px;
-  border: 1px solid #555;
-}
-.input:disabled {
-  background: #ddd;
-}
-
-.rel {
+  min-height: 100vh;
+  background: #232b2b;
   position: relative;
 }
-.gameContentWrapper {
-  width: 130px;
-  display: flex;
-  justify-content: space-between;
+
+.canvasContainer {
+  justify-content: center;
+  align-items: center;
+  background: #2e3a3a;
+  border: 3px solid #7fa7a6;
+  border-radius: 24px;
+  box-shadow:
+    0 8px 32px #232b2b88,
+    0 2px 16px #7fa7a655;
+  padding: 32px;
+  margin: 0 auto;
+  transition: box-shadow 0.2s;
+}
+
+.canvasContainer:hover {
+  box-shadow:
+    0 12px 48px #7fa7a6cc,
+    0 4px 24px #232b2b88;
+}
+
+@media (max-width: 900px) {
+  .canvasContainer {
+    padding: 12px;
+    border-radius: 12px;
+  }
+}
+
+.rightFixed {
+  position: fixed;
+  top: 32px;
+  right: 32px;
 }

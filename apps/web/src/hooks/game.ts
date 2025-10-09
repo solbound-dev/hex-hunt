@@ -104,7 +104,6 @@ export const useInitializeSockets = (
 
     socketRef.current.on('reconnect', (data) => {
       setGameId(data.gameId);
-      console.log('data.game on reconnect', data.game);
       setGameState(data.game);
     });
   }, [

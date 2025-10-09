@@ -1,0 +1,31 @@
+.button {
+  background: #7fa7a6;
+  color: #232b2b;
+  border: 2px solid #e0e7c3;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #232b2b22;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    color 0.2s;
+  margin-top: 8px;
+  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
+  text-shadow: none;
+}
+
+.button:hover {
+  background: #e0e7c3;
+  color: #232b2b;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px #232b2b22;
+}
+
+.button:disabled {
+  background: #bfcfcf;
+  color: #888;
+  cursor: not-allowed;
+}

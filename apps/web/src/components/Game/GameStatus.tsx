@@ -4,6 +4,8 @@ import type { Socket } from 'socket.io-client';
 import type { GameData } from '../../utils/calculation-utils';
 import { colors } from '../../utils/draw-utils';
 import { useQueryClient } from '@tanstack/react-query';
+import Button from '../Button';
+import clsx from 'clsx';
 
 type GameStatusProps = {
   gameId: string;
@@ -28,26 +30,8 @@ export const GameStatus: React.FC<GameStatusProps> = ({
   return (
     <div className={c.statusWrapper}>
       <div className={c.gameInfoContainer}>
-        {/* <input
-          disabled={!!gameState?.started}
-          className={c.input}
-          type='text'
-          placeholder='gameId'
-          value={gameId}
-          onChange={(e) => setGameId(e.target.value)}
-        /> */}
         <h3>gameId: {gameId}</h3>
-        {/* <button
-          className={c.button}
-          onClick={() => {
-            console.log('joingame');
-            socketRef.current?.emit('joinGame', { gameId: gameId, tier: 1 });
-            queryClient.invalidateQueries({ queryKey: ['games'] });
-          }}
-          disabled={!gameId}>
-          Enter game{' '}
-        </button>{' '} */}
-        <button
+        <Button
           className={c.button}
           onClick={() => {
             socketRef.current?.emit('start', { gameId: gameId });
@@ -55,7 +39,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           }}
           disabled={gameState?.started || !gameId}>
           Start game
-        </button>
+        </Button>
         <span className={c.normalText}>{Math.round(timeRemaining / 1000)}</span>
       </div>
       <div className={c.gameInfoContainer}>
@@ -66,7 +50,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           }}></div>
         <h3>my id: {socketRef.current?.id}</h3>
       </div>
-      <div className={c.gameInfoContainer}>
+      <div className={clsx(c.gameInfoContainer, c.rightFixed)}>
         {gameState?.players.map((p) => (
           <div
             key={p.walletId}
