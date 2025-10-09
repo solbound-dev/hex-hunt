@@ -1,3 +1,9 @@
+.flex {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
 .statusWrapper {
   position: fixed;
   top: 32px;
@@ -23,10 +29,11 @@
   gap: 14px;
 }
 
-.normalText {
+.timerText {
   font-size: 1.2rem;
   color: #e0e7c3;
   font-family: 'VT323', 'monospace', sans-serif;
+  font-weight: 700;
 }
 
 .madeMoveIndicator {

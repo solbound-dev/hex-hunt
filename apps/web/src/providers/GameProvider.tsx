@@ -66,7 +66,6 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     MOVE_DURATION_IN_SECONDS,
   );
   const [availableGames, setAvailableGames] = useState<string[]>([]);
-  const [ranOutOfTime, setRanOutOfTime] = useState(false);
   // const { imgRef, canvasRef } = useInitializeGame();
 
   const socketRef = useInitializeSockets(
@@ -74,7 +73,6 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setIsShooting,
     setMadeMove,
     setTimeRemaining,
-    setRanOutOfTime,
     setAvailableGames,
     setGameId,
   );
@@ -85,8 +83,6 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     gameId,
     timeRemaining,
     setTimeRemaining,
-    ranOutOfTime,
-    setRanOutOfTime,
   );
 
   const value = {

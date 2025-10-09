@@ -59,8 +59,6 @@ export class GameService {
     game.players.forEach((p) => (p.pendingMove = null));
 
     const interval = setInterval(() => {
-      console.log('interval fired');
-
       game.players.forEach((p) => {
         if (!p.pendingMove) {
           console.log('player dead', p.playerType);

@@ -32,7 +32,6 @@ const Game = () => {
     gameId,
     setGameId,
     gameState,
-    setGameState,
     isShooting,
     setIsShooting,
     madeMove,
@@ -44,6 +43,10 @@ const Game = () => {
     timeRemaining,
     socketRef,
   } = useGame();
+
+  if (!gameId || !gameState) {
+    navigate('/');
+  }
 
   const { imgRef, canvasRef } = useInitializeGame();
 
@@ -138,22 +141,13 @@ const Game = () => {
   return (
     <div className={c.gameWrapper}>
       <GameStatus
-        gameId={gameId}
-        gameState={gameState}
         timeRemaining={timeRemaining}
         madeMove={madeMove}
         socketRef={socketRef}
         setGameId={setGameId}
+        walletId={walletId?.toString() || ''}
       />
-      <Button
-        onClick={() => {
-          socketRef.current?.emit('leaveGame', { gameId });
-          setGameId('');
-          setGameState(null);
-          navigate('/');
-        }}>
-        Leave
-      </Button>
+
       <div className={c.rel}>
         <div className={c.canvasContainer}>
           <canvas

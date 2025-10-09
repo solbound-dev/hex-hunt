@@ -16,6 +16,7 @@ const FindGamePage = () => {
   const [privateGameId, setPrivateGameId] = useState('');
   const [showPrivateGameInput, setShowPrivateGameInput] = useState(false);
 
+  console.log(gameId, gameState);
   if (gameId || gameState) {
     navigate('/game');
   }

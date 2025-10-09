@@ -52,7 +52,6 @@ export const useInitializeSockets = (
   setIsShooting: (isShooting: boolean) => void,
   setMadeMove: (madeMove: boolean) => void,
   setTimeRemaining: (time: number) => void,
-  setRanOutOfTime: (ranOutOfTime: boolean) => void,
   setAvailableGames: (games: string[]) => void,
   setGameId: (gameId: string) => void,
 ) => {
@@ -82,7 +81,6 @@ export const useInitializeSockets = (
       setTimeRemaining(MOVE_DURATION_IN_SECONDS * 1000);
       setIsShooting(false);
       setMadeMove(false);
-      setRanOutOfTime(false);
     });
 
     socketRef.current.on('alreadyHasRoom', () => {
@@ -93,13 +91,13 @@ export const useInitializeSockets = (
       console.log('Player joined:', data);
       toast.success('Joined!');
       setGameId(data.gameId);
+      setGameState(data.game);
     });
     socketRef.current.on('gameState', (data) => {
       console.log('gamestate', data);
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
-      setRanOutOfTime(false);
     });
 
     socketRef.current.on('reconnect', (data) => {
@@ -111,7 +109,6 @@ export const useInitializeSockets = (
     setIsShooting,
     setMadeMove,
     setTimeRemaining,
-    setRanOutOfTime,
     setAvailableGames,
     setGameId,
   ]);
@@ -126,8 +123,6 @@ export const useTimer = (
   gameId: string,
   timeRemaining: number,
   setTimeRemaining: (time: number) => void,
-  ranOutOfTime: boolean,
-  setRanOutOfTime: (ranOutOfTime: boolean) => void,
   walletId?: string,
 ) => {
   const [eventDate, setEventDate] = useState('');
@@ -148,7 +143,7 @@ export const useTimer = (
         new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
       ).toISOString(),
     );
-    if (gameState) {
+    if (gameState?.started) {
       setCountdownStarted(true);
     }
   }, [gameState, socketRef, walletId]);
@@ -164,9 +159,6 @@ export const useTimer = (
           remainingTime = 0;
           clearInterval(countdownInterval);
           setCountdownStarted(false);
-          if (!madeMove) {
-            setRanOutOfTime(true);
-          }
         }
         setTimeRemaining(remainingTime);
       }, 1000);
@@ -179,7 +171,6 @@ export const useTimer = (
     timeRemaining,
     gameId,
     madeMove,
-    setRanOutOfTime,
     setTimeRemaining,
   ]);
 
