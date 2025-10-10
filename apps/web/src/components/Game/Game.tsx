@@ -138,6 +138,8 @@ const Game = () => {
     });
   };
 
+  if (!imgRef) return;
+
   return (
     <div className={c.gameWrapper}>
       <GameStatus

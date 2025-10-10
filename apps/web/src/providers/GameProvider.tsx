@@ -66,7 +66,6 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     MOVE_DURATION_IN_SECONDS,
   );
   const [availableGames, setAvailableGames] = useState<string[]>([]);
-  // const { imgRef, canvasRef } = useInitializeGame();
 
   const socketRef = useInitializeSockets(
     setGameState,

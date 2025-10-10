@@ -127,6 +127,9 @@ export function drawPlayerIsometric(
   drawHexIsometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
+
+  if (!image) return;
+
   if (image.complete) {
     ctx.drawImage(
       image,
@@ -152,7 +155,7 @@ export function drawLastSeenPlayerIsometric(
   const y = center.y;
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
-
+  if (!image) return;
   if (image.complete) {
     ctx.save();
     ctx.globalAlpha = 0.5;
@@ -178,7 +181,7 @@ export function drawCardIsometric(
     const y = center.y;
 
     const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
-
+    if (!image) return;
     if (image.complete) {
       ctx.drawImage(
         image,
@@ -279,6 +282,7 @@ export function drawDeadPlayerIsometric(
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
 
+  if (!image) return;
   if (image.complete) {
     const imgSize = image.width;
     ctx.drawImage(

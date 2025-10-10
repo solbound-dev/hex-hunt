@@ -61,8 +61,6 @@ export class GameService {
     const interval = setInterval(() => {
       game.players.forEach((p) => {
         if (!p.pendingMove) {
-          console.log('player dead', p.playerType);
-
           p.isDead = true;
         }
       });
