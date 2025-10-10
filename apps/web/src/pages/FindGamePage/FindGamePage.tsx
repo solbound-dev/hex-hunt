@@ -31,7 +31,6 @@ const FindGamePage = () => {
       <div className={c.buttonGroup}>
         <Button
           onClick={() => {
-            console.log('aa');
             socketRef.current?.emit('quickJoin', { tier: 1 });
             navigate('/game');
           }}>
