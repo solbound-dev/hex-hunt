@@ -1,25 +1,29 @@
 import { useLocation } from 'wouter';
 import { useAuth } from '../../providers/AuthProvider';
 import { useGame } from '../../providers/GameProvider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../../components/Button';
 import c from './style.module.css';
 
 const FindGamePage = () => {
   const { isAuthenticated, isCheckingAuth } = useAuth();
   const { socketRef, gameId, gameState } = useGame();
-  const [, navigate] = useLocation();
-  if (!isAuthenticated && !isCheckingAuth) {
-    navigate('/login');
-  }
-
   const [privateGameId, setPrivateGameId] = useState('');
   const [showPrivateGameInput, setShowPrivateGameInput] = useState(false);
 
-  console.log(gameId, gameState);
-  if (gameId || gameState) {
-    navigate('/game');
-  }
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (!isAuthenticated && !isCheckingAuth) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isCheckingAuth, navigate]);
+
+  useEffect(() => {
+    if (gameId || gameState) {
+      navigate('/game');
+    }
+  }, [gameId, gameState, navigate]);
 
   return (
     <div className={c.pageWrapper}>

@@ -126,6 +126,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(gameId).emit('playerJoined', {
       playerId: newPlayer.id,
       gameId: gameId,
+      game: game.serialize(),
     });
 
     if (game.started) {
@@ -219,6 +220,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(gameId).emit('playerJoined', {
       playerId: newPlayer.id,
       gameId: gameId,
+      game: game.serialize(),
     });
     this.server.emit('availableGames', availableGames);
 

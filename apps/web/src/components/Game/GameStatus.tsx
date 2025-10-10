@@ -73,7 +73,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
             Start game
           </Button>
         )}
-        {gameState?.started && (
+        {
           <Button
             onClick={() => {
               socketRef.current?.emit('leaveGame', { gameId });
@@ -83,7 +83,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
             }}>
             Leave
           </Button>
-        )}
+        }
       </div>
       <div className={clsx(c.gameInfoContainer, c.rightFixed)}>
         {gameState?.players.map((p) => (

@@ -94,7 +94,7 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data) => {
-      console.log('gamestate', data);
+      toast.success(`Move made ${data.moves}`);
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
