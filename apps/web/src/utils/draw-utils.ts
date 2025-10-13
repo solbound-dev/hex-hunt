@@ -87,12 +87,12 @@ function drawHexIsometric(
   ctx.restore();
   ctx.save();
 
-  // ctx.fillStyle = 'white';
-  // ctx.font = `${Math.floor(size / 4)}px Arial`;
-  // ctx.textAlign = 'center';
-  // ctx.textBaseline = 'middle';
-  // const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
-  // ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
+  ctx.fillStyle = 'white';
+  ctx.font = `${Math.floor(size / 4)}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
+  ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
 }
 
 export function drawPlayerIsometric(
@@ -325,6 +325,7 @@ export function repaint(
   isCanvasHovered: boolean,
   isShooting: boolean,
   hoveredHex: Hex | null,
+  clickedHex: Hex | null,
   walletId?: string,
 ) {
   if (!gameState) return;
@@ -337,11 +338,13 @@ export function repaint(
 
   drawGridIsometric(context, generateGrid(GRID_RADIUS));
 
-  drawHexIsometric(context, hoveredHex, HEX_SIZE, {
-    strokeStyle: `rgba(255,255,0,1)`,
-    lineWidth: 4,
-    blur: true,
-  });
+  if (!clickedHex) {
+    drawHexIsometric(context, hoveredHex, HEX_SIZE, {
+      strokeStyle: `rgba(255,255,0,1)`,
+      lineWidth: 4,
+      blur: true,
+    });
+  }
 
   const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
   if (!currentPlayer) return;
@@ -361,6 +364,11 @@ export function repaint(
   }
 
   drawDisappearedHexesIsometric(context, gameState.disappearedHexes, HEX_SIZE);
+
+  drawHexIsometric(context, clickedHex, HEX_SIZE, {
+    strokeStyle: 'rgba(0, 255, 0, 1)',
+    lineWidth: 8,
+  });
 
   if (
     gameState.moves &&
@@ -382,6 +390,7 @@ export function repaint(
     currentPlayer,
     otherPlayers,
     isCanvasHovered,
+    clickedHex,
   );
 }
 
@@ -392,8 +401,9 @@ function paintInOrder(
   currentPlayer: Player,
   otherPlayers: Player[],
   isCanvasHovered: boolean,
+  clickedHex: Hex | null,
 ) {
-  if (isCanvasHovered) {
+  if (isCanvasHovered && !clickedHex) {
     drawAvailableMovesHighlightIsometric(
       context,
       currentPlayer.pos!,

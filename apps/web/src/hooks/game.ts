@@ -4,6 +4,7 @@ import { getContext, setCanvasRef, setImgRef } from '../utils/utils';
 import {
   generateGrid,
   GRID_RADIUS,
+  Hex,
   MOVE_DURATION_IN_SECONDS,
   type GameData,
 } from '../utils/calculation-utils';
@@ -54,6 +55,7 @@ export const useInitializeSockets = (
   setTimeRemaining: (time: number) => void,
   setAvailableGames: (games: string[]) => void,
   setGameId: (gameId: string) => void,
+  setClickedHex: (hex: Hex | null) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
 
@@ -98,6 +100,7 @@ export const useInitializeSockets = (
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
+      setClickedHex(null);
     });
 
     socketRef.current.on('reconnect', (data) => {
