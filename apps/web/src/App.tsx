@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage';
 import AuthProvider from './providers/AuthProvider';
 import FindGamePage from './pages/FindGamePage';
 import GameProvider from './providers/GameProvider';
+import WindowSizeProvider from './providers/WindowSizeProvider';
 
 const queryClient = new QueryClient();
 
@@ -20,18 +21,20 @@ function App() {
         <WalletWrapper>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
-              <GameProvider>
-                <Switch>
-                  <Route path={'/login'} component={() => <LoginPage />} />
-                  <Route
-                    path={'/select-game'}
-                    component={() => <div>Select Game</div>}
-                  />
-                  <Route path={'/'} component={() => <FindGamePage />} />
-                  <Route path={'/game'} component={() => <Game />} />
-                  <Route path={'*'} component={() => <div>Error page</div>} />
-                </Switch>{' '}
-              </GameProvider>
+              <WindowSizeProvider>
+                <GameProvider>
+                  <Switch>
+                    <Route path={'/login'} component={() => <LoginPage />} />
+                    <Route
+                      path={'/select-game'}
+                      component={() => <div>Select Game</div>}
+                    />
+                    <Route path={'/'} component={() => <FindGamePage />} />
+                    <Route path={'/game'} component={() => <Game />} />
+                    <Route path={'*'} component={() => <div>Error page</div>} />
+                  </Switch>{' '}
+                </GameProvider>
+              </WindowSizeProvider>
             </AuthProvider>
           </QueryClientProvider>
         </WalletWrapper>

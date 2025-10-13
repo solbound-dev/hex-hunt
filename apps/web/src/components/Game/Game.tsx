@@ -141,7 +141,8 @@ const Game = () => {
   if (!imgRef) return;
 
   return (
-    <div className={c.gameWrapper}>
+    <div className={c.gameWrapper} style={{ objectFit: 'cover' }}>
+      {/* <Background /> */}
       <GameStatus
         timeRemaining={timeRemaining}
         madeMove={madeMove}

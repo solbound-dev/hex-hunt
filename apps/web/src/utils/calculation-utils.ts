@@ -1,5 +1,5 @@
-export const CANVAS_SIZE = window.innerHeight / 1.6;
-export const HEX_SIZE = (CANVAS_SIZE / 70) * 5;
+export const CANVAS_SIZE = window.innerHeight / 1.1;
+export const HEX_SIZE = (CANVAS_SIZE / 70) * 5.8;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
 export const MOVE_DURATION_IN_SECONDS = 10;
@@ -145,11 +145,14 @@ export function inverseIsometricTransformation(
   oy: number,
   hexSize: number,
 ) {
-  const oxPrime = ox - 7 * hexSize;
-  const oyPrime = oy - 2 * hexSize;
+  // const oxPrime = ox - 6.1 * hexSize;
+  // const oyPrime = oy + 0.1 * hexSize;
 
-  const x = (oyPrime / 0.35 + oxPrime / 0.7) / 2;
-  const y = (oyPrime / 0.35 - oxPrime / 0.7) / 2;
+  // const x = (oyPrime / 0.35 + oxPrime / 0.7) / 2;
+  // const y = (oyPrime / 0.35 - oxPrime / 0.7) / 2;
+
+  const x = 0.5 * ((ox - 6.1 * hexSize) / 0.7 + (oy + 0.1 * hexSize) / 0.35);
+  const y = 0.5 * ((oy + 0.1 * hexSize) / 0.35 - (ox - 6.1 * hexSize) / 0.7);
 
   return { x, y };
 }

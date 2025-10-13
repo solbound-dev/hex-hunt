@@ -47,12 +47,14 @@ export const GameStatus: React.FC<GameStatusProps> = ({
     <div className={c.statusWrapper}>
       <div className={c.gameInfoContainer}>
         <div className={c.flex}>
-          <div
-            className={c.madeMoveIndicator}
-            style={{
-              backgroundColor: madeMove ? 'lightgreen' : 'grey',
-            }}
-          />
+          {gameState?.started && !gameState.draw && !gameContainsWinner && (
+            <div
+              className={c.madeMoveIndicator}
+              style={{
+                backgroundColor: madeMove ? 'lightgreen' : 'grey',
+              }}
+            />
+          )}
           {gameState?.started && !gameState.draw && !gameContainsWinner && (
             <span
               className={c.timerText}
