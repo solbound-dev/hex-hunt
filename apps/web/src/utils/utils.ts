@@ -8,7 +8,7 @@ import backgroundRef from '../assets/background-11.png';
 
 import { CANVAS_SIZE, Hex } from './calculation-utils';
 import type { ImgRef } from '../hooks/game';
-//
+
 export function setBackgroundImage(
   backgroundImgRef: React.RefObject<HTMLImageElement | null>,
 ) {
