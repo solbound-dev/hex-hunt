@@ -1,0 +1,79 @@
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #232b2b;
+  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
+  align-items: flex-start;
+  padding-left: 64px;
+  padding-top: 48px;
+}
+
+.header {
+  color: #7fa7a6;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 32px;
+  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  margin: 0 auto 32px auto;
+  background: #2e3a3a;
+  padding: 32px 40px;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 #232b2b55;
+  border: 2px solid #7fa7a6;
+  max-width: 340px;
+}
+
+.inputWrapper {
+  margin-top: 18px;
+  background: #2e3a3a;
+  padding: 18px 24px;
+  border-radius: 12px;
+  border: 2px solid #7fa7a6;
+  box-shadow: 0 2px 12px 0 #232b2b33;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.input {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #7fa7a6;
+  background: #232b2b;
+  color: #e0e7c3;
+  font-size: 1rem;
+  font-family: 'VT323', 'monospace', sans-serif;
+}
+
+.joinButton {
+  background: #7fa7a6;
+  color: #232b2b;
+  border: 2px solid #e0e7c3;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #232b2b22;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    color 0.2s;
+  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
+}
+
+.joinButton:hover {
+  background: #e0e7c3;
+  color: #232b2b;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px #232b2b22;
+}

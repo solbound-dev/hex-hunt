@@ -1,4 +1,3 @@
-import type { Socket } from 'socket.io-client';
 import {
   generateGrid,
   GRID_RADIUS,
@@ -11,7 +10,6 @@ import {
   PlayerType,
   type GameData,
 } from './calculation-utils';
-import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import type { ImgRef } from '../hooks/game';
 
 export const colors = {
@@ -30,8 +28,8 @@ type StyleOptions = {
 
 function applyIsometricTransformation(x: number, y: number, hexSize: number) {
   return {
-    ox: x * 0.7 - y * 0.7 + 7 * hexSize,
-    oy: 0.5 * x * 0.7 + 0.5 * y * 0.7 + 2 * hexSize,
+    ox: x * 0.7 - y * 0.7 + 6.1 * hexSize,
+    oy: 0.5 * x * 0.7 + 0.5 * y * 0.7 - 0.1 * hexSize,
   };
 }
 
@@ -129,6 +127,9 @@ export function drawPlayerIsometric(
   drawHexIsometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
+
+  if (!image) return;
+
   if (image.complete) {
     ctx.drawImage(
       image,
@@ -154,7 +155,7 @@ export function drawLastSeenPlayerIsometric(
   const y = center.y;
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
-
+  if (!image) return;
   if (image.complete) {
     ctx.save();
     ctx.globalAlpha = 0.5;
@@ -180,7 +181,7 @@ export function drawCardIsometric(
     const y = center.y;
 
     const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
-
+    if (!image) return;
     if (image.complete) {
       ctx.drawImage(
         image,
@@ -243,8 +244,8 @@ export function drawZoneContractionWarningIsometric(
       const newHex = new Hex(hex.q, hex.r);
       if (newHex.distanceTo(new Hex(0, 0)) === currentRadius) {
         drawHexIsometric(ctx, hex, size, {
-          strokeStyle: 'rgba(255, 140,0, 0.5)',
-          fillStyle: 'rgba(255, 140,0, 0.5)',
+          strokeStyle: 'rgba(255, 140,0, 0.2)',
+          fillStyle: 'rgba(255, 140,0, 0.2)',
           lineWidth: 1,
         });
         ctx.stroke();
@@ -261,8 +262,8 @@ export function drawDisappearedHexesIsometric(
   if (disappearedHexes.length) {
     disappearedHexes.forEach((hex) => {
       drawHexIsometric(ctx, hex, size, {
-        strokeStyle: 'rgba(139, 0,0,1)',
-        fillStyle: 'rgba(139, 0,0,1)',
+        strokeStyle: 'rgba(139, 0,0,0.2)',
+        fillStyle: 'rgba(139, 0,0,0.2)',
         lineWidth: 1,
       });
       ctx.stroke();
@@ -281,6 +282,7 @@ export function drawDeadPlayerIsometric(
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
 
+  if (!image) return;
   if (image.complete) {
     const imgSize = image.width;
     ctx.drawImage(
@@ -310,7 +312,7 @@ export function drawHoverHighlight(
 export function drawGridIsometric(ctx: CanvasRenderingContext2D, grid: Hex[]) {
   grid.forEach((hex) =>
     drawHexIsometric(ctx, hex, HEX_SIZE, {
-      strokeStyle: 'white',
+      strokeStyle: 'rgba(255, 255, 255, 0.1)',
       lineWidth: 1.5,
     }),
   );
@@ -318,14 +320,15 @@ export function drawGridIsometric(ctx: CanvasRenderingContext2D, grid: Hex[]) {
 
 export function repaint(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>,
   imgRef: React.RefObject<ImgRef>,
-  gameState: GameData | undefined,
+  gameState: GameData | undefined | null,
   isCanvasHovered: boolean,
   isShooting: boolean,
   hoveredHex: Hex | null,
+  walletId?: string,
 ) {
   if (!gameState) return;
+  if (!walletId) return;
 
   const context = canvasRef.current?.getContext('2d');
   if (!context) return;
@@ -340,13 +343,10 @@ export function repaint(
     blur: true,
   });
 
-  const currentPlayer = gameState.players.find(
-    (p) => p.id === socketRef.current?.id,
-  )!;
+  const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
+  if (!currentPlayer) return;
 
-  const otherPlayers = gameState.players.filter(
-    (p) => p.id !== socketRef.current?.id,
-  );
+  const otherPlayers = gameState.players.filter((p) => p.walletId !== walletId);
 
   if (isShooting) {
     const pos = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);
@@ -407,6 +407,7 @@ function paintInOrder(
   otherPlayers.forEach((p) =>
     assets.push({ pos: p.lastSeenPos!, type: p.playerType }),
   );
+
   assets.push(
     { pos: currentPlayer.pos!, type: currentPlayer.playerType },
     { pos: gameState.cardPos!, type: 'card' },

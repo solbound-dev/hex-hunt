@@ -3,7 +3,8 @@ import { Hex } from './Hex';
 export class Player {
   constructor(
     public playerType: PlayerType,
-    public id: string,
+    public id: string, //socket.io id
+    public walletId: string,
     public pos: Hex,
     public lastSeenPos: Hex,
     public won: boolean = false,

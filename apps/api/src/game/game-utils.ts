@@ -4,7 +4,7 @@ import { Hex } from './Hex';
 
 export const MAX_PLAYERS = 4;
 export const START_GRID_RADIUS = 3;
-export const MOVE_DURATION_IN_SECONDS = 100;
+export const MOVE_DURATION_IN_SECONDS = 10;
 
 export function isNeighbor(hex: Hex, other: Hex) {
   return hex.neighbors().some((n) => n.equals(other));
@@ -46,7 +46,7 @@ export function updateAndEmitGameState(
   game.players.forEach((p) => {
     if (p.cards === 3 && p.pos?.equals(new Hex(0, 0))) {
       game.players.forEach((op) => {
-        if (op.id !== p.id) {
+        if (op.walletId !== p.walletId) {
           op.isDead = true;
         }
       });

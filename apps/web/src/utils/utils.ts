@@ -1,5 +1,5 @@
-import astronautSrc from '../assets/astronaut.png';
-import alienSrc from '../assets/alien.png';
+import astronautSrc from '../assets/astronaut-hex.png';
+import alienSrc from '../assets/alien-hex.png';
 import robotSrc from '../assets/robot.png';
 import wizardSrc from '../assets/wizard.png';
 import cardSrc from '../assets/card.png';
@@ -26,9 +26,11 @@ export function setCanvasRef(
 ) {
   const canvas = canvasRef.current;
   canvas!.width = CANVAS_SIZE * 2;
-  canvas!.height = CANVAS_SIZE * 2;
+  // canvas!.height = CANVAS_SIZE * 2;
+  canvas!.height = (CANVAS_SIZE * 2) / 1.6;
   canvas!.style.width = `${CANVAS_SIZE}px`;
-  canvas!.style.height = `${CANVAS_SIZE}px`;
+  // canvas!.style.height = `${CANVAS_SIZE}px`;
+  canvas!.style.height = `${CANVAS_SIZE / 1.6}px`;
   return canvas;
 }
 

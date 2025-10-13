@@ -1,76 +1,103 @@
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import c from './style.module.css';
 import type { Socket } from 'socket.io-client';
-import type { GameData } from '../../utils/calculation-utils';
 import { colors } from '../../utils/draw-utils';
+import { useQueryClient } from '@tanstack/react-query';
+import Button from '../Button';
+import clsx from 'clsx';
+import { useGame } from '../../providers/GameProvider';
+import { useLocation } from 'wouter';
+import type { Player } from '../../utils/calculation-utils';
+
+const getColor = (time: number) => {
+  if (time > 5000) return 'lightgreen';
+  if (time > 2000) return 'orange';
+  return 'red';
+};
+
+const getTextDecoration = (p: Player, walletId: string | undefined) => {
+  if (p.isDead) return 'line-through';
+  if (p.walletId === walletId) return 'underline';
+  return 'none';
+};
 
 type GameStatusProps = {
-  gameId: string;
-  gameState: GameData | undefined;
   timeRemaining: number;
   madeMove: boolean;
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
   setGameId: (gameId: string) => void;
+  walletId?: string;
 };
 
 export const GameStatus: React.FC<GameStatusProps> = ({
-  gameId,
-  gameState,
   timeRemaining,
   madeMove,
   socketRef,
-  setGameId,
+  walletId,
 }) => {
+  const queryClient = useQueryClient();
+
+  const [, navigate] = useLocation();
+
+  const { gameState, gameId, setGameId, setGameState } = useGame();
+
+  const gameContainsWinner = gameState?.players.some((p) => p.won);
+
   return (
     <div className={c.statusWrapper}>
       <div className={c.gameInfoContainer}>
-        <input
-          disabled={!!gameState?.started}
-          className={c.input}
-          type='text'
-          placeholder='gameId'
-          value={gameId}
-          onChange={(e) => setGameId(e.target.value)}
-        />
-        <button
-          className={c.button}
-          onClick={() => {
-            socketRef.current?.emit('joinGame', { gameId: gameId });
-          }}>
-          Enter game{' '}
-        </button>{' '}
-        <button
-          className={c.button}
-          onClick={() => {
-            socketRef.current?.emit('start', { gameId: gameId });
-          }}
-          disabled={gameState?.started || !gameId}>
-          Start game
-        </button>
-        <span className={c.normalText}>{Math.round(timeRemaining / 1000)}</span>
+        <div className={c.flex}>
+          {gameState?.started && !gameState.draw && !gameContainsWinner && (
+            <div
+              className={c.madeMoveIndicator}
+              style={{
+                backgroundColor: madeMove ? 'lightgreen' : 'grey',
+              }}
+            />
+          )}
+          {gameState?.started && !gameState.draw && !gameContainsWinner && (
+            <span
+              className={c.timerText}
+              style={{ color: getColor(timeRemaining) }}>
+              {Math.round(timeRemaining / 1000)}
+            </span>
+          )}
+        </div>
+        <h3>gameId: {gameId}</h3>
+        {!gameState?.started && (
+          <Button
+            className={c.button}
+            onClick={() => {
+              socketRef.current?.emit('start', { gameId: gameId });
+              queryClient.invalidateQueries({ queryKey: ['games'] });
+            }}
+            disabled={gameState?.started || !gameId}>
+            Start game
+          </Button>
+        )}
+        {
+          <Button
+            onClick={() => {
+              socketRef.current?.emit('leaveGame', { gameId });
+              setGameId('');
+              setGameState(null);
+              navigate('/');
+            }}>
+            Leave
+          </Button>
+        }
       </div>
-      <div className={c.gameInfoContainer}>
-        <div
-          className={c.madeMoveIndicator}
-          style={{
-            backgroundColor: madeMove ? 'lightgreen' : 'grey',
-          }}></div>
-        <h3>my id: {socketRef.current?.id}</h3>
-        <h3>Game: {gameId}</h3>
-      </div>
-      <div className={c.gameInfoContainer}>
+      <div className={clsx(c.gameInfoContainer, c.rightFixed)}>
         {gameState?.players.map((p) => (
           <div
-            key={p.id}
+            key={p.walletId}
             style={{
-              color: colors[p.playerType],
-              textDecoration: p.isDead ? 'line-through' : 'none',
-              fontWeight: p.id === socketRef.current?.id ? 'bold' : 'normal',
-              fontSize: p.id === socketRef.current?.id ? '24px' : '20px',
+              color: !p.won ? colors[p.playerType] : 'gold',
+              textDecoration: getTextDecoration(p, walletId),
+              fontSize: p.won ? '24px' : '20px',
             }}>
-            {p.playerType} ({p.wins})
-            {p.id === socketRef.current?.id ? ' (you)' : ''} | {p.cards} / 3
-            {p.won && ' WON!'}
+            {p.playerType} ({p.wins}){p.walletId === walletId ? ' (you)' : ''} |{' '}
+            {p.cards} / 3{p.won && ' WON!'}
           </div>
         ))}
       </div>

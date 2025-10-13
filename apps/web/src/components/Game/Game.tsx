@@ -1,63 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import c from './style.module.css';
 import {
   getMousePosition,
   getNearestHex,
-  Hex,
   isInGrid,
   isSameMove,
-  MOVE_DURATION_IN_SECONDS,
   pixelToHex,
-  type GameData,
 } from '../../utils/calculation-utils';
 import { repaint } from '../../utils/draw-utils';
 
 import { isNeighbor } from '../../utils/utils';
-import {
-  useInitializeGame,
-  useInitializeSockets,
-  useTimer,
-} from '../../hooks/game';
 import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useAuth } from '../../providers/AuthProvider';
+import { useLocation } from 'wouter';
+import { useGame } from '../../providers/GameProvider';
+import { useInitializeGame } from '../../hooks/game';
+import Button from '../Button';
 
 const Game = () => {
-  const [gameId, setGameId] = useState('');
-  const [gameState, setGameState] = useState<GameData>();
-  const [isShooting, setIsShooting] = useState(false);
-  const [madeMove, setMadeMove] = useState(false);
-  const [isCanvasHovered, setIsCanvasHovered] = useState(false);
-  const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<number>(
-    MOVE_DURATION_IN_SECONDS,
-  );
-  const [ranOutOfTime, setRanOutOfTime] = useState(false);
+  const { isAuthenticated, isCheckingAuth } = useAuth();
+  const [, navigate] = useLocation();
+  if (!isAuthenticated && !isCheckingAuth) {
+    navigate('/login');
+  }
+
+  const { publicKey: walletId } = useWallet();
+
+  const {
+    gameId,
+    setGameId,
+    gameState,
+    isShooting,
+    setIsShooting,
+    madeMove,
+    setMadeMove,
+    isCanvasHovered,
+    setIsCanvasHovered,
+    hoveredHex,
+    setHoveredHex,
+    timeRemaining,
+    socketRef,
+  } = useGame();
+
+  if (!gameId || !gameState) {
+    navigate('/');
+  }
 
   const { imgRef, canvasRef } = useInitializeGame();
 
-  const socketRef = useInitializeSockets(
-    setGameState,
-    setIsShooting,
-    setMadeMove,
-    setTimeRemaining,
-    setRanOutOfTime,
-  );
-  useTimer(
-    gameState,
-    socketRef,
-    madeMove,
-    gameId,
-    timeRemaining,
-    setTimeRemaining,
-    ranOutOfTime,
-    setRanOutOfTime,
-  );
-
   useEffect(() => {
     const winner = gameState?.players.find((p) => p.won);
-    if (winner) {
-      toast.success(`${winner.playerType} WON!`);
-    }
+    if (winner) toast.success(`${winner.playerType} WON!`);
+
+    if (gameState?.draw) toast.success('Draw - all players died');
   }, [gameState]);
 
   //canvas click
@@ -73,17 +70,18 @@ const Game = () => {
 
       setHoveredHex(nearest);
     };
-
     canvas.addEventListener('mousemove', handleMouseMove);
+
+    if (!gameId || !gameState?.started) return;
 
     repaint(
       canvasRef,
-      socketRef,
       imgRef,
       gameState,
       isCanvasHovered,
       isShooting,
       hoveredHex,
+      walletId?.toString(),
     );
 
     return () => {
@@ -97,6 +95,9 @@ const Game = () => {
     canvasRef,
     imgRef,
     socketRef,
+    walletId,
+    setHoveredHex,
+    gameId,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -107,7 +108,7 @@ const Game = () => {
     if (gameHasWinner) return;
 
     const playerIsDead = gameState.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
+      (p) => p.walletId === walletId && p.isDead,
     );
     if (playerIsDead) return;
 
@@ -117,7 +118,7 @@ const Game = () => {
     const move = pixelToHex(x, y);
 
     const currentPlayer = gameState.players.find(
-      (p) => p.id === socketRef.current?.id,
+      (p) => p.walletId === walletId?.toString(),
     )!;
 
     if (
@@ -137,47 +138,37 @@ const Game = () => {
     });
   };
 
+  if (!imgRef) return;
+
   return (
-    <div>
-      <div>
-        <GameStatus
-          gameId={gameId}
-          gameState={gameState}
-          timeRemaining={timeRemaining}
-          madeMove={madeMove}
-          socketRef={socketRef}
-          setGameId={setGameId}
-        />
-      </div>
-      <div className={c.canvasWrapper}>
-        {' '}
-        <canvas
-          ref={canvasRef}
-          onClick={handleCanvasClick}
-          onMouseEnter={() => setIsCanvasHovered(true)}
-          onMouseLeave={() => setIsCanvasHovered(false)}
-        />
-        <div>
-          <button
-            disabled={madeMove || !gameState}
-            className={c.button}
-            onClick={() => {
-              if (!madeMove) setIsShooting((prev) => !prev);
-            }}>
-            {isShooting ? 'Cancel Shooting' : 'Shoot'}
-          </button>
-          {gameState?.players.some((p) => p.won) && (
-            <button
+    <div className={c.gameWrapper} style={{ objectFit: 'cover' }}>
+      {/* <Background /> */}
+      <GameStatus
+        timeRemaining={timeRemaining}
+        madeMove={madeMove}
+        socketRef={socketRef}
+        setGameId={setGameId}
+        walletId={walletId?.toString() || ''}
+      />
+
+      <div className={c.rel}>
+        <div className={c.canvasContainer}>
+          <canvas
+            ref={canvasRef}
+            onClick={handleCanvasClick}
+            onMouseEnter={() => setIsCanvasHovered(true)}
+            onMouseLeave={() => setIsCanvasHovered(false)}
+          />
+          <div>
+            <Button
+              disabled={madeMove || !gameState}
+              className={c.button}
               onClick={() => {
-                console.log('gameState on restart', gameState);
-                console.log('timeRemaining on restart', timeRemaining);
-                socketRef.current?.emit('restartGame', {
-                  gameId,
-                });
+                if (!madeMove) setIsShooting(!isShooting);
               }}>
-              Restart
-            </button>
-          )}
+              {isShooting ? 'Cancel Shooting' : 'Shoot'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
