@@ -4,6 +4,10 @@ import { Player } from './Player';
 
 export class Game {
   constructor(
+    public tier: number,
+    public isPrivate: boolean,
+    public interval: NodeJS.Timeout | null = null,
+    public createdAt: string = new Date().toISOString(),
     public moveExpiryDate: string = '',
     public disappearedHexes: Hex[] = [],
     public warningHexes: Hex[] = [],
@@ -12,9 +16,16 @@ export class Game {
     public cardPos: Hex | null = null,
     public currentRadius: number = START_GRID_RADIUS,
     public started: boolean = false,
+    public draw: boolean = false,
     //this should not get sent to both players:
     public players: Player[] = [], //we currently send position of every player to every player
   ) {}
+
+  serialize() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { interval, ...rest } = this;
+    return rest;
+  }
 
   getAvailablePlayerPos(): Hex {
     if (this.grid.length === 0) {
@@ -66,7 +77,7 @@ export class Game {
 
   shootInDirection(directionHex: Hex, shooter: Player) {
     this.players.forEach((p) => {
-      if (p.id === shooter.id) return;
+      if (p.walletId === shooter.walletId) return;
 
       let targetPos: Hex;
       if (p.isShooting) {
@@ -119,7 +130,7 @@ export class Game {
     }
 
     this.players.forEach((p) => {
-      if (p.id === currentPlayer.id) return;
+      if (p.walletId === currentPlayer.walletId) return;
       if (p.isDead) return;
       let otherPlayerNextPosition: Hex;
       if (p.isShooting) {
@@ -145,5 +156,68 @@ export class Game {
       player.justPickedCard = true;
       player.isImmune = true;
     }
+  }
+
+  updateState() {
+    this.moves++;
+    if (this.moves % 8 === 0 && this.currentRadius > 1) {
+      this.currentRadius--;
+      this.contractZone();
+      const zoneAteCard = this.disappearedHexes.some((hex) =>
+        hex.equals(this.cardPos!),
+      );
+      if (zoneAteCard) {
+        this.spawnCard();
+      }
+    }
+
+    this.players.forEach((p) => {
+      const playerIsInForbiddenZone = this.disappearedHexes.some((h) => {
+        h.equals(p.pos);
+      });
+      if (playerIsInForbiddenZone) {
+        console.log(`${p.playerType} died`);
+        p.isDead = true;
+      }
+    });
+
+    this.players.forEach((p) => {
+      if (p.cards === 3 && p.pos?.equals(new Hex(0, 0))) {
+        this.players.forEach((op) => {
+          if (op.walletId !== p.walletId) {
+            op.isDead = true;
+          }
+        });
+      }
+    });
+
+    const numberOfDeadPlayers = this.players.reduce(
+      (prev, curr) => prev + (curr.isDead ? 1 : 0),
+      0,
+    );
+
+    if (numberOfDeadPlayers === this.players.length - 1) {
+      this.players.forEach((p) => {
+        if (!p.isDead) {
+          p.won = true;
+          p.wins++;
+        }
+      });
+    }
+
+    if (numberOfDeadPlayers === this.players.length) {
+      this.draw = true;
+    }
+
+    //emit was here
+
+    this.players.forEach((p) => {
+      if (!p.justPickedCard) {
+        p.isImmune = false;
+      }
+      p.pendingMove = null;
+      p.isShooting = null;
+      p.didJustCollide = false;
+    });
   }
 }

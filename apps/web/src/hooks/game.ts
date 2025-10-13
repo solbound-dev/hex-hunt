@@ -9,6 +9,7 @@ import {
 } from '../utils/calculation-utils';
 import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
+import toast from 'react-hot-toast';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -51,7 +52,8 @@ export const useInitializeSockets = (
   setIsShooting: (isShooting: boolean) => void,
   setMadeMove: (madeMove: boolean) => void,
   setTimeRemaining: (time: number) => void,
-  setRanOutOfTime: (ranOutOfTime: boolean) => void,
+  setAvailableGames: (games: string[]) => void,
+  setGameId: (gameId: string) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
 
@@ -59,34 +61,58 @@ export const useInitializeSockets = (
     socketRef.current = io(import.meta.env.VITE_API_URL, {
       transports: ['websocket'],
     });
-    socketRef.current.on('gameFull', () =>
-      console.log('This game already started'),
-    );
+
+    socketRef.current.on('playerLeft', () => {
+      toast.error('Player left');
+    });
+
+    socketRef.current.on('availableGames', (data) => {
+      setAvailableGames(data);
+    });
+
+    socketRef.current.on('gameFull', () => {
+      console.log('This game already started');
+      toast.error('Game unavailable');
+    });
 
     socketRef.current.on('gameStart', (data) => {
-      console.log('Game started! Data:', socketRef.current?.id, data);
+      console.log('Game started! Data:', data);
       setGameState(data);
       setTimeRemaining(MOVE_DURATION_IN_SECONDS * 1000);
       setIsShooting(false);
       setMadeMove(false);
-      setRanOutOfTime(false);
     });
 
-    socketRef.current.on('playerJoined', (data) =>
-      console.log('Player joined:', data),
-    );
+    socketRef.current.on('alreadyHasRoom', () => {
+      toast.error('You are already in another room');
+    });
+
+    socketRef.current.on('playerJoined', (data) => {
+      console.log('Player joined:', data);
+      toast.success('Joined!');
+      setGameId(data.gameId);
+      setGameState(data.game);
+    });
     socketRef.current.on('gameState', (data) => {
+      toast.success(`Move made ${data.moves}`);
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
-      setRanOutOfTime(false);
+    });
+
+    socketRef.current.on('reconnect', (data) => {
+      console.log('now', new Date().toISOString());
+      console.log('game', data.game.moveExpiryDate);
+      setGameId(data.gameId);
+      setGameState(data.game);
     });
   }, [
     setGameState,
     setIsShooting,
     setMadeMove,
     setTimeRemaining,
-    setRanOutOfTime,
+    setAvailableGames,
+    setGameId,
   ]);
 
   return socketRef;
@@ -99,8 +125,7 @@ export const useTimer = (
   gameId: string,
   timeRemaining: number,
   setTimeRemaining: (time: number) => void,
-  ranOutOfTime: boolean,
-  setRanOutOfTime: (ranOutOfTime: boolean) => void,
+  walletId?: string,
 ) => {
   const [eventDate, setEventDate] = useState('');
   const [countdownStarted, setCountdownStarted] = useState(false);
@@ -108,7 +133,7 @@ export const useTimer = (
   //reset timer
   useEffect(() => {
     const playerIsDead = gameState?.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
+      (p) => p.walletId === walletId && p.isDead,
     );
 
     if (playerIsDead) {
@@ -120,10 +145,10 @@ export const useTimer = (
         new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
       ).toISOString(),
     );
-    if (gameState) {
+    if (gameState?.started) {
       setCountdownStarted(true);
     }
-  }, [gameState, socketRef]);
+  }, [gameState, socketRef, walletId]);
 
   //timer logic
   useEffect(() => {
@@ -136,9 +161,6 @@ export const useTimer = (
           remainingTime = 0;
           clearInterval(countdownInterval);
           setCountdownStarted(false);
-          if (!madeMove) {
-            setRanOutOfTime(true);
-          }
         }
         setTimeRemaining(remainingTime);
       }, 1000);
@@ -151,34 +173,7 @@ export const useTimer = (
     timeRemaining,
     gameId,
     madeMove,
-    setRanOutOfTime,
     setTimeRemaining,
-  ]);
-
-  //ran out of time
-  useEffect(() => {
-    const winner = gameState?.players.find((p) => p.won);
-    if (winner) return;
-
-    const playerIsDead = gameState?.players.some(
-      (p) => p.id === socketRef.current?.id && p.isDead,
-    );
-    const gameHasWinner = gameState?.players.some((p) => p.won);
-    if (ranOutOfTime && !madeMove && !playerIsDead && !gameHasWinner) {
-      socketRef.current?.emit('updateGame', {
-        gameId,
-        move: null,
-        isShooting: false,
-        didRunOutOfTime: true,
-      });
-    }
-  }, [
-    ranOutOfTime,
-    gameId,
-    madeMove,
-    gameState?.players,
-    socketRef,
-    gameState,
   ]);
 
   return { timeRemaining, setTimeRemaining };
