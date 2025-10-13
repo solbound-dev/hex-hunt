@@ -21,6 +21,8 @@ interface GameContext {
   setIsCanvasHovered: (isCanvasHovered: boolean) => void;
   hoveredHex: Hex | null;
   setHoveredHex: (hoveredHex: Hex | null) => void;
+  clickedHex: Hex | null;
+  setClickedHex: (hoveredHex: Hex | null) => void;
   timeRemaining: number;
   setTimeRemaining: (timeRemaining: number) => void;
   availableGames: string[];
@@ -41,6 +43,8 @@ const initialContextValue = {
   setIsCanvasHovered: () => {},
   hoveredHex: null,
   setHoveredHex: () => {},
+  clickedHex: null,
+  setClickedHex: () => {},
   timeRemaining: MOVE_DURATION_IN_SECONDS * 1000,
   setTimeRemaining: () => {},
   availableGames: [],
@@ -62,6 +66,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
   const [madeMove, setMadeMove] = useState(false);
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
   const [hoveredHex, setHoveredHex] = useState<Hex | null>(null);
+  const [clickedHex, setClickedHex] = useState<Hex | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(
     MOVE_DURATION_IN_SECONDS,
   );
@@ -74,6 +79,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setTimeRemaining,
     setAvailableGames,
     setGameId,
+    setClickedHex,
   );
   useTimer(
     gameState!,
@@ -102,6 +108,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     availableGames,
     setAvailableGames,
     socketRef,
+    clickedHex,
+    setClickedHex,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

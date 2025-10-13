@@ -42,11 +42,15 @@ const Game = () => {
     setHoveredHex,
     timeRemaining,
     socketRef,
+    clickedHex,
+    setClickedHex,
   } = useGame();
 
-  if (!gameId || !gameState) {
-    navigate('/');
-  }
+  useEffect(() => {
+    if (!gameId || !gameState) {
+      navigate('/');
+    }
+  }, [gameId, gameState, navigate]);
 
   const { imgRef, canvasRef } = useInitializeGame();
 
@@ -81,6 +85,7 @@ const Game = () => {
       isCanvasHovered,
       isShooting,
       hoveredHex,
+      clickedHex,
       walletId?.toString(),
     );
 
@@ -98,6 +103,8 @@ const Game = () => {
     walletId,
     setHoveredHex,
     gameId,
+    madeMove,
+    clickedHex,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -129,6 +136,7 @@ const Game = () => {
     ) {
       return;
     }
+    setClickedHex(hoveredHex);
     setMadeMove(true);
 
     socketRef.current?.emit('updateGame', {
