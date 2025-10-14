@@ -140,8 +140,8 @@ export class Game {
       }
       if (currentPlayerNextPosition.equals(otherPlayerNextPosition)) {
         currentPlayer.lastSeenPos = new Hex(
-          currentPlayer.pos.q,
-          currentPlayer.pos.r,
+          currentPlayer.pendingMove!.q,
+          currentPlayer.pendingMove!.r,
         );
         currentPlayer.didJustCollide = true;
       }
@@ -209,8 +209,6 @@ export class Game {
       this.draw = true;
     }
 
-    //emit was here
-
     this.players.forEach((p) => {
       if (!p.justPickedCard) {
         p.isImmune = false;
@@ -219,5 +217,9 @@ export class Game {
       p.isShooting = null;
       p.didJustCollide = false;
     });
+  }
+
+  getPlayerTypeByWalletId(walletId: string) {
+    return this.players.find((p) => p.walletId === walletId)?.playerType;
   }
 }

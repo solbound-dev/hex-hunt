@@ -124,6 +124,8 @@ const Game = () => {
 
     const move = pixelToHex(x, y);
 
+    if (madeMove) return;
+
     const currentPlayer = gameState.players.find(
       (p) => p.walletId === walletId?.toString(),
     )!;

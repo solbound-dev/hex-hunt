@@ -48,7 +48,6 @@ export class GameService {
 
   startGame(gameId: string, server: Server) {
     const game = this.games[gameId];
-    console.log('games', Object.keys(this.games));
     if (!game || game.started) return;
 
     game.started = true;
@@ -89,6 +88,19 @@ export class GameService {
       if (game.draw || gameHasWinner) {
         clearInterval(interval);
       }
+
+      console.log('\nfinal state:');
+      game.players.forEach((p) =>
+        console.log(
+          '-',
+          p.walletId.slice(0, 6),
+          p.playerType,
+          '\n  ',
+          'pos: ',
+          p.pos,
+        ),
+      );
+      console.log('------------------');
       server.to(gameId).emit('gameState', game.serialize());
     }, MOVE_DURATION_IN_SECONDS * 1000);
 
@@ -211,14 +223,6 @@ export class GameService {
     );
     game.players.push(newPlayer);
 
-    if (game.players.length === MAX_PLAYERS) {
-      game.spawnCard();
-      game.moveExpiryDate = new Date(
-        Date.now() + MOVE_DURATION_IN_SECONDS * 1000,
-      ).toISOString();
-      game.players.forEach((p) => (p.pendingMove = null));
-      game.started = true;
-    }
     return { gameId, game, newPlayer };
   }
 
@@ -256,14 +260,16 @@ export class GameService {
 
     if (game.draw) return null;
 
-    // game.players.forEach((p) => {
-    //   if (token.walletId === p.walletId) {
-    //     const moveTooLate = new Date() > new Date(game.moveExpiryDate);
-    //     if (data.didRunOutOfTime || moveTooLate) {
-    //       p.isDead = true;
-    //     }
-    //   }
-    // });
+    console.log(
+      '---\n',
+      new Date().toLocaleTimeString('en-GB', { hour12: false }),
+      'updateGame start',
+      token.walletId.slice(0, 6),
+      game.getPlayerTypeByWalletId(token.walletId),
+      '\n',
+      data.move,
+      data.isShooting,
+    );
 
     game.players.forEach((p) => {
       if (token.walletId === p.walletId) {
@@ -272,6 +278,10 @@ export class GameService {
         }
 
         if (data.move) {
+          if (p.pendingMove !== null) {
+            console.log("pending move wasn't null", p.playerType);
+          }
+
           if (p.pendingMove === null) {
             if (p.pos.equals(data.move)) return;
             if (!isNeighbor(p.pos, data.move)) return;
@@ -282,34 +292,6 @@ export class GameService {
     });
 
     game.players.forEach((p) => (p.justPickedCard = false));
-
-    // const waitingForMoves = game.players.some(
-    //   (p) => p.pendingMove === null && !p.isDead,
-    // );
-
-    //do this part at the end of interval
-    // if (!waitingForMoves) {
-    //   game.players.forEach((p) => {
-    //     if (p.isShooting) {
-    //       p.lastSeenPos = p.pos;
-    //       game.shootInDirection(p.pendingMove!, p);
-    //     }
-    //   });
-
-    //   game.players.forEach((p) => game.checkCollisionAndUpdate(p));
-
-    //   game.players.forEach((p) => {
-    //     if (!p.isShooting && !p.didJustCollide && !p.isDead) {
-    //       p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
-    //     }
-    //   });
-
-    //   game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
-
-    //   game.updateState();
-
-    //   return game;
-    // }
   }
 
   restartGame(clientId: string, gameId: string, tokenString: string) {
