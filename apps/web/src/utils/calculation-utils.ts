@@ -145,12 +145,6 @@ export function inverseIsometricTransformation(
   oy: number,
   hexSize: number,
 ) {
-  // const oxPrime = ox - 6.1 * hexSize;
-  // const oyPrime = oy + 0.1 * hexSize;
-
-  // const x = (oyPrime / 0.35 + oxPrime / 0.7) / 2;
-  // const y = (oyPrime / 0.35 - oxPrime / 0.7) / 2;
-
   const x = 0.5 * ((ox - 6.1 * hexSize) / 0.7 + (oy + 0.1 * hexSize) / 0.35);
   const y = 0.5 * ((oy + 0.1 * hexSize) / 0.35 - (ox - 6.1 * hexSize) / 0.7);
 

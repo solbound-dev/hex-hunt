@@ -116,6 +116,7 @@ export const useInitializeSockets = (
     setTimeRemaining,
     setAvailableGames,
     setGameId,
+    setClickedHex,
   ]);
 
   return socketRef;

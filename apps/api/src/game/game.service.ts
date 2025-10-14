@@ -48,7 +48,6 @@ export class GameService {
 
   startGame(gameId: string, server: Server) {
     const game = this.games[gameId];
-    console.log('games', Object.keys(this.games));
     if (!game || game.started) return;
 
     game.started = true;
@@ -57,6 +56,8 @@ export class GameService {
       new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
     ).toISOString();
     game.players.forEach((p) => (p.pendingMove = null));
+
+    console.log('game before interval', game);
 
     const interval = setInterval(() => {
       game.players.forEach((p) => {
@@ -211,14 +212,6 @@ export class GameService {
     );
     game.players.push(newPlayer);
 
-    if (game.players.length === MAX_PLAYERS) {
-      game.spawnCard();
-      game.moveExpiryDate = new Date(
-        Date.now() + MOVE_DURATION_IN_SECONDS * 1000,
-      ).toISOString();
-      game.players.forEach((p) => (p.pendingMove = null));
-      game.started = true;
-    }
     return { gameId, game, newPlayer };
   }
 

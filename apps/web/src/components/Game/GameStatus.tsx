@@ -39,7 +39,8 @@ export const GameStatus: React.FC<GameStatusProps> = ({
 
   const [, navigate] = useLocation();
 
-  const { gameState, gameId, setGameId, setGameState } = useGame();
+  const { gameState, gameId, setGameId, setGameState, setClickedHex } =
+    useGame();
 
   const gameContainsWinner = gameState?.players.some((p) => p.won);
 
@@ -81,6 +82,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
               socketRef.current?.emit('leaveGame', { gameId });
               setGameId('');
               setGameState(null);
+              setClickedHex(null);
               navigate('/');
             }}>
             Leave
@@ -96,8 +98,8 @@ export const GameStatus: React.FC<GameStatusProps> = ({
               textDecoration: getTextDecoration(p, walletId),
               fontSize: p.won ? '24px' : '20px',
             }}>
-            {p.playerType} ({p.wins}){p.walletId === walletId ? ' (you)' : ''} |{' '}
-            {p.cards} / 3{p.won && ' WON!'}
+            {p.playerType} {p.walletId === walletId ? ' (you)' : ''} | {p.cards}{' '}
+            / 3{p.won && ' WON!'}
           </div>
         ))}
       </div>

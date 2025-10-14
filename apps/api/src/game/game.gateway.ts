@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { Hex } from './Hex';
 import { GameService } from './game.service';
 import { parse } from 'cookie';
+import { MAX_PLAYERS } from './game-utils';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -85,8 +86,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.server.to(gameId).emit('gameStart', game.serialize());
     console.log(`GAME ${gameId} STARTED===============================`);
-    const availableGames = this.gameService.getAvailableGames();
-    this.server.emit('availableGames', availableGames);
   }
 
   @SubscribeMessage('hostPrivateGame')
@@ -177,7 +176,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       game: game.serialize(),
     });
 
-    if (game.started) {
+    if (game.players.length === MAX_PLAYERS) {
+      console.log('fourth player joined, game supposed to be initialized');
+
+      const game = this.gameService.startGame(gameId, this.server);
+      if (!game) {
+        console.log(`Game ${gameId} does not exist or is already started`);
+        return;
+      }
       this.server.to(gameId).emit('gameStart', game.serialize());
       console.log('GAME STARTED===============================');
     }
