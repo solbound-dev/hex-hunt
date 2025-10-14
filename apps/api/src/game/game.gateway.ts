@@ -130,7 +130,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (game.started) {
       this.server.to(gameId).emit('gameStart', game.serialize());
-      console.log('GAME STARTED===============================');
+      console.log(
+        '=====GAME STARTED=====',
+        gameId,
+        new Date().toLocaleTimeString('en-GB', { hour12: false }),
+      );
+      console.log('\nfinal state:');
+      game.players.forEach((p) =>
+        console.log(
+          '-',
+          p.walletId.slice(0, 6),
+          p.playerType,
+          '\n  ',
+          'pos: ',
+          p.pos,
+        ),
+      );
     }
   }
 
@@ -185,7 +200,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
       this.server.to(gameId).emit('gameStart', game.serialize());
-      console.log('GAME STARTED===============================');
+      console.log(
+        '=====GAME STARTED=====',
+        gameId,
+        new Date().toLocaleTimeString('en-GB', { hour12: false }),
+      );
     }
   }
 
@@ -232,7 +251,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (game.started) {
       this.server.to(gameId).emit('gameStart', game.serialize());
-      console.log('GAME STARTED===============================');
+      console.log(
+        '=====GAME STARTED=====',
+        gameId,
+        new Date().toLocaleTimeString('en-GB', { hour12: false }),
+      );
     }
   }
 
