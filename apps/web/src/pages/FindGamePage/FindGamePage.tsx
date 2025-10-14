@@ -7,7 +7,7 @@ import c from './style.module.css';
 
 const FindGamePage = () => {
   const { isAuthenticated, isCheckingAuth } = useAuth();
-  const { socketRef, gameId, gameState } = useGame();
+  const { socketRef, gameId, gameState, socketRef2 } = useGame();
   const [privateGameId, setPrivateGameId] = useState('');
   const [showPrivateGameInput, setShowPrivateGameInput] = useState(false);
 
@@ -32,6 +32,7 @@ const FindGamePage = () => {
         <Button
           onClick={() => {
             socketRef.current?.emit('quickJoin', { tier: 1 });
+            socketRef2.current?.emit('quickJoin', { tier: 1 });
             navigate('/game');
           }}>
           Quick match

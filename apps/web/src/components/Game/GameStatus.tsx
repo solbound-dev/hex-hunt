@@ -33,14 +33,21 @@ export const GameStatus: React.FC<GameStatusProps> = ({
   timeRemaining,
   madeMove,
   socketRef,
+
   walletId,
 }) => {
   const queryClient = useQueryClient();
 
   const [, navigate] = useLocation();
 
-  const { gameState, gameId, setGameId, setGameState, setClickedHex } =
-    useGame();
+  const {
+    gameState,
+    gameId,
+    setGameId,
+    setGameState,
+    setClickedHex,
+    socketRef2,
+  } = useGame();
 
   const gameContainsWinner = gameState?.players.some((p) => p.won);
 
@@ -80,6 +87,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           <Button
             onClick={() => {
               socketRef.current?.emit('leaveGame', { gameId });
+              socketRef2.current?.emit('leaveGame', { gameId });
               setGameId('');
               setGameState(null);
               setClickedHex(null);

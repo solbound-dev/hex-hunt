@@ -58,6 +58,7 @@ export const useInitializeSockets = (
   setClickedHex: (hex: Hex | null) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
+  const socketRef2 = useRef<Socket | null>(null);
 
   useEffect(() => {
     socketRef.current = io(import.meta.env.VITE_API_URL, {
@@ -109,6 +110,49 @@ export const useInitializeSockets = (
       setGameId(data.gameId);
       setGameState(data.game);
     });
+
+    //2
+    socketRef2.current = io(import.meta.env.VITE_API_URL, {
+      transports: ['websocket'],
+    });
+
+    // socketRef.current.on('gameFull', () => {
+    //   console.log('This game already started');
+    //   toast.error('Game unavailable');
+    // });
+
+    // socketRef2.current.on('gameStart', (data) => {
+    //   console.log('Game started! Data:', data);
+    //   setGameState(data);
+    //   setTimeRemaining(MOVE_DURATION_IN_SECONDS * 1000);
+    //   setIsShooting(false);
+    //   setMadeMove(false);
+    // });
+
+    // socketRef2.current.on('alreadyHasRoom', () => {
+    //   toast.error('You are already in another room');
+    // });
+
+    // socketRef2.current.on('playerJoined', (data) => {
+    //   console.log('Player joined:', data);
+    //   toast.success('Joined!');
+    //   setGameId(data.gameId);
+    //   setGameState(data.game);
+    // });
+    // socketRef2.current.on('gameState', (data) => {
+    //   toast.success(`Move made ${data.moves}`);
+    //   setGameState(data);
+    //   setIsShooting(false);
+    //   setMadeMove(false);
+    //   setClickedHex(null);
+    // });
+
+    // socketRef2.current.on('reconnect', (data) => {
+    //   console.log('now', new Date().toISOString());
+    //   console.log('game', data.game.moveExpiryDate);
+    //   setGameId(data.gameId);
+    //   setGameState(data.game);
+    // });
   }, [
     setGameState,
     setIsShooting,
@@ -119,7 +163,7 @@ export const useInitializeSockets = (
     setClickedHex,
   ]);
 
-  return socketRef;
+  return { socketRef, socketRef2 };
 };
 
 export const useTimer = (

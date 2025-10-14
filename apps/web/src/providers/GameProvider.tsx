@@ -28,6 +28,10 @@ interface GameContext {
   availableGames: string[];
   setAvailableGames: (availableGames: string[]) => void;
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
+  socketRef2: React.RefObject<Socket<
+    DefaultEventsMap,
+    DefaultEventsMap
+  > | null>;
 }
 
 const initialContextValue = {
@@ -50,6 +54,7 @@ const initialContextValue = {
   availableGames: [],
   setAvailableGames: () => {},
   socketRef: { current: null },
+  socketRef2: { current: null },
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -72,7 +77,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
   );
   const [availableGames, setAvailableGames] = useState<string[]>([]);
 
-  const socketRef = useInitializeSockets(
+  const { socketRef, socketRef2 } = useInitializeSockets(
     setGameState,
     setIsShooting,
     setMadeMove,
@@ -110,6 +115,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     socketRef,
     clickedHex,
     setClickedHex,
+    socketRef2,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
