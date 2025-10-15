@@ -7,7 +7,7 @@ import c from './style.module.css';
 
 const FindGamePage = () => {
   const { isAuthenticated, isCheckingAuth } = useAuth();
-  const { socketRef, gameId, gameState } = useGame();
+  const { socketRef, gameId } = useGame();
   const [privateGameId, setPrivateGameId] = useState('');
   const [showPrivateGameInput, setShowPrivateGameInput] = useState(false);
 
@@ -19,11 +19,11 @@ const FindGamePage = () => {
     }
   }, [isAuthenticated, isCheckingAuth, navigate]);
 
-  // useEffect(() => {
-  //   if (gameId || gameState) {
-  //     navigate('/game');
-  //   }
-  // }, [gameId, gameState, navigate]);
+  useEffect(() => {
+    if (gameId) {
+      navigate('/game');
+    }
+  }, [gameId, navigate]);
 
   console.log('isAuthenticated', isAuthenticated, isCheckingAuth);
 

@@ -11,6 +11,7 @@ import {
 import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import toast from 'react-hot-toast';
+import { useLocation } from 'wouter';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -49,7 +50,7 @@ export const useInitializeGame = () => {
 };
 
 export const useInitializeSockets = (
-  setGameState: (data: GameData) => void,
+  setGameState: (data: GameData | null) => void,
   setIsShooting: (isShooting: boolean) => void,
   setMadeMove: (madeMove: boolean) => void,
   setTimeRemaining: (time: number) => void,
@@ -58,6 +59,7 @@ export const useInitializeSockets = (
   setClickedHex: (hex: Hex | null) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     socketRef.current = io(import.meta.env.VITE_API_URL, {
@@ -66,6 +68,10 @@ export const useInitializeSockets = (
 
     socketRef.current.on('playerLeft', () => {
       toast.error('Player left');
+      setGameId('');
+      setGameState(null);
+      setClickedHex(null);
+      navigate('/');
     });
 
     socketRef.current.on('availableGames', (data) => {
@@ -96,6 +102,7 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data) => {
+      console.log('Game state updated:', data);
       toast.success(`Move made ${data.moves}`);
       setGameState(data);
       setIsShooting(false);
@@ -117,6 +124,7 @@ export const useInitializeSockets = (
     setAvailableGames,
     setGameId,
     setClickedHex,
+    navigate,
   ]);
 
   return socketRef;

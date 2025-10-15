@@ -6,7 +6,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import Button from '../Button';
 import clsx from 'clsx';
 import { useGame } from '../../providers/GameProvider';
-import { useLocation } from 'wouter';
 import type { Player } from '../../utils/calculation-utils';
 
 const getColor = (time: number) => {
@@ -37,10 +36,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const [, navigate] = useLocation();
-
-  const { gameState, gameId, setGameId, setGameState, setClickedHex } =
-    useGame();
+  const { gameState, gameId } = useGame();
 
   const gameContainsWinner = gameState?.players.some((p) => p.won);
 
@@ -80,10 +76,6 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           <Button
             onClick={() => {
               socketRef.current?.emit('leaveGame', { gameId });
-              setGameId('');
-              setGameState(null);
-              setClickedHex(null);
-              navigate('/');
             }}>
             Leave
           </Button>
