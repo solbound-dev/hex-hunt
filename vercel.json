@@ -9,5 +9,5 @@
       }
     }
   ],
-  "routes": [{ "src": "/((?!.*\\..*).*)", "dest": "apps/web/index.html" }]
+  "routes": [{ "src": "/((?!.*\\..*).*)", "dest": "index.html" }]
 }
