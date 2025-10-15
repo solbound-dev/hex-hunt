@@ -47,34 +47,35 @@ const FindGamePage = () => {
           }}>
           Host private game
         </Button>
-        <Button onClick={() => setShowPrivateGameInput((prev) => !prev)}>
-          Join private game
-        </Button>
-      </div>
-      {showPrivateGameInput && (
-        <div className={c.inputWrapper}>
-          <input
-            className={c.input}
-            placeholder='gameId'
-            value={privateGameId}
-            onChange={(e) => setPrivateGameId(e.target.value)}
-          />
-          <button
-            className={c.joinButton}
-            onClick={() => {
-              socketRef.current?.disconnect();
-              socketRef.current?.connect();
-              socketRef.current?.emit('joinPrivateGame', {
-                gameId: privateGameId,
-                tier: 1,
-                isPrivate: true,
-              });
-              navigate('/game');
-            }}>
-            Join
-          </button>
+        <div className={c.rel}>
+          <Button onClick={() => setShowPrivateGameInput((prev) => !prev)}>
+            Join private game
+          </Button>
+          {showPrivateGameInput && (
+            <div className={c.inputWrapper}>
+              <input
+                className={c.input}
+                placeholder='gameId'
+                value={privateGameId}
+                onChange={(e) => setPrivateGameId(e.target.value)}
+              />
+              <Button
+                onClick={() => {
+                  socketRef.current?.disconnect();
+                  socketRef.current?.connect();
+                  socketRef.current?.emit('joinPrivateGame', {
+                    gameId: privateGameId,
+                    tier: 1,
+                    isPrivate: true,
+                  });
+                  navigate('/game');
+                }}>
+                Join
+              </Button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -5,8 +5,6 @@
   background: #232b2b;
   font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
   align-items: flex-start;
-  padding-left: 64px;
-  padding-top: 48px;
 }
 
 .header {
@@ -16,6 +14,8 @@
   letter-spacing: 2px;
   margin-bottom: 32px;
   font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
+  padding-left: 64px;
+  padding-top: 48px;
 }
 
 .buttonGroup {
@@ -42,6 +42,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: absolute;
+  right: -100%;
+  bottom: -200%;
 }
 
 .input {
@@ -54,26 +57,30 @@
   font-family: 'VT323', 'monospace', sans-serif;
 }
 
-.joinButton {
-  background: #7fa7a6;
-  color: #232b2b;
-  border: 2px solid #e0e7c3;
-  border-radius: 8px;
-  padding: 8px 20px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 8px #232b2b22;
-  transition:
-    background 0.2s,
-    transform 0.2s,
-    color 0.2s;
-  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
-}
-
 .joinButton:hover {
   background: #e0e7c3;
   color: #232b2b;
   transform: translateY(-2px) scale(1.04);
   box-shadow: 0 4px 16px #232b2b22;
+}
+
+.rel {
+  position: relative;
+}
+
+@media (orientation: landscape) and (max-width: 1000px) {
+  .input {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    border: none;
+  }
+
+  .inputWrapper {
+    align-items: center;
+    margin-top: 12px;
+    padding: 0;
+    gap: 8px;
+    right: -100%;
+    bottom: -100%;
+  }
 }
