@@ -172,9 +172,10 @@ export class Game {
     }
 
     this.players.forEach((p) => {
-      const playerIsInForbiddenZone = this.disappearedHexes.some((h) => {
-        h.equals(p.pos);
-      });
+      const playerIsInForbiddenZone = this.disappearedHexes.some((h) =>
+        h.equals(p.pos),
+      );
+
       if (playerIsInForbiddenZone) {
         console.log(`${p.playerType} died`);
         p.isDead = true;
