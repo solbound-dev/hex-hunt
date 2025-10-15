@@ -25,12 +25,16 @@ const FindGamePage = () => {
     }
   }, [gameId, gameState, navigate]);
 
+  console.log('isAuthenticated', isAuthenticated, isCheckingAuth);
+
   return (
     <div className={c.pageWrapper}>
       <div className={c.header}>Find game</div>
       <div className={c.buttonGroup}>
         <Button
           onClick={() => {
+            socketRef.current?.disconnect();
+            socketRef.current?.connect();
             socketRef.current?.emit('quickJoin', { tier: 1 });
             navigate('/game');
           }}>
@@ -38,6 +42,8 @@ const FindGamePage = () => {
         </Button>
         <Button
           onClick={() => {
+            socketRef.current?.disconnect();
+            socketRef.current?.connect();
             socketRef.current?.emit('hostPrivateGame', { tier: 1 });
             navigate('/game');
           }}>
@@ -58,6 +64,8 @@ const FindGamePage = () => {
           <button
             className={c.joinButton}
             onClick={() => {
+              socketRef.current?.disconnect();
+              socketRef.current?.connect();
               socketRef.current?.emit('joinPrivateGame', {
                 gameId: privateGameId,
                 tier: 1,

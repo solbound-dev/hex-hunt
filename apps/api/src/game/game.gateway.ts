@@ -156,6 +156,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const cookie = client.handshake.headers.cookie;
     const token = parse(cookie || '')?.accessToken;
+
     if (!token) {
       return;
     }
