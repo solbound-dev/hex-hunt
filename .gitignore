@@ -8,3 +8,8 @@ build/
 *.log
 .vercel
 .yarn/
+
+app-release*
+.gradle/
+
+android.keystore

@@ -1,0 +1,50 @@
+{
+  "packageId": "xyz.hextraction.twa",
+  "host": "hextraction.xyz",
+  "name": "Hextraction",
+  "launcherName": "Hextraction",
+  "display": "fullscreen",
+  "themeColor": "#000000",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#000000",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://hextraction.xyz/android-chrome-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/home/bd4/src/solbound-dev/hex-hunt/android.keystore",
+    "alias": "hextraction"
+  },
+  "appVersionName": "2",
+  "appVersionCode": 2,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://hextraction.xyz/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://hextraction.xyz/",
+  "minSdkVersion": 21,
+  "orientation": "landscape",
+  "fingerprints": [
+    {
+      "value": "84:E2:FA:7D:A7:98:E1:13:83:C4:3C:8C:94:A8:C6:23:E7:5F:DA:72:29:6E:39:F4:ED:C6:CD:64:F6:6E:D4:8C"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "2"
+}
