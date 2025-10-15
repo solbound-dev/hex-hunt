@@ -95,6 +95,7 @@
   right: 0;
 }
 
+/*  */
 @media (orientation: landscape) and (max-width: 1000px) {
   .rightFixed {
     top: 12px;
