@@ -9,7 +9,5 @@
       }
     }
   ],
-  "routes": [
-    { "source": "/((?!.*\\..*).*)", "destination": "apps/web/index.html" }
-  ]
+  "routes": [{ "src": "/((?!.*\\..*).*)", "dest": "apps/web/index.html" }]
 }
