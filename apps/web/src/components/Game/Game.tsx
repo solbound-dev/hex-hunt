@@ -22,9 +22,12 @@ import Button from '../Button';
 const Game = () => {
   const { isAuthenticated, isCheckingAuth } = useAuth();
   const [, navigate] = useLocation();
-  if (!isAuthenticated && !isCheckingAuth) {
-    navigate('/login');
-  }
+
+  useEffect(() => {
+    if (!isAuthenticated && !isCheckingAuth) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isCheckingAuth, navigate]);
 
   const { publicKey: walletId } = useWallet();
 

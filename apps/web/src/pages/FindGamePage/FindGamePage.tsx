@@ -19,11 +19,11 @@ const FindGamePage = () => {
     }
   }, [isAuthenticated, isCheckingAuth, navigate]);
 
-  useEffect(() => {
-    if (gameId || gameState) {
-      navigate('/game');
-    }
-  }, [gameId, gameState, navigate]);
+  // useEffect(() => {
+  //   if (gameId || gameState) {
+  //     navigate('/game');
+  //   }
+  // }, [gameId, gameState, navigate]);
 
   console.log('isAuthenticated', isAuthenticated, isCheckingAuth);
 
