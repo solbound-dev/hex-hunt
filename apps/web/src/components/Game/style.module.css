@@ -21,8 +21,8 @@
   box-shadow: 0 2px 12px #232b2b33;
   padding: 20px 28px;
   margin-bottom: 0;
-  min-width: 260px;
-  max-width: 340px;
+  /* min-width: 260px;
+  max-width: 340px; */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -52,8 +52,8 @@
   }
   .gameInfoContainer {
     padding: 12px 10px;
-    min-width: 160px;
-    max-width: 90vw;
+    /* min-width: 160px;
+    max-width: 90vw; */
   }
 }
 
@@ -72,27 +72,42 @@
 }
 
 .canvasContainer {
-  /* justify-content: center;
-  align-items: center;
-  background: #2e3a3a; */
-  /* border: 3px solid #7fa7a6; */
-  /* border-radius: 50%; */
-  /* box-shadow:
-    0 8px 32px #232b2b88,
-    0 2px 16px #7fa7a655; */
-  /* padding: 32px; */
-  margin: 0 auto;
-  transition: box-shadow 0.2s;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
 }
-
-/* .canvasContainer:hover {
-  box-shadow:
-    0 12px 48px #7fa7a6cc,
-    0 4px 24px #232b2b88;
-} */
 
 .rightFixed {
   position: fixed;
   top: 32px;
   right: 32px;
+}
+
+.rel {
+  position: relative;
+}
+
+.shootButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+@media (orientation: landscape) and (max-width: 1000px) {
+  .rightFixed {
+    top: 12px;
+    right: 12px;
+  }
+
+  .gameInfoContainer {
+    padding: 12px 10px;
+    font-size: 12px;
+    gap: 8px;
+
+    h3 {
+      margin: 6px 0;
+    }
+  }
 }

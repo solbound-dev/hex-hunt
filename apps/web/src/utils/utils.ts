@@ -26,11 +26,9 @@ export function setCanvasRef(
 ) {
   const canvas = canvasRef.current;
   canvas!.width = CANVAS_SIZE * 2;
-  // canvas!.height = CANVAS_SIZE * 2;
-  canvas!.height = (CANVAS_SIZE * 2) / 1.6;
+  canvas!.height = (CANVAS_SIZE * 2) / 1.7;
   canvas!.style.width = `${CANVAS_SIZE}px`;
-  // canvas!.style.height = `${CANVAS_SIZE}px`;
-  canvas!.style.height = `${CANVAS_SIZE / 1.6}px`;
+  canvas!.style.height = `${CANVAS_SIZE / 1.7}px`;
   return canvas;
 }
 

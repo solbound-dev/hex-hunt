@@ -152,7 +152,6 @@ const Game = () => {
 
   return (
     <div className={c.gameWrapper} style={{ objectFit: 'cover' }}>
-      {/* <Background /> */}
       <GameStatus
         timeRemaining={timeRemaining}
         madeMove={madeMove}
@@ -161,15 +160,17 @@ const Game = () => {
         walletId={walletId?.toString() || ''}
       />
 
-      <div className={c.rel}>
-        <div className={c.canvasContainer}>
+      {/* <div className={c.rel}> */}
+      <div className={c.canvasContainer}>
+        <div className={c.rel}>
           <canvas
+            className={c.canvas}
             ref={canvasRef}
             onClick={handleCanvasClick}
             onMouseEnter={() => setIsCanvasHovered(true)}
             onMouseLeave={() => setIsCanvasHovered(false)}
           />
-          <div>
+          <div className={c.shootButton}>
             <Button
               disabled={madeMove || !gameState}
               className={c.button}

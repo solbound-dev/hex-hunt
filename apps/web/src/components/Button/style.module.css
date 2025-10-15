@@ -29,3 +29,10 @@
   color: #888;
   cursor: not-allowed;
 }
+
+@media (orientation: landscape) and (max-width: 1000px) {
+  .button {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+}

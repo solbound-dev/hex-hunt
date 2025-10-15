@@ -1,4 +1,9 @@
-export const CANVAS_SIZE = window.innerHeight / 1.1;
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+export const CANVAS_SIZE =
+  height / width > 2160 / 3840 ? height / 1.1 : width / 2;
+
 export const HEX_SIZE = (CANVAS_SIZE / 70) * 5.8;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
@@ -145,8 +150,8 @@ export function inverseIsometricTransformation(
   oy: number,
   hexSize: number,
 ) {
-  const x = 0.5 * ((ox - 6.1 * hexSize) / 0.7 + (oy + 0.1 * hexSize) / 0.35);
-  const y = 0.5 * ((oy + 0.1 * hexSize) / 0.35 - (ox - 6.1 * hexSize) / 0.7);
+  const x = 0.5 * ((ox - 6.1 * hexSize) / 0.7 + (oy + 0.6 * hexSize) / 0.35);
+  const y = 0.5 * ((oy + 0.6 * hexSize) / 0.35 - (ox - 6.1 * hexSize) / 0.7);
 
   return { x, y };
 }

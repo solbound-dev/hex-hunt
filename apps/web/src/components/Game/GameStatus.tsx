@@ -91,7 +91,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
       </div>
       <div className={clsx(c.gameInfoContainer, c.rightFixed)}>
         {gameState?.players.map((p) => (
-          <div
+          <h3
             key={p.walletId}
             style={{
               color: !p.won ? colors[p.playerType] : 'gold',
@@ -100,7 +100,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
             }}>
             {p.playerType} {p.walletId === walletId ? ' (you)' : ''} | {p.cards}{' '}
             / 3{p.won && ' WON!'}
-          </div>
+          </h3>
         ))}
       </div>
     </div>
