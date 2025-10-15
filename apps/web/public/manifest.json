@@ -1,6 +1,6 @@
 {
-  "name": "Hex Hunt",
-  "short_name": "Hex Hunt",
+  "name": "Hextraction",
+  "short_name": "Hextraction",
   "scope": "/",
   "start_url": "/",
   "icons": [
@@ -17,5 +17,5 @@
   ],
   "theme_color": "#000000",
   "background_color": "#000000",
-  "display": "standalone"
+  "display": "fullscreen"
 }

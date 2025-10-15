@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "xyz.hextraction.twa",
+        "sha256_cert_fingerprints": ["84:E2:FA:7D:A7:98:E1:13:83:C4:3C:8C:94:A8:C6:23:E7:5F:DA:72:29:6E:39:F4:ED:C6:CD:64:F6:6E:D4:8C"]
+      }
+    }]

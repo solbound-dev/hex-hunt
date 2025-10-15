@@ -55,7 +55,7 @@ const LoginPage = () => {
       <div className={c.infoWrapper}>
         <h1>HEXTRACTION</h1>
         <p>
-          Hex Hunt is a fast-paced, turn-based strategy game played on a
+          Hextraction is a fast-paced, turn-based strategy game played on a
           shifting hexagonal grid. Each player takes on a unique role—like
           Astronaut, Alien, Robot, or Wizard—and must carefully plan their moves
           to outmaneuver their opponents. The board itself is dynamic, with
@@ -65,7 +65,7 @@ const LoginPage = () => {
           opponents’ choices, secure safe ground, and seize opportunities before
           they vanish. To add tension, every turn has a strict time limit,
           keeping the pace brisk and the pressure high. With its blend of
-          tactical depth and accessibility, Hex Hunt captures the spirit of
+          tactical depth and accessibility, Hextraction captures the spirit of
           classic games like Chess and Battleship, but with a fresh, modern
           twist. It’s easy to learn but endlessly replayable, making it a
           perfect choice for friends who love clever competition.
