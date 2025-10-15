@@ -150,7 +150,9 @@ export class Game {
 
   checkDidPlayerCollectCardAndUpdate(player: Player) {
     if (player.pos.equals(this.cardPos!)) {
-      player.cards++;
+      if (player.cards < 3) {
+        player.cards++;
+      }
       player.lastSeenPos = this.cardPos!;
       this.spawnCard();
       player.justPickedCard = true;
