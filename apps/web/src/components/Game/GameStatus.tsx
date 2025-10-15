@@ -7,6 +7,7 @@ import Button from '../Button';
 import clsx from 'clsx';
 import { useGame } from '../../providers/GameProvider';
 import type { Player } from '../../utils/calculation-utils';
+import { useLocation } from 'wouter';
 
 const getColor = (time: number) => {
   if (time > 5000) return 'lightgreen';
@@ -36,9 +37,17 @@ export const GameStatus: React.FC<GameStatusProps> = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const { gameState, gameId } = useGame();
+  const { gameState, gameId, setGameId, setGameState, setClickedHex } =
+    useGame();
+
+  const [, navigate] = useLocation();
 
   const gameContainsWinner = gameState?.players.some((p) => p.won);
+
+  // let numberOfPlayers = 0;
+  // if (gameState?.players) {
+  //   numberOfPlayers = gameState.players.length;
+  // }
 
   return (
     <div className={c.statusWrapper}>
@@ -67,8 +76,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
             onClick={() => {
               socketRef.current?.emit('start', { gameId: gameId });
               queryClient.invalidateQueries({ queryKey: ['games'] });
-            }}
-            disabled={gameState?.started || !gameId}>
+            }}>
             Start game
           </Button>
         )}
@@ -76,6 +84,10 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           <Button
             onClick={() => {
               socketRef.current?.emit('leaveGame', { gameId });
+              setGameId('');
+              setGameState(null);
+              setClickedHex(null);
+              navigate('/');
             }}>
             Leave
           </Button>

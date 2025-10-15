@@ -68,10 +68,6 @@ export const useInitializeSockets = (
 
     socketRef.current.on('playerLeft', () => {
       toast.error('Player left');
-      setGameId('');
-      setGameState(null);
-      setClickedHex(null);
-      navigate('/');
     });
 
     socketRef.current.on('availableGames', (data) => {

@@ -25,8 +25,6 @@ const FindGamePage = () => {
     }
   }, [gameId, navigate]);
 
-  console.log('isAuthenticated', isAuthenticated, isCheckingAuth);
-
   return (
     <div className={c.pageWrapper}>
       <div className={c.header}>Find game</div>
