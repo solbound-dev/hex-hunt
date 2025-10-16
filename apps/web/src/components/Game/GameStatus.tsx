@@ -58,6 +58,9 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           {Math.round(timeRemaining / 1000)}
         </span>
       )}
+      {!gameState?.started && (
+        <span className={c.timerText}>Waiting for players...</span>
+      )}
       <div className={c.gameInfoContainer}>
         <div className={c.flex}>
           {gameState?.started && !gameState.draw && !gameContainsWinner && (

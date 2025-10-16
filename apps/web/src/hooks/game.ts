@@ -100,6 +100,9 @@ export const useInitializeSockets = (
     socketRef.current.on('gameState', (data) => {
       console.log('Game state updated:', data);
       toast.success(`Move made ${data.moves}`);
+      if ((data.moves + 1) % 8 === 0) {
+        toast.success('Zone contracting on next move!');
+      }
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);

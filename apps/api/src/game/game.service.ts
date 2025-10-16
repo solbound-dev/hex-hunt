@@ -76,7 +76,9 @@ export class GameService {
       game.players.forEach((p) => {
         // if (!p.isShooting && !p.didJustCollide && !p.isDead) {
         if (!p.isShooting && !p.didJustCollide) {
-          p.pos = new Hex(p.pendingMove!.q, p.pendingMove!.r);
+          if (p.pendingMove) {
+            p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
+          }
         }
       });
 
