@@ -59,8 +59,10 @@ export class GameService {
 
     const interval = setInterval(() => {
       game.players.forEach((p) => {
-        if (!p.pendingMove) {
+        if (!p.pendingMove && !p.isDead) {
           p.isDead = true;
+          p.lastSeenPos = new Hex(p.pos.q, p.pos.r);
+          p.diedAtMove = game.moves;
         }
       });
 

@@ -45,6 +45,7 @@ export class Player {
     public isImmune: boolean = false,
     public won: boolean = false,
     public wins: number = 0,
+    public diedAtMove: number | null = null,
   ) {}
 }
 

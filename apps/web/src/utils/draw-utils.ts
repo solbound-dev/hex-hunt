@@ -20,10 +20,11 @@ export const colors = {
 };
 
 type StyleOptions = {
-  strokeStyle: string;
-  lineWidth: number;
+  strokeStyle?: string;
+  lineWidth?: number;
   fillStyle?: string;
   blur?: boolean;
+  globalAlpha?: boolean;
 };
 
 function applyIsometricTransformation(x: number, y: number, hexSize: number) {
@@ -72,11 +73,11 @@ function drawHexIsometric(
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 4;
     ctx.shadowBlur = 30;
-    ctx.shadowColor = styleOptions.strokeStyle;
+    ctx.shadowColor = styleOptions.strokeStyle!;
     ctx.stroke();
   } else {
-    ctx.strokeStyle = styleOptions.strokeStyle;
-    ctx.lineWidth = styleOptions.lineWidth;
+    ctx.strokeStyle = styleOptions.strokeStyle!;
+    ctx.lineWidth = styleOptions.lineWidth!;
     ctx.shadowBlur = 0;
     ctx.stroke();
   }
@@ -146,11 +147,11 @@ export function drawPlayerIsometric(
 
 export function drawLastSeenPlayerIsometric(
   ctx: CanvasRenderingContext2D,
-  hex: Hex,
+  player: Player,
   size: number,
   image: HTMLImageElement,
 ) {
-  const center = hexToPixel(hex);
+  const center = hexToPixel(player.lastSeenPos!);
   const x = center.x;
   const y = center.y;
 
@@ -294,6 +295,7 @@ export function drawDeadPlayerIsometric(
   ctx: CanvasRenderingContext2D,
   deadPlayerPos: Hex,
   image: HTMLImageElement,
+  styleOptions?: StyleOptions,
 ) {
   const center = hexToPixel(deadPlayerPos);
   const x = center.x;
@@ -304,6 +306,11 @@ export function drawDeadPlayerIsometric(
   if (!image) return;
   if (image.complete) {
     const imgSize = image.width;
+    if (styleOptions?.globalAlpha) {
+      ctx.save();
+      ctx.globalAlpha = 0.5;
+    }
+
     ctx.drawImage(
       image,
       ocx - imgSize / 2,
@@ -311,6 +318,7 @@ export function drawDeadPlayerIsometric(
       imgSize,
       imgSize,
     );
+    ctx.restore();
   }
 }
 
@@ -471,12 +479,26 @@ function paintInOrder(
     } else {
       const lastSeenPlayerImage = mapPlayerTypeToImage(sa.type, imgRef);
 
-      drawLastSeenPlayerIsometric(
-        context,
-        asset,
-        HEX_SIZE,
-        lastSeenPlayerImage!,
-      );
+      const player = otherPlayers.find((p) => {
+        const lastSeenPos = new Hex(p.lastSeenPos!.q, p.lastSeenPos!.r);
+        const pos = new Hex(sa.pos.q, sa.pos.r);
+        return lastSeenPos.equals(pos);
+      });
+
+      if (player?.isDead && player.diedAtMove === gameState.moves - 1) {
+        drawDeadPlayerIsometric(context, player.pos!, imgRef.current.skull!, {
+          globalAlpha: true,
+        });
+      } else {
+        if (!player?.isDead) {
+          drawLastSeenPlayerIsometric(
+            context,
+            player!,
+            HEX_SIZE,
+            lastSeenPlayerImage!,
+          );
+        }
+      }
     }
   });
 }

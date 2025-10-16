@@ -16,6 +16,7 @@ export class Player {
     public isShooting: boolean | null = null,
     public isImmune: boolean = false,
     public didJustCollide: boolean = false,
+    public diedAtMove: number | null = null,
   ) {}
 }
 

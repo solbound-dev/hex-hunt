@@ -99,6 +99,8 @@ export class Game {
         }
         if (position.equals(targetPos) && !p.isImmune) {
           p.isDead = true;
+          p.diedAtMove = this.moves;
+          p.lastSeenPos = new Hex(position.q, position.r);
           console.log('dead', p.playerType);
         }
       }
@@ -181,6 +183,8 @@ export class Game {
       if (playerIsInForbiddenZone) {
         console.log(`${p.playerType} died`);
         p.isDead = true;
+        p.diedAtMove = this.moves;
+        p.lastSeenPos = new Hex(p.pos.q, p.pos.r);
       }
     });
 
