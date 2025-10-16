@@ -150,6 +150,9 @@ const Game = () => {
       isShooting: isShooting,
     });
   };
+  const currentPlayer = gameState?.players.find(
+    (p) => p.walletId === walletId?.toString(),
+  );
 
   if (!imgRef) return;
 
@@ -163,7 +166,6 @@ const Game = () => {
         walletId={walletId?.toString() || ''}
       />
 
-      {/* <div className={c.rel}> */}
       <div className={c.canvasContainer}>
         <div className={c.rel}>
           <canvas
@@ -175,10 +177,12 @@ const Game = () => {
           />
           <div className={c.shootButton}>
             <Button
-              disabled={madeMove || !gameState}
+              disabled={madeMove || !gameState || currentPlayer?.isDead}
               className={c.button}
               onClick={() => {
-                if (!madeMove) setIsShooting(!isShooting);
+                if (!madeMove) {
+                  setIsShooting(!isShooting);
+                }
               }}>
               {isShooting ? 'Cancel Shooting' : 'Shoot'}
             </Button>

@@ -51,6 +51,13 @@ export const GameStatus: React.FC<GameStatusProps> = ({
 
   return (
     <div className={c.statusWrapper}>
+      {gameState?.started && !gameState.draw && !gameContainsWinner && (
+        <span
+          className={c.timerText}
+          style={{ color: getColor(timeRemaining) }}>
+          {Math.round(timeRemaining / 1000)}
+        </span>
+      )}
       <div className={c.gameInfoContainer}>
         <div className={c.flex}>
           {gameState?.started && !gameState.draw && !gameContainsWinner && (
@@ -60,13 +67,6 @@ export const GameStatus: React.FC<GameStatusProps> = ({
                 backgroundColor: madeMove ? 'lightgreen' : 'grey',
               }}
             />
-          )}
-          {gameState?.started && !gameState.draw && !gameContainsWinner && (
-            <span
-              className={c.timerText}
-              style={{ color: getColor(timeRemaining) }}>
-              {Math.round(timeRemaining / 1000)}
-            </span>
           )}
         </div>
         <h3>gameId: {gameId}</h3>

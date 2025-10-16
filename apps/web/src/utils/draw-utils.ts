@@ -199,6 +199,7 @@ export function drawAvailableMovesHighlightIsometric(
   pos: Hex,
   grid: Hex[],
   disappearedHexes: Hex[],
+
   size: number,
 ) {
   const positionInstance = new Hex(pos.q, pos.r);
@@ -222,11 +223,29 @@ export function drawShootHighlightIsometric(
   size: number,
 ) {
   pos.neighbors().forEach((n) => {
+    const dir = new Hex(n.q - pos.q, n.r - pos.r);
+    let position = new Hex(pos.q, pos.r);
+    while (
+      isInGrid(
+        new Hex(position.q + dir.q, position.r + dir.r),
+        grid,
+        disappearedHexes,
+      )
+    ) {
+      position = new Hex(position.q + dir.q, position.r + dir.r);
+      drawHexIsometric(ctx, position, size, {
+        strokeStyle: 'white',
+        lineWidth: 1,
+        fillStyle: 'rgba(255, 255, 0, 0.2)',
+      });
+      ctx.stroke();
+    }
+    //draw neighbors
     if (isInGrid(n, grid, disappearedHexes)) {
       drawHexIsometric(ctx, n, size, {
         strokeStyle: 'white',
         lineWidth: 1,
-        fillStyle: 'rgba(255, 255, 0, 100)',
+        fillStyle: 'rgba(255, 255, 0, 0.5)',
       });
       ctx.stroke();
     }
@@ -338,16 +357,16 @@ export function repaint(
 
   drawGridIsometric(context, generateGrid(GRID_RADIUS));
 
-  if (!clickedHex) {
+  const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
+  if (!currentPlayer) return;
+
+  if (!clickedHex && !currentPlayer?.isDead) {
     drawHexIsometric(context, hoveredHex, HEX_SIZE, {
       strokeStyle: `rgba(255,255,0,1)`,
       lineWidth: 4,
       blur: true,
     });
   }
-
-  const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
-  if (!currentPlayer) return;
 
   const otherPlayers = gameState.players.filter((p) => p.walletId !== walletId);
 
@@ -403,7 +422,7 @@ function paintInOrder(
   isCanvasHovered: boolean,
   clickedHex: Hex | null,
 ) {
-  if (isCanvasHovered && !clickedHex) {
+  if (isCanvasHovered && !clickedHex && !currentPlayer.isDead) {
     drawAvailableMovesHighlightIsometric(
       context,
       currentPlayer.pos!,
