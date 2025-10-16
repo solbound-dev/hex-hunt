@@ -1,8 +1,17 @@
+.wrapper {
+  height: 100vh;
+  overflow: hidden;
+}
+
 .pageWrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: #232b2b;
+  min-height: 120vh;
+  /* background: #232b2b; */
+  background-image: url('../../assets/background-hex.png');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
   font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
   align-items: flex-start;
 }
@@ -66,6 +75,26 @@
 
 .rel {
   position: relative;
+}
+
+.fixedRight {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+}
+
+.infoContainer {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  padding: 20px;
+  background-color: #232b2b;
+  transition: right 0.3s ease-in-out;
+}
+
+.open {
+  right: 0;
 }
 
 @media (orientation: landscape) and (max-width: 1000px) {

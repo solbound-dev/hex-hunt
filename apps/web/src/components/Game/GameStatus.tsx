@@ -44,10 +44,10 @@ export const GameStatus: React.FC<GameStatusProps> = ({
 
   const gameContainsWinner = gameState?.players.some((p) => p.won);
 
-  // let numberOfPlayers = 0;
-  // if (gameState?.players) {
-  //   numberOfPlayers = gameState.players.length;
-  // }
+  let numberOfPlayers = 0;
+  if (gameState?.players) {
+    numberOfPlayers = gameState.players.length;
+  }
 
   return (
     <div className={c.statusWrapper}>
@@ -70,7 +70,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           )}
         </div>
         <h3>gameId: {gameId}</h3>
-        {!gameState?.started && (
+        {!gameState?.started && numberOfPlayers >= 2 && (
           <Button
             className={c.button}
             onClick={() => {
@@ -100,7 +100,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
             style={{
               color: !p.won ? colors[p.playerType] : 'gold',
               textDecoration: getTextDecoration(p, walletId),
-              fontSize: p.won ? '24px' : '20px',
+              fontSize: p.won ? '20px' : '16px',
             }}>
             {p.playerType} {p.walletId === walletId ? ' (you)' : ''} | {p.cards}{' '}
             / 3{p.won && ' WON!'}
