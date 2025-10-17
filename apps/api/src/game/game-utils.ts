@@ -4,7 +4,7 @@ import { Hex } from './Hex';
 
 export const MAX_PLAYERS = 4;
 export const START_GRID_RADIUS = 3;
-export const MOVE_DURATION_IN_SECONDS = 20;
+export const MOVE_DURATION_IN_SECONDS = 10;
 
 export function isNeighbor(hex: Hex, other: Hex) {
   return hex.neighbors().some((n) => n.equals(other));
@@ -68,9 +68,6 @@ export function updateAndEmitGameState(
   }
 
   websocketServer.to(gameId).emit('gameState', game);
-  game.moveExpiryDate = new Date(
-    new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
-  ).toISOString();
   game.players.forEach((p) => {
     if (!p.justPickedCard) {
       p.isImmune = false;

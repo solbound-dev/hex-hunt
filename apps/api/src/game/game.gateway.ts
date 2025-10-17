@@ -277,27 +277,27 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const game = this.gameService.updateGame(data, token);
+    const game = this.gameService.updateGame(data, token, this.server);
     if (!game) return;
 
     // this.server.to(data.gameId).emit('gameState', game);
   }
 
-  @SubscribeMessage('restartGame')
-  handleRestartGame(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { gameId: string },
-  ) {
-    const cookie = client.handshake.headers.cookie;
-    const token = parse(cookie || '')?.accessToken;
-    if (!token) {
-      //TODO: nekako hendlat neki emit il nesto
-      return;
-    }
-    const game = this.gameService.restartGame(client.id, data.gameId, token);
+  // @SubscribeMessage('restartGame')
+  // handleRestartGame(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() data: { gameId: string },
+  // ) {
+  //   const cookie = client.handshake.headers.cookie;
+  //   const token = parse(cookie || '')?.accessToken;
+  //   if (!token) {
+  //     //TODO: nekako hendlat neki emit il nesto
+  //     return;
+  //   }
+  //   const game = this.gameService.restartGame(client.id, data.gameId, token);
 
-    if (!game) return;
+  //   if (!game) return;
 
-    this.server.to(data.gameId).emit('gameStart', game.serialize());
-  }
+  //   this.server.to(data.gameId).emit('gameStart', game.serialize());
+  // }
 }
