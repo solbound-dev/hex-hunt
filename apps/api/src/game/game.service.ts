@@ -6,7 +6,6 @@ import {
   isNeighbor,
   MAX_PLAYERS,
   MOVE_DURATION_IN_SECONDS,
-  START_GRID_RADIUS,
 } from './game-utils';
 import { Player, PlayerType } from './Player';
 import { Hex } from './Hex';
@@ -52,62 +51,64 @@ export class GameService {
 
     game.started = true;
     game.spawnCard();
-    game.moveExpiryDate = new Date(
-      new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
-    ).toISOString();
+    // game.moveExpiryDate = new Date(
+    //   new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
+    // ).toISOString();
     game.players.forEach((p) => (p.pendingMove = null));
 
-    const interval = setInterval(() => {
-      game.players.forEach((p) => {
-        if (!p.pendingMove && !p.isDead) {
-          p.isDead = true;
-          p.lastSeenPos = new Hex(p.pos.q, p.pos.r);
-          p.diedAtMove = game.moves;
-        }
-      });
+    // const interval = setInterval(() => {
+    //   game.players.forEach((p) => {
+    //     if (!p.pendingMove && !p.isDead) {
+    //       p.isDead = true;
+    //       p.lastSeenPos = new Hex(p.pos.q, p.pos.r);
+    //       p.diedAtMove = game.moves;
+    //     }
+    //   });
 
-      game.players.forEach((p) => {
-        if (p.isShooting) {
-          p.lastSeenPos = p.pos;
-          game.shootInDirection(p.pendingMove!, p);
-        }
-      });
+    //   game.players.forEach((p) => {
+    //     if (p.isShooting) {
+    //       p.lastSeenPos = p.pos;
+    //       game.shootInDirection(p.pendingMove!, p);
+    //     }
+    //   });
 
-      game.players.forEach((p) => game.checkCollisionAndUpdate(p));
+    //   game.players.forEach((p) => game.checkCollisionAndUpdate(p));
 
-      game.players.forEach((p) => {
-        // if (!p.isShooting && !p.didJustCollide && !p.isDead) {
-        if (!p.isShooting && !p.didJustCollide) {
-          if (p.pendingMove) {
-            p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
-          }
-        }
-      });
+    //   game.players.forEach((p) => {
+    //     // if (!p.isShooting && !p.didJustCollide && !p.isDead) {
+    //     if (!p.isShooting && !p.didJustCollide) {
+    //       if (p.pendingMove) {
+    //         p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
+    //       }
+    //     }
+    //   });
 
-      game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
+    //   game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
 
-      game.updateState();
+    //   game.updateState();
 
-      const gameHasWinner = game.players.some((p) => p.won);
+    //   const gameHasWinner = game.players.some((p) => p.won);
 
-      if (game.draw || gameHasWinner) {
-        clearInterval(interval);
-      }
+    //   if (game.draw || gameHasWinner) {
+    //     clearInterval(interval);
+    //   }
 
-      console.log('\nfinal state:');
-      game.players.forEach((p) =>
-        console.log(
-          '-',
-          p.walletId.slice(0, 6),
-          p.playerType,
-          '\n  ',
-          'pos: ',
-          p.pos,
-        ),
-      );
-      console.log('------------------');
-      server.to(gameId).emit('gameState', game.serialize());
-    }, MOVE_DURATION_IN_SECONDS * 1000);
+    //   console.log('\nfinal state:');
+    //   game.players.forEach((p) =>
+    //     console.log(
+    //       '-',
+    //       p.walletId.slice(0, 6),
+    //       p.playerType,
+    //       '\n  ',
+    //       'pos: ',
+    //       p.pos,
+    //     ),
+    //   );
+    //   console.log('------------------');
+    //   server.to(gameId).emit('gameState', game.serialize());
+    // }, MOVE_DURATION_IN_SECONDS * 1000);
+
+    const interval = this.getInterval(gameId, game, server);
 
     game.interval = interval;
 
@@ -239,6 +240,7 @@ export class GameService {
       didRunOutOfTime: boolean;
     },
     tokenString: string,
+    server: Server,
   ) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
@@ -297,50 +299,132 @@ export class GameService {
     });
 
     game.players.forEach((p) => (p.justPickedCard = false));
+
+    const waitingForMoves = game.players.some(
+      (p) => p.pendingMove === null && !p.isDead,
+    );
+
+    if (!waitingForMoves) {
+      this.calculateTurnOutcome(game);
+
+      // const gameHasWinner = game.players.some((p) => p.won);
+
+      server.to(data.gameId).emit('gameState', game.serialize());
+
+      if (game.interval) {
+        clearInterval(game.interval);
+      }
+      const interval = this.getInterval(data.gameId, game, server);
+      game.interval = interval;
+    }
   }
 
-  restartGame(clientId: string, gameId: string, tokenString: string) {
-    const token = JSON.parse(
-      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    ) as Token;
-    if (!token) return;
-
-    const game = this.games[gameId];
-    if (!game) return null;
-
-    const gameContainsClient = game.players.some(
-      (p) => p.walletId === token.walletId,
-    );
-    if (!gameContainsClient) return null;
-
-    const gameContainsWinner = game.players.some((p) => p.won);
-    if (!gameContainsWinner) return null;
-
-    game.moveExpiryDate = '';
-    game.disappearedHexes = [];
-    game.warningHexes = [];
-    game.moves = 0;
-    game.cardPos = null;
-    game.currentRadius = START_GRID_RADIUS;
-
+  calculateTurnOutcome(game: Game) {
     game.players.forEach((p) => {
-      p.pos = game.getAvailablePlayerPos();
-      p.lastSeenPos = p.pos;
-      p.won = false;
-      p.cards = 0;
-      p.pendingMove = null;
-      p.isDead = false;
-      p.justPickedCard = false;
-      p.isShooting = null;
-      p.isImmune = false;
-      p.didJustCollide = false;
+      if (p.isShooting) {
+        p.lastSeenPos = p.pos;
+        game.shootInDirection(p.pendingMove!, p);
+      }
     });
 
-    game.spawnCard();
-    game.moveExpiryDate = new Date(
-      new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
-    ).toISOString();
+    game.players.forEach((p) => game.checkCollisionAndUpdate(p));
 
-    return game;
+    game.players.forEach((p) => {
+      // if (!p.isShooting && !p.didJustCollide && !p.isDead) {
+      if (!p.isShooting && !p.didJustCollide) {
+        if (p.pendingMove) {
+          p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
+        }
+      }
+    });
+
+    game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
+
+    game.updateState();
   }
+
+  getInterval(gameId: string, game: Game, server: Server) {
+    const gameContainsWinner = game.players.some((p) => p.won);
+    if (gameContainsWinner || game.draw) return null;
+
+    const interval = setInterval(() => {
+      game.players.forEach((p) => {
+        if (!p.pendingMove && !p.isDead) {
+          // p.isDead = true;
+          p.pendingMove = p.pos;
+          p.lastSeenPos = new Hex(p.pos.q, p.pos.r);
+          // p.diedAtMove = game.moves;
+        }
+      });
+
+      this.calculateTurnOutcome(game);
+
+      const gameHasWinner = game.players.some((p) => p.won);
+
+      if (game.draw || gameHasWinner) {
+        clearInterval(interval);
+      }
+
+      console.log('\nfinal state:');
+      game.players.forEach((p) =>
+        console.log(
+          '-',
+          p.walletId.slice(0, 6),
+          p.playerType,
+          '\n  ',
+          'pos: ',
+          p.pos,
+        ),
+      );
+      console.log('------------------');
+      server.to(gameId).emit('gameState', game.serialize());
+    }, MOVE_DURATION_IN_SECONDS * 1000);
+
+    return interval;
+  }
+
+  // restartGame(clientId: string, gameId: string, tokenString: string) {
+  //   const token = JSON.parse(
+  //     Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+  //   ) as Token;
+  //   if (!token) return;
+
+  //   const game = this.games[gameId];
+  //   if (!game) return null;
+
+  //   const gameContainsClient = game.players.some(
+  //     (p) => p.walletId === token.walletId,
+  //   );
+  //   if (!gameContainsClient) return null;
+
+  //   const gameContainsWinner = game.players.some((p) => p.won);
+  //   if (!gameContainsWinner) return null;
+
+  //   game.moveExpiryDate = '';
+  //   game.disappearedHexes = [];
+  //   game.warningHexes = [];
+  //   game.moves = 0;
+  //   game.cardPos = null;
+  //   game.currentRadius = START_GRID_RADIUS;
+
+  //   game.players.forEach((p) => {
+  //     p.pos = game.getAvailablePlayerPos();
+  //     p.lastSeenPos = p.pos;
+  //     p.won = false;
+  //     p.cards = 0;
+  //     p.pendingMove = null;
+  //     p.isDead = false;
+  //     p.justPickedCard = false;
+  //     p.isShooting = null;
+  //     p.isImmune = false;
+  //     p.didJustCollide = false;
+  //   });
+
+  //   game.spawnCard();
+  //   game.moveExpiryDate = new Date(
+  //     new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
+  //   ).toISOString();
+
+  //   return game;
+  // }
 }
