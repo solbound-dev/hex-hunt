@@ -430,7 +430,14 @@ function paintInOrder(
   isCanvasHovered: boolean,
   clickedHex: Hex | null,
 ) {
-  if (isCanvasHovered && !clickedHex && !currentPlayer.isDead) {
+  const gameContainsWinner = gameState.players.some((p) => p.won);
+
+  if (
+    isCanvasHovered &&
+    !clickedHex &&
+    !currentPlayer.isDead &&
+    !gameContainsWinner
+  ) {
     drawAvailableMovesHighlightIsometric(
       context,
       currentPlayer.pos!,
