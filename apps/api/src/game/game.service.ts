@@ -342,7 +342,6 @@ export class GameService {
   //   const gameContainsWinner = game.players.some((p) => p.won);
   //   if (!gameContainsWinner) return null;
 
-  //   game.moveExpiryDate = '';
   //   game.disappearedHexes = [];
   //   game.warningHexes = [];
   //   game.moves = 0;
@@ -363,9 +362,6 @@ export class GameService {
   //   });
 
   //   game.spawnCard();
-  //   game.moveExpiryDate = new Date(
-  //     new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
-  //   ).toISOString();
 
   //   return game;
   // }

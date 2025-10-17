@@ -8,7 +8,6 @@ export class Game {
     public isPrivate: boolean,
     public interval: NodeJS.Timeout | null = null,
     public createdAt: string = new Date().toISOString(),
-    // public moveExpiryDate: string = '',
     public disappearedHexes: Hex[] = [],
     public warningHexes: Hex[] = [],
     public moves: number = 0,

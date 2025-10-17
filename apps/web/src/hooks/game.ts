@@ -111,7 +111,6 @@ export const useInitializeSockets = (
 
     socketRef.current.on('reconnect', (data) => {
       console.log('now', new Date().toISOString());
-      console.log('game', data.game.moveExpiryDate);
       setGameId(data.gameId);
       setGameState(data.game);
     });
