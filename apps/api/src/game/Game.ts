@@ -76,7 +76,7 @@ export class Game {
   }
 
   shootInDirection(directionHex: Hex, shooter: Player) {
-    // const RANGE = 3;
+    const RANGE = 3;
 
     this.players.forEach((p) => {
       if (p.walletId === shooter.walletId) return;
@@ -93,7 +93,7 @@ export class Game {
         directionHex.r - current.r,
       );
       let position = new Hex(current.q, current.r);
-      while (this.isInGrid(position)) {
+      while (current.distanceTo(position) < RANGE && this.isInGrid(position)) {
         position = new Hex(position.q + dir.q, position.r + dir.r);
         if (position.equals(this.cardPos!)) {
           this.spawnCard();
@@ -183,10 +183,12 @@ export class Game {
       );
 
       if (playerIsInForbiddenZone) {
-        console.log(`${p.playerType} died`);
-        p.isDead = true;
-        p.diedAtMove = this.moves;
-        p.lastSeenPos = new Hex(p.pos.q, p.pos.r);
+        if (!p.isDead) {
+          console.log(`${p.playerType} died`);
+          p.isDead = true;
+          p.diedAtMove = this.moves - 1;
+          p.lastSeenPos = new Hex(p.pos.q, p.pos.r);
+        }
       }
     });
 
