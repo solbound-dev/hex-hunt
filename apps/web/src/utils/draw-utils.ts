@@ -223,10 +223,13 @@ export function drawShootHighlightIsometric(
   disappearedHexes: Hex[],
   size: number,
 ) {
+  const RANGE = 3;
+
   pos.neighbors().forEach((n) => {
     const dir = new Hex(n.q - pos.q, n.r - pos.r);
     let position = new Hex(pos.q, pos.r);
     while (
+      pos.distanceTo(position) < RANGE &&
       isInGrid(
         new Hex(position.q + dir.q, position.r + dir.r),
         grid,

@@ -76,6 +76,8 @@ export class Game {
   }
 
   shootInDirection(directionHex: Hex, shooter: Player) {
+    // const RANGE = 3;
+
     this.players.forEach((p) => {
       if (p.walletId === shooter.walletId) return;
 
