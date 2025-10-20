@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "builds": [
     {
       "src": "apps/web/package.json",
@@ -9,5 +9,7 @@
       }
     }
   ],
-  "routes": [{ "src": "/((?!.*\\.[^/]+$).*)", "dest": "index.html" }]
+  "rewrites": [
+    { "source": "/((?!.*\\.[^/]+$).*)", "destination": "/index.html" }
+  ]
 }
