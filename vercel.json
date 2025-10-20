@@ -10,7 +10,7 @@
     }
   ],
   "routes": [
-    { "src": "/assets/(.*)", "dest": "apps/web/assets/$1" },
-    { "src": "/(.*)", "dest": "apps/web/index.html" }
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
