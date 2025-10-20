@@ -11,6 +11,34 @@
   ],
   "routes": [
     { "src": "/assets/(.*)", "dest": "apps/web/assets/$1" },
+    { "src": "/\\.well-known/(.*)", "dest": "apps/web/dist/.well-known/$1" },
+    {
+      "src": "/android-chrome-192x192\\.png",
+      "dest": "apps/web/dist/android-chrome-192x192.png"
+    },
+    {
+      "src": "/android-chrome-512x512\\.png",
+      "dest": "apps/web/dist/android-chrome-512x512.png"
+    },
+    {
+      "src": "/apple-touch-icon\\.png",
+      "dest": "apps/web/dist/apple-touch-icon.png"
+    },
+    {
+      "src": "/favicon-16x16\\.png",
+      "dest": "apps/web/dist/favicon-16x16.png"
+    },
+    {
+      "src": "/favicon-32x32\\.png",
+      "dest": "apps/web/dist/favicon-32x32.png"
+    },
+    { "src": "/favicon\\.ico", "dest": "apps/web/dist/favicon.ico" },
+    { "src": "/manifest\\.json", "dest": "apps/web/dist/manifest.json" },
+    {
+      "src": "/service-worker\\.js",
+      "dest": "apps/web/dist/service-worker.js"
+    },
+
     { "src": "/(.*)", "dest": "apps/web/index.html" }
   ]
 }
