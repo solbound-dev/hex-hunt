@@ -2,9 +2,12 @@ import WinnerCard from '../../components/WinnerCard';
 import c from './style.module.css';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { ConnectService } from '../../api/auth/ConnectService';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+// import { WalletConnectButton } from '@solana/wallet-adapter-react-ui';
+
 import useCheckAuth from '../../hooks/useCheckAuth';
 import Button from '../../components/Button';
+import WalletConnectButton from '../../components/WalletConnectButton';
+import { useState } from 'react';
 
 const winners = [
   { id: '88egrVzK5b4cBYJZrNvACPncxtYmRixcmfS5DsFwCDc3', amount: 5 },
@@ -12,14 +15,19 @@ const winners = [
   { id: '88egrVzK5b4cBYJZrNvACPncxtYmRixcmfS5DsFwCDc3', amount: 5 },
 ];
 const LoginPage = () => {
+  const [isWalletListOpen, setIsWalletListOpen] = useState(false);
   const { publicKey, signMessage } = useWallet();
   useCheckAuth();
 
   return (
     <div className={c.pageWrapper}>
       <div className={c.walletMultiButton}>
-        <WalletMultiButton />
-        {publicKey && (
+        {/* <WalletMultiButton /> */}
+        <WalletConnectButton
+          isWalletListOpen={isWalletListOpen}
+          setIsWalletListOpen={setIsWalletListOpen}
+        />
+        {/* {publicKey && (
           <Button
             className={c.button}
             onClick={async () => {
@@ -50,7 +58,7 @@ const LoginPage = () => {
             }}>
             Login with wallet
           </Button>
-        )}
+        )} */}
       </div>
       <div className={c.infoWrapper}>
         <h1>HEXTRACTION</h1>
