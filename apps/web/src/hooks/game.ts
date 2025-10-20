@@ -108,7 +108,7 @@ export const useInitializeSockets = (
       setMadeMove(false);
       setClickedHex(null);
     });
-
+    //
     socketRef.current.on('reconnect', (data) => {
       console.log('now', new Date().toISOString());
       setGameId(data.gameId);
