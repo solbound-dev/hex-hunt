@@ -2,9 +2,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 1170px;
+  /* min-height: 1170px; */
   position: relative;
-  height: 1170px;
+  height: 100vh;
   background-image: url('../../assets/loading-background.png');
   background-position: center center;
   background-repeat: no-repeat;

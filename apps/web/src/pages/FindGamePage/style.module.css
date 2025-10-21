@@ -88,6 +88,7 @@
   left: 50%;
   transform: translate(-50%, 100%);
   transition: all 0.3s ease-in-out;
+  width: 100vw;
 }
 
 .open {
@@ -96,6 +97,8 @@
 
 .rulesWrapper {
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .infoInnerWrapper {

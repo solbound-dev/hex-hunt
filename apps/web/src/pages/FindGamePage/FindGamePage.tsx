@@ -141,9 +141,12 @@ const FindGamePage = () => {
         <br />
         <Button onClick={() => setShowInfo(true)}>Rules</Button>
       </div>{' '} */}
-      <div className={clsx(c.infoContainer, { [c.open]: showInfo })}>
+
+      <div
+        className={clsx(c.infoContainer, { [c.open]: showInfo })}
+        onClick={() => setShowInfo(false)}>
         <div className={c.rulesWrapper}>
-          <img src={RulesBackground} alt='' />
+          <img className={c.rulesPaper} src={RulesBackground} alt='' />
           <div className={c.infoInnerWrapper}>
             <h2 className={c.rulesTitle}>Rules</h2>
             <ul>
