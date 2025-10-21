@@ -4,7 +4,6 @@ import robotSrc from '../assets/robot.png';
 import wizardSrc from '../assets/wizard.png';
 import cardSrc from '../assets/card.png';
 import skullSrc from '../assets/skull.png';
-import backgroundRef from '../assets/background-11.png';
 
 import { CANVAS_SIZE, Hex } from './calculation-utils';
 import type { ImgRef } from '../hooks/game';
@@ -13,7 +12,6 @@ export function setBackgroundImage(
   backgroundImgRef: React.RefObject<HTMLImageElement | null>,
 ) {
   const background = new Image();
-  background.src = backgroundRef;
   background.width = CANVAS_SIZE;
   background.height = CANVAS_SIZE;
   background.onload = () => {

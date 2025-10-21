@@ -8,3 +8,13 @@ body {
   background: #111;
   color: #fff;
 }
+
+@font-face {
+  font-family: ari-display;
+  src: url('./assets/fonts/ari-w9500-display.ttf');
+}
+
+@font-face {
+  font-family: ari-condensed-display;
+  src: url('./assets/fonts/ari-w9500-condensed-display.ttf');
+}
