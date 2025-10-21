@@ -1,0 +1,45 @@
+import clsx from 'clsx';
+import c from './style.module.css';
+import type { ReactNode } from 'react';
+
+interface Props {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  children: ReactNode;
+}
+
+const Modal: React.FC<Props> = ({ isOpen, setIsOpen, children }) => {
+  return (
+    <>
+      <div
+        className={clsx(c.modalBackground, {
+          [c.active]: isOpen,
+        })}
+        onClick={() => setIsOpen(false)}></div>
+      <div>
+        <div className={clsx(c.modalContainer, { [c.active]: isOpen })}>
+          {children}
+          {/* <h2 className={c.modalTitle}>
+            Select a wallet on Solana to continue...
+          </h2>
+          <ul className={c.ul}>
+            <li className={c.li}>
+              <Button
+                className={c.modalButton}
+                onClick={() => handleWalletClick()}>
+                <img
+                  className={c.walletIcon}
+                  src={SolflareIcon}
+                  alt='solflare'
+                />{' '}
+                <p className={c.walletName}>Solflare</p>
+              </Button>
+            </li>
+          </ul> */}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Modal;

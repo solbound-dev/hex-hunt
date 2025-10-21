@@ -12,7 +12,6 @@ export function setBackgroundImage(
   backgroundImgRef: React.RefObject<HTMLImageElement | null>,
 ) {
   const background = new Image();
-  background.src = backgroundRef;
   background.width = CANVAS_SIZE;
   background.height = CANVAS_SIZE;
   background.onload = () => {

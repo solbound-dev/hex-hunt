@@ -1,0 +1,73 @@
+.modalBackground {
+  width: 100vw;
+  height: 100vh;
+  opacity: 0;
+  background-color: black;
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.modalBackground.active {
+  opacity: 0.3;
+  pointer-events: auto;
+}
+
+.modalContainer {
+  width: 503px;
+  padding: 32px;
+  background: #f2e2b7;
+  z-index: 10;
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.modalContainer.active {
+  opacity: 1;
+}
+
+.modalButton {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: #1a1f2c;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%;
+  padding: 8px;
+  background: rgba(27, 31, 45, 0.1);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.modalButton:hover {
+  border-bottom: 2px solid black;
+}
+
+.walletName {
+  margin: 0;
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #1a1f2c;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%;
+}
+
+.walletIcon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}

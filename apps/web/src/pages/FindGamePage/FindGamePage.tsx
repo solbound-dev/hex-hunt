@@ -31,7 +31,7 @@ const FindGamePage = () => {
     <div className={c.wrapper}>
       <div className={c.pageWrapper}>
         <div className={c.header}>Find game</div>
-        <div className={c.buttonGroup}>
+        {/* <div className={c.buttonGroup}>
           <Button
             onClick={() => {
               socketRef.current?.disconnect();
@@ -77,8 +77,8 @@ const FindGamePage = () => {
                 </Button>
               </div>
             )}
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
         <div className={c.fixedRight}>
           <Button onClick={() => logoutAndDisconnect()}>Logout</Button>
           <br />
