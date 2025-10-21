@@ -42,3 +42,4 @@ void bootstrap();
 //mrzin kompjutere
 //
 //
+//
