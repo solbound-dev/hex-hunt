@@ -2,7 +2,6 @@ import { useLocation } from 'wouter';
 import { useAuth } from '../../providers/AuthProvider';
 import { useGame } from '../../providers/GameProvider';
 import { useEffect, useState } from 'react';
-import Button from '../../components/Button';
 import c from './style.module.css';
 import clsx from 'clsx';
 import Modal from '../../components/Modal';
@@ -17,7 +16,6 @@ const FindGamePage = () => {
   const { isAuthenticated, isCheckingAuth, logoutAndDisconnect } = useAuth();
   const { socketRef, gameId } = useGame();
   const [privateGameId, setPrivateGameId] = useState('');
-  const [showPrivateGameInput, setShowPrivateGameInput] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
   const [, navigate] = useLocation();
@@ -81,66 +79,34 @@ const FindGamePage = () => {
               name='Host private game'></ModalButton>
           </li>
           <li className={c.li}>
-            <ModalButton
-              icon={LockIcon}
-              iconSize={20}
-              name='Join private game'></ModalButton>
-          </li>
-        </ul>
-      </Modal>
-      {/* <div className={c.buttonGroup}>
-          <Button
-            onClick={() => {
-              socketRef.current?.disconnect();
-              socketRef.current?.connect();
-              socketRef.current?.emit('quickJoin', { tier: 1 });
-              navigate('/game');
-            }}>
-            Quick match
-          </Button>
-          <Button
-            onClick={() => {
-              socketRef.current?.disconnect();
-              socketRef.current?.connect();
-              socketRef.current?.emit('hostPrivateGame', { tier: 1 });
-              navigate('/game');
-            }}>
-            Host private game
-          </Button>
-          <div className={c.rel}>
-            <Button onClick={() => setShowPrivateGameInput((prev) => !prev)}>
-              Join private game
-            </Button>
-            {showPrivateGameInput && (
-              <div className={c.inputWrapper}>
+            <div className={c.inputWrapper}>
+              <div className={c.flexAlignCenter}>
+                <img className={c.mr8} src={LockIcon} alt='' />
                 <input
                   className={c.input}
-                  placeholder='gameId'
+                  placeholder='Join private game'
                   value={privateGameId}
                   onChange={(e) => setPrivateGameId(e.target.value)}
                 />
-                <Button
-                  onClick={() => {
-                    socketRef.current?.disconnect();
-                    socketRef.current?.connect();
-                    socketRef.current?.emit('joinPrivateGame', {
-                      gameId: privateGameId,
-                      tier: 1,
-                      isPrivate: true,
-                    });
-                    navigate('/game');
-                  }}>
-                  Join
-                </Button>
               </div>
-            )}
-          </div> */}
-      {/* </div> */}
-      {/* <div className={c.fixedRight}>
-        <Button onClick={() => logoutAndDisconnect()}>Logout</Button>
-        <br />
-        <Button onClick={() => setShowInfo(true)}>Rules</Button>
-      </div>{' '} */}
+              <button
+                className={c.joinPrivateGameButton}
+                onClick={() => {
+                  socketRef.current?.disconnect();
+                  socketRef.current?.connect();
+                  socketRef.current?.emit('joinPrivateGame', {
+                    gameId: privateGameId,
+                    tier: 1,
+                    isPrivate: true,
+                  });
+                  navigate('/game');
+                }}>
+                Join
+              </button>
+            </div>
+          </li>
+        </ul>
+      </Modal>
 
       <div
         className={clsx(c.infoContainer, { [c.open]: showInfo })}

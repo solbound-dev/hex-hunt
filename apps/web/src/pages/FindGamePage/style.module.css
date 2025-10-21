@@ -41,35 +41,49 @@
 }
 
 .inputWrapper {
-  margin-top: 18px;
-  background: #2e3a3a;
-  padding: 18px 24px;
-  border-radius: 12px;
-  border: 2px solid #7fa7a6;
-  box-shadow: 0 2px 12px 0 #232b2b33;
   display: flex;
   align-items: center;
-  gap: 12px;
-  position: absolute;
-  right: -100%;
-  bottom: -200%;
+  width: 100%;
+  color: #1a1f2c;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%;
+  padding: 8px;
+  background: rgba(27, 31, 45, 0.1);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  justify-content: space-between;
+}
+
+.flexAlignCenter {
+  display: flex;
+  align-items: center;
+}
+
+.mr8 {
+  margin-right: 8px;
 }
 
 .input {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid #7fa7a6;
-  background: #232b2b;
-  color: #e0e7c3;
-  font-size: 1rem;
-  font-family: 'Trebuchet MS', sans-serif;
+  height: 28px;
+  border: none;
+  background: #f2e2b7;
+  padding-left: 8px;
 }
 
-.joinButton:hover {
-  background: #e0e7c3;
-  color: #232b2b;
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 16px #232b2b22;
+.joinPrivateGameButton {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #1b1f2d;
+  color: #1b1f2d;
+  cursor: pointer;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 140%;
 }
 
 .rel {
