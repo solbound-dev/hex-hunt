@@ -13,6 +13,8 @@ RUN turbo prune --scope=api --docker
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
 RUN apk add --no-cache libc6-compat
+RUN corepack enable
+
 WORKDIR /app
 
 COPY .gitignore .gitignore
