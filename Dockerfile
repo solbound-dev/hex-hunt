@@ -24,7 +24,7 @@ RUN yarn install --immutable && yarn cache clean
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN yarn turbo run build --filter=api...
+RUN yarn turbo run build
 
 FROM base AS runner
 WORKDIR /app
