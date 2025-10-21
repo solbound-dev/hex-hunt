@@ -7,14 +7,37 @@
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
-  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
+  font-family: 'Trebuchet MS', sans-serif;
   align-items: flex-start;
+  overflow-y: hidden;
 }
 
 .navigation {
   position: fixed;
   top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 770px;
+  padding: 16px;
+  padding-bottom: 14px;
   background: #1b1f2d;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid#f2e2b7;
+}
+
+.navigationText {
+  font-family: 'ari-display';
+  color: #f2e2b7;
+  font-size: 20px;
+}
+
+.logo {
+  height: 42px;
+  width: auto;
+  margin-right: 12px;
 }
 
 .inputWrapper {
@@ -39,7 +62,7 @@
   background: #232b2b;
   color: #e0e7c3;
   font-size: 1rem;
-  font-family: 'VT323', 'monospace', sans-serif;
+  font-family: 'Trebuchet MS', sans-serif;
 }
 
 .joinButton:hover {
@@ -61,16 +84,41 @@
 
 .infoContainer {
   position: fixed;
-  top: 0;
-  right: -300px;
-  width: 300px;
-  padding: 20px;
-  background-color: #232b2b;
-  transition: right 0.3s ease-in-out;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 100%);
+  transition: all 0.3s ease-in-out;
 }
 
 .open {
-  right: 0;
+  transform: translate(-50%, 0%);
+}
+
+.rulesWrapper {
+  position: relative;
+}
+
+.infoInnerWrapper {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 140px;
+}
+
+.rulesTitle {
+  color: #1b1f2d;
+  text-align: left;
+  font-family: 'ari-display';
+  font-size: 64px;
+  font-style: normal;
+  font-weight: 400;
+  width: 490px;
+  margin: 0;
 }
 
 @media (orientation: landscape) and (max-width: 1000px) {
@@ -99,4 +147,59 @@
   list-style-type: none;
   padding: 0;
   margin-bottom: 8px;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.rulesButton {
+  color: #f2e2b7;
+  text-align: center;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  margin-right: 24px;
+  cursor: pointer;
+}
+
+.rulesButton.active {
+  border-bottom: 1px solid #f2e2b7;
+}
+
+.logoutButton {
+  padding: 8px;
+  color: #f2e2b7;
+  text-align: center;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  margin-right: 24px;
+  background-color: #e33e3f;
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.rulesText {
+  color: #1b1f2d;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 140%;
+  width: 490px;
 }
