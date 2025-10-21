@@ -1,3 +1,6 @@
+# At the top of Dockerfile
+ARG CACHEBUSTER=1
+
 FROM node:18-alpine
 # TODO
 # LABEL org.opencontainers.image.source https://github.com/dump-hr/futsal-app

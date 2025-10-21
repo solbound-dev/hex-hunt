@@ -37,3 +37,5 @@ async function bootstrap() {
 }
 
 void bootstrap();
+
+//force rebuild
