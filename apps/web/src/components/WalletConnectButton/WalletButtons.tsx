@@ -3,6 +3,8 @@ import type { WalletName } from '@solana/wallet-adapter-base';
 import Button from '../Button';
 import clsx from 'clsx';
 import c from './style.module.css';
+import SolflareIcon from '../../assets/solflare.png';
+// import PhantomIcon from '../../assets/phantom.png';
 
 interface Props {
   isWalletListOpen: boolean;
@@ -37,7 +39,12 @@ const WalletButtons: React.FC<Props> = ({
               <Button
                 className={c.modalButton}
                 onClick={() => handleWalletClick()}>
-                Solflare
+                <img
+                  className={c.walletIcon}
+                  src={SolflareIcon}
+                  alt='solflare'
+                />{' '}
+                <p className={c.walletName}>Solflare</p>
               </Button>
             </li>
           </ul>
