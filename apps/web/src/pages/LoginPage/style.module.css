@@ -1,9 +1,32 @@
 .pageWrapper {
-  display: flex;
+  /* display: flex;
   flex-direction: column;
   min-height: 100vh;
   background: #232b2b;
-  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
+  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #232b2b;
+  position: relative;
+  height: 100vh;
+  background-image: url('../../assets/login-background.png');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.flex {
+  display: flex;
+  gap: 22px;
+  margin-bottom: 64px;
+}
+
+.title {
+  color: #f2e2b7;
+  font-family: ari-display;
+  font-size: 40px;
 }
 
 .walletMultiButton {
@@ -20,68 +43,28 @@
 }
 
 .infoWrapper {
-  background: #2e3a3a;
-  color: #e0e7c3;
-  padding: 32px 32px;
-  border-radius: 16px;
-  box-shadow: 0 2px 16px 0 #232b2b55;
-  max-width: 1000px;
-  margin-left: 64px;
-  margin-top: 48px;
-  margin-bottom: 0;
-  text-align: left;
-  border: 2px solid #7fa7a6;
-}
-
-.infoWrapper h1 {
-  font-size: 60px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  margin-bottom: 16px;
-  color: #7fa7a6;
-  text-shadow: none;
-  text-align: left;
-  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
-}
-
-.infoWrapper p {
-  font-size: 20px;
-  line-height: 1.7;
-  margin: 0;
-  color: #e0e7c3;
-  text-align: left;
-  text-shadow: none;
-}
-
-.winnersSection {
-  position: absolute;
-  left: 64px;
-  bottom: 32px;
-  background: #2e3a3a;
-  padding: 24px 32px 32px 32px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 #232b2b33;
-  border: 2px solid #7fa7a6;
-  max-width: 1000vw;
-}
-
-.winnersSection h2 {
-  color: #7fa7a6;
-  font-size: 40px;
-  font-weight: 600;
-  margin-bottom: 18px;
-  text-align: left;
-  letter-spacing: 1px;
-  font-family: 'Press Start 2P', 'VT323', 'monospace', sans-serif;
-  text-shadow: none;
-}
-
-.winnersWrapper {
+  max-width: 670px;
   display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  max-width: 80vw;
+  flex-direction: column;
+  align-items: center;
 }
+
+.infoParagraph {
+  color: #f2e2b7;
+  text-align: center;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 140%;
+  opacity: 0.5;
+  margin: 0;
+  margin-bottom: 30px;
+}
+
+.bold {
+  font-weight: 600;
+}
+
 /* 
 .button {
   background: #7fa7a6;

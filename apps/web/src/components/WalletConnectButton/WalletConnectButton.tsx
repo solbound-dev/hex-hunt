@@ -17,7 +17,7 @@ const WalletConnectButton: React.FC<Props> = ({
       )}
       <div>
         <Button onClick={() => setIsWalletListOpen((prev) => !prev)}>
-          Connect wallet
+          Select Wallet to Start
         </Button>
       </div>
       <WalletButtons
