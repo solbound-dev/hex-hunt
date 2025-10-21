@@ -3,8 +3,8 @@ app-release-bundle.aab
 app-release-signed.apk
 app-release-signed.apk.idsig
 app-release-unsigned-aligned.apk
-build/
-gradle/
+build/*
+gradle/*
 gradlew
 gradlew.bat
 gradle.properties
