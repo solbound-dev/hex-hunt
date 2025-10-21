@@ -115,6 +115,10 @@
   justify-content: center;
 }
 
+/* .rulesPaper {
+  height: 90vh;
+} */
+
 .infoInnerWrapper {
   position: absolute;
   width: 100%;

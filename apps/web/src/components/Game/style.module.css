@@ -14,6 +14,35 @@
   z-index: 100;
 }
 
+.startGameButton {
+  padding: 8px 16px;
+  color: #f2e2b7;
+  text-align: center;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  margin-right: 24px;
+  background-color: #4caf50;
+  cursor: pointer;
+}
+
+.startGameButton:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.fixedTop {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 
 .gameInfoContainer {
   background: #2e3a3a;
   border: 2px solid #7fa7a6;
@@ -23,16 +52,15 @@
   margin-bottom: 0;
   /* min-width: 260px;
   max-width: 340px; */
-  display: flex;
+/* display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
+  gap: 14px; */
 
-  h3 {
+/* h3 {
     margin: 0;
-  }
-}
-
+  } */
+/* } */
 .timerText {
   font-size: 64px;
   color: #e0e7c3;
@@ -43,6 +71,27 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
+}
+
+.leaveButton {
+  padding: 8px;
+  color: #f2e2b7;
+  text-align: center;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  margin-right: 24px;
+  background-color: #e33e3f;
+  cursor: pointer;
+}
+
+.leaveButton:hover {
+  transform: translateY(-2px) scale(1.04);
 }
 
 .madeMoveIndicator {
@@ -100,8 +149,8 @@
 
 .shootButton {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: -32px;
+  right: -32px;
 }
 
 @media (orientation: landscape) and (max-width: 1000px) {

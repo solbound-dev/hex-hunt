@@ -1,13 +1,12 @@
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import c from './style.module.css';
 import type { Socket } from 'socket.io-client';
-import { colors } from '../../utils/draw-utils';
 import { useQueryClient } from '@tanstack/react-query';
 import Button from '../Button';
-import clsx from 'clsx';
 import { useGame } from '../../providers/GameProvider';
 import type { Player } from '../../utils/calculation-utils';
 import { useLocation } from 'wouter';
+import DarkContainer from '../DarkContainer';
 
 const getColor = (time: number) => {
   if (time > 5000) return 'lightgreen';
@@ -59,9 +58,11 @@ export const GameStatus: React.FC<GameStatusProps> = ({
         </span>
       )}
       {!gameState?.started && (
-        <span className={c.timerText}>Waiting for players...</span>
+        <DarkContainer className={c.fixedTop}>
+          <span>Waiting for players...</span>
+        </DarkContainer>
       )}
-      <div className={c.gameInfoContainer}>
+      <DarkContainer>
         <div className={c.flex}>
           {gameState?.started && !gameState.draw && !gameContainsWinner && (
             <div
@@ -72,10 +73,10 @@ export const GameStatus: React.FC<GameStatusProps> = ({
             />
           )}
         </div>
-        <h3>gameId: {gameId}</h3>
+        <div>Game code: {gameId}</div>
         {!gameState?.started && numberOfPlayers >= 2 && (
           <Button
-            className={c.button}
+            className={c.startGameButton}
             onClick={() => {
               socketRef.current?.emit('start', { gameId: gameId });
               queryClient.invalidateQueries({ queryKey: ['games'] });
@@ -91,25 +92,26 @@ export const GameStatus: React.FC<GameStatusProps> = ({
               setGameState(null);
               setClickedHex(null);
               navigate('/');
-            }}>
+            }}
+            className={c.leaveButton}>
             Leave
           </Button>
         }
-      </div>
-      <div className={clsx(c.gameInfoContainer, c.rightFixed)}>
+      </DarkContainer>
+      <DarkContainer className={c.rightFixed}>
         {gameState?.players.map((p) => (
-          <h3
+          <div
             key={p.walletId}
             style={{
-              color: !p.won ? colors[p.playerType] : 'gold',
               textDecoration: getTextDecoration(p, walletId),
               fontSize: p.won ? '20px' : '16px',
             }}>
             {p.playerType} {p.walletId === walletId ? ' (you)' : ''} | {p.cards}{' '}
             / 3{p.won && ' WON!'}
-          </h3>
+          </div>
         ))}
-      </div>
+      </DarkContainer>
+      {/* </div> */}
     </div>
   );
 };

@@ -16,7 +16,11 @@ const FindGamePage = () => {
   const { isAuthenticated, isCheckingAuth, logoutAndDisconnect } = useAuth();
   const { socketRef, gameId } = useGame();
   const [privateGameId, setPrivateGameId] = useState('');
-  const [showInfo, setShowInfo] = useState(false);
+  const [showInfo, setShowInfo] = useState(!localStorage.getItem('seenRules'));
+
+  useEffect(() => {
+    localStorage.setItem('seenRules', 'true');
+  }, []);
 
   const [, navigate] = useLocation();
 
