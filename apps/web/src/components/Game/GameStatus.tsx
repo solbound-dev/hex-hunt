@@ -59,7 +59,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
       )}
       {!gameState?.started && (
         <DarkContainer className={c.fixedTop}>
-          <span>Waiting for players...</span>
+          <span className={c.fs12}>Waiting for players...</span>
         </DarkContainer>
       )}
       <DarkContainer>

@@ -102,19 +102,6 @@
   margin-bottom: 6px;
 }
 
-@media (max-width: 700px) {
-  .statusWrapper {
-    top: 12px;
-    left: 12px;
-    gap: 18px;
-  }
-  .gameInfoContainer {
-    padding: 12px 10px;
-    /* min-width: 160px;
-    max-width: 90vw; */
-  }
-}
-
 .gameWrapper {
   display: flex;
   justify-content: center;
@@ -151,22 +138,4 @@
   position: absolute;
   bottom: -32px;
   right: -32px;
-}
-
-@media (orientation: landscape) and (max-width: 1000px) {
-  .rightFixed {
-    top: 12px;
-    right: 12px;
-  }
-
-  .gameInfoContainer {
-    padding: 12px 10px;
-    font-size: 12px;
-    gap: 8px;
-
-    h3 {
-      margin: 0;
-      font-size: 12px;
-    }
-  }
 }
