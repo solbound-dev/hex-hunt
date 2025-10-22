@@ -9,7 +9,6 @@ import Loading from '../../components/Loading';
 
 const LoginPage = () => {
   const [isWalletListOpen, setIsWalletListOpen] = useState(false);
-  // const { publicKey, signMessage } = useWallet();
   useCheckAuth();
 
   const [showLoading, setShowLoading] = useState(true);
@@ -17,51 +16,15 @@ const LoginPage = () => {
   useEffect(() => {
     setTimeout(() => {
       setShowLoading(false);
-    }, 2500);
+    }, 1500);
   }, []);
 
   return (
     <>
-      {' '}
       {showLoading && <Loading />}
       {!showLoading && (
         <div className={c.pageWrapper}>
-          <div className={c.walletMultiButton}>
-            {/* <WalletMultiButton /> */}
-
-            {/* {publicKey && (
-          <Button
-            className={c.button}
-            onClick={async () => {
-              if (!publicKey || !signMessage) return;
-
-              const connectService = new ConnectService();
-
-              const walletAddress = publicKey.toString();
-              const messageResponse = await connectService.requestMessage({
-                walletAddress,
-              });
-
-              const signature = await connectService.createMessageSignature(
-                publicKey,
-                signMessage,
-                messageResponse.message,
-              );
-
-              try {
-                await connectService.authorizeWalletWithMessage({
-                  walletAddress,
-                  signature,
-                });
-              } catch (e) {
-                console.log('error', e);
-                return;
-              }
-            }}>
-            Login with wallet
-          </Button>
-        )} */}
-          </div>
+          <div className={c.walletMultiButton}></div>
           <div className={c.infoWrapper}>
             <div className={c.flex}>
               <img src={Logo} alt='logo' />{' '}

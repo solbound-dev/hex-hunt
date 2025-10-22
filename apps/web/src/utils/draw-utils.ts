@@ -100,6 +100,7 @@ export function drawPlayerIsometric(
   ctx: CanvasRenderingContext2D,
   hex: Hex,
   playerType: PlayerType,
+  isImmune: boolean,
   size: number,
   image: HTMLImageElement,
 ) {
@@ -129,6 +130,33 @@ export function drawPlayerIsometric(
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
 
+  if (isImmune) {
+    ctx.save();
+
+    const multiplier = 1;
+    const ellipseWidth = multiplier * size * 0.8;
+    const ellipseHeight = multiplier * size * 0.3; // flattened for isometric look
+
+    ctx.beginPath();
+    ctx.ellipse(
+      ocx,
+      ocy,
+      ellipseWidth,
+      ellipseHeight,
+      -0.02 * Math.PI,
+      0,
+      2 * Math.PI,
+    );
+    ctx.strokeStyle = 'rgba(255,255,255,1)';
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = 'rgba(255,255,255,1)';
+    ctx.globalAlpha = 0.6;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.globalAlpha = 1;
+  }
   if (!image) return;
 
   if (image.complete) {
@@ -474,6 +502,7 @@ function paintInOrder(
           context,
           currentPlayer.pos!,
           currentPlayer.playerType,
+          currentPlayer.isImmune,
           HEX_SIZE,
           playerImage!,
         );

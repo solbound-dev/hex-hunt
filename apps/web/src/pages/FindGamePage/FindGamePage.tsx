@@ -56,6 +56,7 @@ const FindGamePage = () => {
           </button>
         </div>
       </div>
+      {/* <Modal isOpen={!showInfo} setIsOpen={() => {}}> */}
       <Modal isOpen={!showInfo} setIsOpen={() => {}}>
         <ul className={c.ul}>
           <li className={c.li}>
@@ -117,9 +118,9 @@ const FindGamePage = () => {
         onClick={() => setShowInfo(false)}>
         <div className={c.rulesWrapper}>
           <img className={c.rulesPaper} src={RulesBackground} alt='' />
-          <div className={c.infoInnerWrapper}>
-            <h2 className={c.rulesTitle}>Rules</h2>
-            <ul>
+          <div className={clsx(c.infoInnerWrapper, { [c.open]: showInfo })}>
+            <h2 className={clsx(c.rulesTitle)}>Rules</h2>
+            <ul className={c.rulesTextWrapper}>
               <li className={c.rulesText}>
                 Move: Click an adjacent hex to move your character before the
                 timer runs out.

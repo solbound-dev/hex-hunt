@@ -6,7 +6,7 @@ const Loading = () => {
   return (
     <div className={c.wrapper}>
       <div className={clsx(c.hexagon, c.loadingText)}>
-        <CountUp className={c.loadingText} duration={2.5} end={100} /> %
+        <CountUp className={c.loadingText} duration={1.5} end={100} /> %
       </div>
     </div>
   );
