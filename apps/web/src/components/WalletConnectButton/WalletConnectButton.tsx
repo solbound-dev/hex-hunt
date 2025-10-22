@@ -1,32 +1,20 @@
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Button from '../Button';
-import WalletButtons from './WalletButtons';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useAuth } from '../../providers/AuthProvider';
 
-interface Props {
-  isWalletListOpen: boolean;
-  setIsWalletListOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
+const WalletConnectButton: React.FC = () => {
+  const { connected } = useWallet();
+  const { authenticateUser } = useAuth();
 
-const WalletConnectButton: React.FC<Props> = ({
-  isWalletListOpen,
-  setIsWalletListOpen,
-}) => {
   return (
-    <>
-      {isWalletListOpen && (
-        <div onClick={() => setIsWalletListOpen(false)}></div>
-      )}
-      <div>
+    <div>
+      {!connected ? (
         <WalletMultiButton />
-        <Button onClick={() => setIsWalletListOpen((prev) => !prev)}>
-          Select Wallet to Start
-        </Button>
-      </div>
-      <WalletButtons
-        isWalletListOpen={isWalletListOpen}
-        setIsWalletListOpen={setIsWalletListOpen}
-      />
-    </>
+      ) : (
+        <Button onClick={() => authenticateUser()}>Sign message</Button>
+      )}
+    </div>
   );
 };
 
