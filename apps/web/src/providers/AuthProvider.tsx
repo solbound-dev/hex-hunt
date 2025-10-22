@@ -16,6 +16,7 @@ interface AuthContextState {
   isCheckingAuth: boolean;
   publicKey: string | null;
   logoutAndDisconnect: VoidFunction;
+  authenticateUser: VoidFunction;
 }
 
 const initialContextValue = {
@@ -23,6 +24,7 @@ const initialContextValue = {
   isCheckingAuth: false,
   publicKey: null,
   logoutAndDisconnect: () => null,
+  authenticateUser: () => null,
 };
 
 type Props = {
@@ -151,6 +153,7 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
     isCheckingAuth,
     publicKey,
     logoutAndDisconnect,
+    authenticateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
