@@ -1,3 +1,4 @@
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Button from '../Button';
 import WalletButtons from './WalletButtons';
 
@@ -16,6 +17,7 @@ const WalletConnectButton: React.FC<Props> = ({
         <div onClick={() => setIsWalletListOpen(false)}></div>
       )}
       <div>
+        <WalletMultiButton />
         <Button onClick={() => setIsWalletListOpen((prev) => !prev)}>
           Select Wallet to Start
         </Button>
