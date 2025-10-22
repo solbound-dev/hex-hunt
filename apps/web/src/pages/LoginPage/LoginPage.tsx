@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import Loading from '../../components/Loading';
 
 const LoginPage = () => {
-  const [isWalletListOpen, setIsWalletListOpen] = useState(false);
+  // const { publicKey, signMessage } = useWallet();
   useCheckAuth();
 
   const [showLoading, setShowLoading] = useState(true);
@@ -39,10 +39,7 @@ const LoginPage = () => {
               the sharpest survive. Easy to learn, endlessly replayable — a
               modern, high-speed twist on classic strategy.
             </p>
-            <WalletConnectButton
-              isWalletListOpen={isWalletListOpen}
-              setIsWalletListOpen={setIsWalletListOpen}
-            />
+            <WalletConnectButton />
           </div>
         </div>
       )}
