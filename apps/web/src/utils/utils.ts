@@ -8,17 +8,6 @@ import skullSrc from '../assets/skull.png';
 import { CANVAS_SIZE, Hex } from './calculation-utils';
 import type { ImgRef } from '../hooks/game';
 
-export function setBackgroundImage(
-  backgroundImgRef: React.RefObject<HTMLImageElement | null>,
-) {
-  const background = new Image();
-  background.width = CANVAS_SIZE;
-  background.height = CANVAS_SIZE;
-  background.onload = () => {
-    backgroundImgRef.current = background;
-  };
-}
-
 export function setCanvasRef(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
 ) {
