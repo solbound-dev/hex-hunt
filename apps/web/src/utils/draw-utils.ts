@@ -2,7 +2,6 @@ import {
   generateGrid,
   GRID_RADIUS,
   Hex,
-  HEX_SIZE,
   hexToPixel,
   isInGrid,
   PI,
@@ -49,9 +48,10 @@ function drawHexIsometric(
   hex: Hex | null,
   size: number,
   styleOptions: StyleOptions,
+  canvasSize: number,
 ) {
   if (!hex) return;
-  const center = hexToPixel(hex);
+  const center = hexToPixel(hex, canvasSize, size);
   const x = center.x;
   const y = center.y;
   ctx.beginPath();
@@ -103,8 +103,9 @@ export function drawPlayerIsometric(
   isImmune: boolean,
   size: number,
   image: HTMLImageElement,
+  canvasSize: number,
 ) {
-  const center = hexToPixel(hex);
+  const center = hexToPixel(hex, canvasSize, size);
   const x = center.x;
   const y = center.y;
 
@@ -126,7 +127,13 @@ export function drawPlayerIsometric(
       color = 'blue';
   }
 
-  drawHexIsometric(ctx, hex, size, { strokeStyle: color, lineWidth: 3 });
+  drawHexIsometric(
+    ctx,
+    hex,
+    size,
+    { strokeStyle: color, lineWidth: 3 },
+    canvasSize,
+  );
 
   const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
 
@@ -178,8 +185,9 @@ export function drawLastSeenPlayerIsometric(
   player: Player,
   size: number,
   image: HTMLImageElement,
+  canvasSize: number,
 ) {
-  const center = hexToPixel(player.lastSeenPos!);
+  const center = hexToPixel(player.lastSeenPos!, canvasSize, size);
   const x = center.x;
   const y = center.y;
 
@@ -203,13 +211,15 @@ export function drawCardIsometric(
   ctx: CanvasRenderingContext2D,
   cardPos: Hex | null,
   image: HTMLImageElement,
+  hexSize: number,
+  canvasSize: number,
 ) {
   if (cardPos) {
-    const center = hexToPixel(cardPos);
+    const center = hexToPixel(cardPos, canvasSize, hexSize);
     const x = center.x;
     const y = center.y;
 
-    const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
+    const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, hexSize);
     if (!image) return;
     if (image.complete) {
       ctx.drawImage(
@@ -228,17 +238,23 @@ export function drawAvailableMovesHighlightIsometric(
   pos: Hex,
   grid: Hex[],
   disappearedHexes: Hex[],
-
   size: number,
+  canvasSize: number,
 ) {
   const positionInstance = new Hex(pos.q, pos.r);
   positionInstance.neighbors().forEach((n) => {
     if (isInGrid(n, grid, disappearedHexes)) {
-      drawHexIsometric(ctx, n, size, {
-        strokeStyle: 'white',
-        lineWidth: 1,
-        fillStyle: 'rgba(0, 255, 0, 0.1)',
-      });
+      drawHexIsometric(
+        ctx,
+        n,
+        size,
+        {
+          strokeStyle: 'white',
+          lineWidth: 1,
+          fillStyle: 'rgba(0, 255, 0, 0.1)',
+        },
+        canvasSize,
+      );
       ctx.stroke();
     }
   });
@@ -250,6 +266,7 @@ export function drawShootHighlightIsometric(
   grid: Hex[],
   disappearedHexes: Hex[],
   size: number,
+  canvasSize: number,
 ) {
   const RANGE = 3;
 
@@ -265,20 +282,32 @@ export function drawShootHighlightIsometric(
       )
     ) {
       position = new Hex(position.q + dir.q, position.r + dir.r);
-      drawHexIsometric(ctx, position, size, {
-        strokeStyle: 'white',
-        lineWidth: 1,
-        fillStyle: 'rgba(255, 255, 0, 0.2)',
-      });
+      drawHexIsometric(
+        ctx,
+        position,
+        size,
+        {
+          strokeStyle: 'white',
+          lineWidth: 1,
+          fillStyle: 'rgba(255, 255, 0, 0.2)',
+        },
+        canvasSize,
+      );
       ctx.stroke();
     }
     //draw neighbors
     if (isInGrid(n, grid, disappearedHexes)) {
-      drawHexIsometric(ctx, n, size, {
-        strokeStyle: 'white',
-        lineWidth: 1,
-        fillStyle: 'rgba(255, 255, 0, 0.5)',
-      });
+      drawHexIsometric(
+        ctx,
+        n,
+        size,
+        {
+          strokeStyle: 'white',
+          lineWidth: 1,
+          fillStyle: 'rgba(255, 255, 0, 0.5)',
+        },
+        canvasSize,
+      );
       ctx.stroke();
     }
   });
@@ -289,16 +318,23 @@ export function drawZoneContractionWarningIsometric(
   grid: Hex[],
   currentRadius: number,
   size: number,
+  canvasSize: number,
 ) {
   if (grid.length) {
     grid.forEach((hex) => {
       const newHex = new Hex(hex.q, hex.r);
       if (newHex.distanceTo(new Hex(0, 0)) === currentRadius) {
-        drawHexIsometric(ctx, hex, size, {
-          strokeStyle: 'rgba(255, 140,0, 0.2)',
-          fillStyle: 'rgba(255, 140,0, 0.2)',
-          lineWidth: 1,
-        });
+        drawHexIsometric(
+          ctx,
+          hex,
+          size,
+          {
+            strokeStyle: 'rgba(255, 140,0, 0.2)',
+            fillStyle: 'rgba(255, 140,0, 0.2)',
+            lineWidth: 1,
+          },
+          canvasSize,
+        );
         ctx.stroke();
       }
     });
@@ -309,14 +345,21 @@ export function drawDisappearedHexesIsometric(
   ctx: CanvasRenderingContext2D,
   disappearedHexes: Hex[],
   size: number,
+  canvasSize: number,
 ) {
   if (disappearedHexes.length) {
     disappearedHexes.forEach((hex) => {
-      drawHexIsometric(ctx, hex, size, {
-        strokeStyle: 'rgba(139, 0,0,0.2)',
-        fillStyle: 'rgba(139, 0,0,0.2)',
-        lineWidth: 1,
-      });
+      drawHexIsometric(
+        ctx,
+        hex,
+        size,
+        {
+          strokeStyle: 'rgba(139, 0,0,0.2)',
+          fillStyle: 'rgba(139, 0,0,0.2)',
+          lineWidth: 1,
+        },
+        canvasSize,
+      );
       ctx.stroke();
     });
   }
@@ -326,13 +369,15 @@ export function drawDeadPlayerIsometric(
   ctx: CanvasRenderingContext2D,
   deadPlayerPos: Hex,
   image: HTMLImageElement,
+  canvasSize: number,
+  hexSize: number,
   styleOptions?: StyleOptions,
 ) {
-  const center = hexToPixel(deadPlayerPos);
+  const center = hexToPixel(deadPlayerPos, canvasSize, hexSize);
   const x = center.x;
   const y = center.y;
 
-  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, HEX_SIZE);
+  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, hexSize);
 
   if (!image) return;
   if (image.complete) {
@@ -357,22 +402,40 @@ export function drawHoverHighlight(
   ctx: CanvasRenderingContext2D,
   hex: Hex | null,
   size: number,
+  canvasSize: number,
 ) {
   if (!hex) return;
 
-  drawHexIsometric(ctx, hex, size, {
-    strokeStyle: 'yellow',
-    lineWidth: 2,
-    fillStyle: 'rgba(255, 255, 0, 1)',
-  });
+  drawHexIsometric(
+    ctx,
+    hex,
+    size,
+    {
+      strokeStyle: 'yellow',
+      lineWidth: 2,
+      fillStyle: 'rgba(255, 255, 0, 1)',
+    },
+    canvasSize,
+  );
 }
 
-export function drawGridIsometric(ctx: CanvasRenderingContext2D, grid: Hex[]) {
+export function drawGridIsometric(
+  ctx: CanvasRenderingContext2D,
+  grid: Hex[],
+  hexSize: number,
+  canvasSize: number,
+) {
   grid.forEach((hex) =>
-    drawHexIsometric(ctx, hex, HEX_SIZE, {
-      strokeStyle: 'rgba(255, 255, 255, 0.1)',
-      lineWidth: 1.5,
-    }),
+    drawHexIsometric(
+      ctx,
+      hex,
+      hexSize,
+      {
+        strokeStyle: 'rgba(255, 255, 255, 0.1)',
+        lineWidth: 1.5,
+      },
+      canvasSize,
+    ),
   );
 }
 
@@ -384,6 +447,8 @@ export function repaint(
   isShooting: boolean,
   hoveredHex: Hex | null,
   clickedHex: Hex | null,
+  hexSize: number,
+  canvasSize: number,
   walletId?: string,
 ) {
   if (!gameState) return;
@@ -394,17 +459,23 @@ export function repaint(
 
   context.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
 
-  drawGridIsometric(context, generateGrid(GRID_RADIUS));
+  drawGridIsometric(context, generateGrid(GRID_RADIUS), hexSize, canvasSize);
 
   const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
   if (!currentPlayer) return;
 
   if (!clickedHex && !currentPlayer?.isDead) {
-    drawHexIsometric(context, hoveredHex, HEX_SIZE, {
-      strokeStyle: `rgba(255,255,0,1)`,
-      lineWidth: 4,
-      blur: true,
-    });
+    drawHexIsometric(
+      context,
+      hoveredHex,
+      hexSize,
+      {
+        strokeStyle: `rgba(255,255,0,1)`,
+        lineWidth: 4,
+        blur: true,
+      },
+      canvasSize,
+    );
   }
 
   const otherPlayers = gameState.players.filter((p) => p.walletId !== walletId);
@@ -417,17 +488,28 @@ export function repaint(
       pos,
       gameState!.grid,
       gameState!.disappearedHexes,
-      HEX_SIZE,
+      hexSize,
+      canvasSize,
     );
   }
 
-  drawDisappearedHexesIsometric(context, gameState.disappearedHexes, HEX_SIZE);
+  drawDisappearedHexesIsometric(
+    context,
+    gameState.disappearedHexes,
+    hexSize,
+    canvasSize,
+  );
 
-  drawHexIsometric(context, clickedHex, HEX_SIZE, {
-    strokeStyle: 'rgba(0, 255, 0, 1)',
-    lineWidth: 8,
-  });
-
+  drawHexIsometric(
+    context,
+    clickedHex,
+    hexSize,
+    {
+      strokeStyle: 'rgba(0, 255, 0, 1)',
+      lineWidth: 8,
+    },
+    canvasSize,
+  );
   if (
     gameState.moves &&
     (gameState.moves % 8 === 6 || gameState.moves % 8 === 7) &&
@@ -437,7 +519,8 @@ export function repaint(
       context,
       gameState.grid,
       gameState.currentRadius,
-      HEX_SIZE,
+      hexSize,
+      canvasSize,
     );
   }
 
@@ -449,6 +532,8 @@ export function repaint(
     otherPlayers,
     isCanvasHovered,
     clickedHex,
+    hexSize,
+    canvasSize,
   );
 }
 
@@ -460,6 +545,8 @@ function paintInOrder(
   otherPlayers: Player[],
   isCanvasHovered: boolean,
   clickedHex: Hex | null,
+  hexSize: number,
+  canvasSize: number,
 ) {
   const gameContainsWinner = gameState.players.some((p) => p.won);
 
@@ -474,7 +561,8 @@ function paintInOrder(
       currentPlayer.pos!,
       gameState.grid,
       gameState.disappearedHexes,
-      HEX_SIZE,
+      hexSize,
+      canvasSize,
     );
   }
 
@@ -503,18 +591,27 @@ function paintInOrder(
           currentPlayer.pos!,
           currentPlayer.playerType,
           currentPlayer.isImmune,
-          HEX_SIZE,
+          hexSize,
           playerImage!,
+          canvasSize,
         );
       } else if (currentPlayer.isDead) {
         drawDeadPlayerIsometric(
           context,
           currentPlayer.pos!,
           imgRef.current.skull!,
+          canvasSize,
+          hexSize,
         );
       }
     } else if (asset.equals(gameState.cardPos!)) {
-      drawCardIsometric(context, gameState.cardPos, imgRef.current.card!);
+      drawCardIsometric(
+        context,
+        gameState.cardPos,
+        imgRef.current.card!,
+        hexSize,
+        canvasSize,
+      );
     } else {
       const lastSeenPlayerImage = mapPlayerTypeToImage(sa.type, imgRef);
 
@@ -525,16 +622,24 @@ function paintInOrder(
       });
 
       if (player?.isDead && player.diedAtMove === gameState.moves - 1) {
-        drawDeadPlayerIsometric(context, player.pos!, imgRef.current.skull!, {
-          globalAlpha: true,
-        });
+        drawDeadPlayerIsometric(
+          context,
+          player.pos!,
+          imgRef.current.skull!,
+          canvasSize,
+          hexSize,
+          {
+            globalAlpha: true,
+          },
+        );
       } else {
         if (!player?.isDead) {
           drawLastSeenPlayerIsometric(
             context,
             player!,
-            HEX_SIZE,
+            hexSize,
             lastSeenPlayerImage!,
+            canvasSize,
           );
         }
       }

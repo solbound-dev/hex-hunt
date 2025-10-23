@@ -7,6 +7,7 @@ import {
 } from '../utils/calculation-utils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import type { Socket } from 'socket.io-client';
+import useScreenSize from '../hooks/useScreenSize';
 
 interface GameContext {
   gameId: string;
@@ -28,6 +29,8 @@ interface GameContext {
   availableGames: string[];
   setAvailableGames: (availableGames: string[]) => void;
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
+  canvasSize: number;
+  hexSize: number;
 }
 
 const initialContextValue = {
@@ -50,6 +53,8 @@ const initialContextValue = {
   availableGames: [],
   setAvailableGames: () => {},
   socketRef: { current: null },
+  canvasSize: 0,
+  hexSize: 0,
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -71,6 +76,11 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     MOVE_DURATION_IN_SECONDS,
   );
   const [availableGames, setAvailableGames] = useState<string[]>([]);
+
+  const size = useScreenSize();
+  const canvasSize =
+    size.height / size.width > 2160 / 3840 ? size.height / 1.1 : size.width / 2;
+  const hexSize = (canvasSize / 70) * 5.8;
 
   const socketRef = useInitializeSockets(
     setGameState,
@@ -110,6 +120,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     socketRef,
     clickedHex,
     setClickedHex,
+    canvasSize,
+    hexSize,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

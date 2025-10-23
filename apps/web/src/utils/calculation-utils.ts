@@ -1,13 +1,13 @@
-const width = window.innerWidth;
-const height = window.innerHeight;
+// const width = window.innerWidth;
+// const height = window.innerHeight;
 
-export const CANVAS_SIZE =
-  height / width > 2160 / 3840 ? height / 1.1 : width / 2;
+// export const CANVAS_SIZE =
+//   height / width > 2160 / 3840 ? height / 1.1 : width / 2;
 
-export const HEX_SIZE = (CANVAS_SIZE / 70) * 5.8;
+// export const HEX_SIZE = (CANVAS_SIZE / 70) * 5.8;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
-export const MOVE_DURATION_IN_SECONDS = 10;
+export const MOVE_DURATION_IN_SECONDS = 20;
 
 export type GameData = {
   grid: Hex[];
@@ -118,18 +118,23 @@ function roundHex(frac: Hex) {
   return new Hex(q, r);
 }
 
-export function pixelToHex(x: number, y: number) {
-  x = (x - CANVAS_SIZE / 2) / HEX_SIZE;
-  y = (y - CANVAS_SIZE / 2) / HEX_SIZE;
+export function pixelToHex(
+  x: number,
+  y: number,
+  canvasSize: number,
+  hexSize: number,
+) {
+  x = (x - canvasSize / 2) / hexSize;
+  y = (y - canvasSize / 2) / hexSize;
   const q = (Math.sqrt(3) / 3) * x - (1 / 3) * y;
   const r = (2 / 3) * y;
   return roundHex(new Hex(q, r));
 }
 
-export function hexToPixel(hex: Hex) {
-  const x = HEX_SIZE * Math.sqrt(3) * (hex.q + hex.r / 2);
-  const y = ((HEX_SIZE * 3) / 2) * hex.r;
-  return { x: x + CANVAS_SIZE / 2, y: y + CANVAS_SIZE / 2 };
+export function hexToPixel(hex: Hex, canvasSize: number, hexSize: number) {
+  const x = hexSize * Math.sqrt(3) * (hex.q + hex.r / 2);
+  const y = ((hexSize * 3) / 2) * hex.r;
+  return { x: x + canvasSize / 2, y: y + canvasSize / 2 };
 }
 
 export function isInGrid(hex: Hex, grid: Hex[], disappearedHexes: Hex[]) {
@@ -160,23 +165,30 @@ export function inverseIsometricTransformation(
 export function getMousePosition(
   event: MouseEvent | React.MouseEvent<HTMLCanvasElement>,
   rect: DOMRect,
+  hexSize: number,
 ) {
   const ox = event.clientX - rect.left;
   const oy = event.clientY - rect.top;
-  const coordinates = inverseIsometricTransformation(ox, oy, HEX_SIZE);
+  const coordinates = inverseIsometricTransformation(ox, oy, hexSize);
   return coordinates;
 }
 
-export function getNearestHex(gameState: GameData, x: number, y: number) {
+export function getNearestHex(
+  gameState: GameData,
+  x: number,
+  y: number,
+  canvasSize: number,
+  hexSize: number,
+) {
   let nearest: Hex | null = null;
   let minDist = Infinity;
 
   for (const h of gameState.grid) {
-    const center = hexToPixel(h);
+    const center = hexToPixel(h, canvasSize, hexSize);
     const dx = center.x - x;
     const dy = center.y - y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < minDist && dist < HEX_SIZE) {
+    if (dist < minDist && dist < hexSize) {
       nearest = h;
       minDist = dist;
     }

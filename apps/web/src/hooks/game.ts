@@ -22,7 +22,7 @@ export type ImgRef = {
   card: HTMLImageElement | null;
 };
 
-export const useInitializeGame = () => {
+export const useInitializeGame = (canvasSize: number, hexSize: number) => {
   const imgRef = useRef<ImgRef>({
     astronaut: null,
     alien: null,
@@ -32,20 +32,22 @@ export const useInitializeGame = () => {
     card: null,
   });
 
-  setImgRef(imgRef);
+  setImgRef(imgRef, canvasSize);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    setCanvasRef(canvasRef);
+    setCanvasRef(canvasRef, canvasSize);
     const context = getContext(canvasRef);
 
     if (!context) return;
-    drawGridIsometric(context, generateGrid(GRID_RADIUS));
-  }, []);
+    drawGridIsometric(context, generateGrid(GRID_RADIUS), hexSize, canvasSize);
+  }, [canvasSize, hexSize]);
 
   return {
     imgRef,
     canvasRef,
+    canvasSize,
+    hexSize,
   };
 };
 
