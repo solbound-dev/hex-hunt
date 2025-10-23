@@ -273,3 +273,18 @@
     padding-right: 30px;
   }
 }
+
+@media screen and (max-height: 500px) {
+  .navigation {
+    top: 10px;
+    width: 70%;
+  }
+
+  .navigationText {
+    font-size: 12px;
+  }
+
+  .joinPrivateGameButton {
+    font-size: 12px;
+  }
+}
