@@ -55,7 +55,7 @@ const Game = () => {
     }
   }, [gameId, gameState, navigate]);
 
-  const { imgRef, canvasRef } = useInitializeGame();
+  const { imgRef, canvasRef, canvasSize, hexSize } = useInitializeGame();
 
   useEffect(() => {
     const winner = gameState?.players.find((p) => p.won);
@@ -70,10 +70,11 @@ const Game = () => {
     const handleMouseMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
 
-      const { x, y } = getMousePosition(event, rect);
+      const { x, y } = getMousePosition(event, rect, hexSize);
       if (!gameState) return;
 
-      const nearest = getNearestHex(gameState, x, y);
+      const nearest = getNearestHex(gameState, x, y, canvasSize, hexSize);
+      console.log('nearest', nearest);
 
       setHoveredHex(nearest);
     };
@@ -89,6 +90,8 @@ const Game = () => {
       isShooting,
       hoveredHex,
       clickedHex,
+      hexSize,
+      canvasSize,
       walletId?.toString(),
     );
 
@@ -108,6 +111,8 @@ const Game = () => {
     gameId,
     madeMove,
     clickedHex,
+    canvasSize,
+    hexSize,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -123,9 +128,9 @@ const Game = () => {
     if (playerIsDead) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
-    const { x, y } = getMousePosition(event, rect);
+    const { x, y } = getMousePosition(event, rect, hexSize);
 
-    const move = pixelToHex(x, y);
+    const move = pixelToHex(x, y, canvasSize, hexSize);
 
     if (madeMove) return;
 
@@ -146,7 +151,7 @@ const Game = () => {
 
     socketRef.current?.emit('updateGame', {
       gameId,
-      move: pixelToHex(x, y),
+      move: pixelToHex(x, y, canvasSize, hexSize),
       isShooting: isShooting,
     });
   };

@@ -12,6 +12,7 @@ import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import toast from 'react-hot-toast';
 import { useLocation } from 'wouter';
+import useScreenSize from './useScreenSize';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -23,6 +24,11 @@ export type ImgRef = {
 };
 
 export const useInitializeGame = () => {
+  const size = useScreenSize();
+  const canvasSize =
+    size.height / size.width > 2160 / 3840 ? size.height / 1.1 : size.width / 2;
+  const hexSize = canvasSize * 5.8;
+
   const imgRef = useRef<ImgRef>({
     astronaut: null,
     alien: null,
@@ -32,20 +38,22 @@ export const useInitializeGame = () => {
     card: null,
   });
 
-  setImgRef(imgRef);
+  setImgRef(imgRef, canvasSize);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    setCanvasRef(canvasRef);
+    setCanvasRef(canvasRef, canvasSize);
     const context = getContext(canvasRef);
 
     if (!context) return;
-    drawGridIsometric(context, generateGrid(GRID_RADIUS));
-  }, []);
+    drawGridIsometric(context, generateGrid(GRID_RADIUS), hexSize, canvasSize);
+  }, [canvasSize, hexSize]);
 
   return {
     imgRef,
     canvasRef,
+    canvasSize,
+    hexSize,
   };
 };
 
