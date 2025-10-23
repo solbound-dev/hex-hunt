@@ -18,3 +18,99 @@ body {
   font-family: ari-condensed-display;
   src: url('./assets/fonts/ari-w9500-condensed-display.ttf');
 }
+
+.wallet-adapter-button {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  color: #1a1f2c !important;
+  font-family: 'Trebuchet MS', sans-serif !important;
+  font-size: 20px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: 140% !important;
+  padding: 8px !important;
+  background: rgba(27, 31, 45, 0.1) !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  cursor: pointer !important;
+  margin-bottom: 8px;
+}
+
+.wallet-adapter-button:hover {
+  border-bottom: 2px solid black !important;
+}
+
+.wallet-adapter-button-trigger {
+  background: #f2e2b7 !important;
+  color: #42636b !important;
+  border: none !important;
+  padding: 20px 24px !important;
+  font-size: 20px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 140% !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px #232b2b22 !important;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    color 0.2s;
+  font-family: 'ari-condensed-display' !important;
+  border-radius: 0 !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  transform: translateY(-2px) scale(1.04) !important;
+  box-shadow: 0 4px 16px #232b2b22 !important;
+}
+
+.wallet-adapter-button-trigger:disabled {
+  filter: grayscale(100%) !important;
+  cursor: not-allowed !important;
+  color: #888 !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  width: 503px !important;
+  padding: 32px !important;
+  background: #f2e2b7 !important;
+  z-index: 10 !important;
+  position: fixed !important;
+  top: 50vh !important;
+  left: 50vw !important;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 0 !important;
+}
+
+.wallet-adapter-modal-button-close {
+  display: none !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #1b1f2d !important;
+  text-align: center !important;
+  font-family: 'ari-condensed-display' !important;
+  font-size: 20px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 140% !important;
+  margin: 0 !important;
+  margin-bottom: 16px !important;
+  padding: 0 !important;
+}
+.wallet-adapter-button-start-icon > * {
+  height: 20px !important;
+}
+
+@media screen and (max-width: 1000px) {
+  .wallet-adapter-button-trigger {
+    font-size: 12px !important;
+    padding: 6px 14px !important;
+  }
+}
