@@ -12,7 +12,6 @@ import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import toast from 'react-hot-toast';
 import { useLocation } from 'wouter';
-import useScreenSize from './useScreenSize';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -23,12 +22,7 @@ export type ImgRef = {
   card: HTMLImageElement | null;
 };
 
-export const useInitializeGame = () => {
-  const size = useScreenSize();
-  const canvasSize =
-    size.height / size.width > 2160 / 3840 ? size.height / 1.1 : size.width / 2;
-  const hexSize = canvasSize * 5.8;
-
+export const useInitializeGame = (canvasSize: number, hexSize: number) => {
   const imgRef = useRef<ImgRef>({
     astronaut: null,
     alien: null,

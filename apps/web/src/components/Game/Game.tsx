@@ -47,6 +47,8 @@ const Game = () => {
     socketRef,
     clickedHex,
     setClickedHex,
+    canvasSize,
+    hexSize,
   } = useGame();
 
   useEffect(() => {
@@ -55,7 +57,7 @@ const Game = () => {
     }
   }, [gameId, gameState, navigate]);
 
-  const { imgRef, canvasRef, canvasSize, hexSize } = useInitializeGame();
+  const { imgRef, canvasRef } = useInitializeGame(canvasSize, hexSize);
 
   useEffect(() => {
     const winner = gameState?.players.find((p) => p.won);
@@ -74,7 +76,6 @@ const Game = () => {
       if (!gameState) return;
 
       const nearest = getNearestHex(gameState, x, y, canvasSize, hexSize);
-      console.log('nearest', nearest);
 
       setHoveredHex(nearest);
     };

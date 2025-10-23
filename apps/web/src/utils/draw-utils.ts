@@ -50,8 +50,6 @@ function drawHexIsometric(
   styleOptions: StyleOptions,
   canvasSize: number,
 ) {
-  console.log('drawHexIso');
-
   if (!hex) return;
   const center = hexToPixel(hex, canvasSize, size);
   const x = center.x;
