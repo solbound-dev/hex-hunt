@@ -19,7 +19,7 @@
 }
 
 .modalContainer {
-  width: 503px;
+  min-width: 503px;
   padding: 32px;
   background: #f2e2b7;
   z-index: 10;

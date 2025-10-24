@@ -11,6 +11,7 @@ import AuthProvider from './providers/AuthProvider';
 import FindGamePage from './pages/FindGamePage';
 import GameProvider from './providers/GameProvider';
 import WindowSizeProvider from './providers/WindowSizeProvider';
+import TutorialPage from './pages/TutorialPage';
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,10 @@ function App() {
                     />
                     <Route path={'/'} component={() => <FindGamePage />} />
                     <Route path={'/game'} component={() => <Game />} />
+                    <Route
+                      path={'/tutorial'}
+                      component={() => <TutorialPage />}
+                    />
                     <Route path={'*'} component={() => <div>Error page</div>} />
                   </Switch>{' '}
                 </GameProvider>

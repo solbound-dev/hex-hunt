@@ -11,6 +11,8 @@ import UsersCrownIcon from '../../assets/users-crown.svg';
 import LockIcon from '../../assets/lock.svg';
 import Logo from '../../assets/logo-hex.svg';
 import RulesBackground from '../../assets/rules-paper.png';
+import { OPTIONS, SLIDES } from '../TutorialPage/TutorialPage';
+import Carousel from '../../components/Carousel';
 
 const FindGamePage = () => {
   const { isAuthenticated, isCheckingAuth, logoutAndDisconnect } = useAuth();
@@ -113,7 +115,7 @@ const FindGamePage = () => {
         </ul>
       </Modal>
 
-      <div
+      {/* <div
         className={clsx(c.infoContainer, { [c.open]: showInfo })}
         onClick={() => setShowInfo(false)}>
         <div className={c.rulesWrapper}>
@@ -135,7 +137,7 @@ const FindGamePage = () => {
               </li>
               <li className={c.rulesText}>
                 Win: Collect 3 cards and go to the middle or just be the last
-                one standing
+                one standing.
               </li>
               <li className={c.rulesText}>
                 Collision: If both players move to the same hex, they bounce
@@ -147,7 +149,7 @@ const FindGamePage = () => {
                 die.
               </li>
               <li className={c.rulesText}>
-                Visibility: Opponents are only visible at their last known
+                Visib'ility: Opponents are only visible at their last known
                 position (when they shoot or collect a card).
               </li>
               <li className={c.rulesText}>
@@ -157,7 +159,11 @@ const FindGamePage = () => {
             </ul>
           </div>
         </div>
-      </div>
+      </div> */}
+
+      <Modal isOpen={showInfo} setIsOpen={() => setShowInfo(false)}>
+        <Carousel slides={SLIDES} options={OPTIONS} />
+      </Modal>
     </div>
   );
 };
