@@ -17,7 +17,6 @@
   top: 32px;
   left: 50%;
   transform: translateX(-50%);
-  width: 770px;
   padding: 16px;
   padding-bottom: 14px;
   background: #1b1f2d;
@@ -26,6 +25,8 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 2px solid#f2e2b7;
+  max-width: 770px;
+  width: 100%;
 }
 
 .navigationText {
@@ -274,7 +275,7 @@
   }
 }
 
-@media screen and (max-height: 500px) {
+@media screen and (max-height: 1000px) {
   .navigation {
     top: 10px;
     width: 70%;
@@ -286,5 +287,11 @@
 
   .joinPrivateGameButton {
     font-size: 12px;
+  }
+}
+
+@media (max-height: 600px) {
+  .navigation {
+    top: 4px;
   }
 }

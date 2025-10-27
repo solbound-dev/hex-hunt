@@ -170,7 +170,10 @@ const FindGamePage = () => {
       </Modal>
 
       <div style={{ pointerEvents: !showInfo ? 'none' : 'auto' }}>
-        <Modal isOpen={showInfo} setIsOpen={() => setShowInfo(false)}>
+        <Modal
+          hasFullHeight={true}
+          isOpen={showInfo}
+          setIsOpen={() => setShowInfo(false)}>
           <Carousel slides={SLIDES} options={OPTIONS} />
         </Modal>
       </div>
