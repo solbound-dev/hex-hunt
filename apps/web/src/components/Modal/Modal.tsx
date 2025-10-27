@@ -16,10 +16,9 @@ const Modal: React.FC<Props> = ({ isOpen, setIsOpen, children }) => {
           [c.active]: isOpen,
         })}
         onClick={() => setIsOpen(false)}></div>
-      <div>
-        <div className={clsx(c.modalContainer, { [c.active]: isOpen })}>
-          {children}
-          {/* <h2 className={c.modalTitle}>
+      <div className={clsx(c.modalContainer, { [c.active]: isOpen })}>
+        {children}
+        {/* <h2 className={c.modalTitle}>
             Select a wallet on Solana to continue...
           </h2>
           <ul className={c.ul}>
@@ -36,7 +35,6 @@ const Modal: React.FC<Props> = ({ isOpen, setIsOpen, children }) => {
               </Button>
             </li>
           </ul> */}
-        </div>
       </div>
     </>
   );

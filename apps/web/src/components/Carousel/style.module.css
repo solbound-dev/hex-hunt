@@ -1,10 +1,17 @@
 .embla {
   margin: auto;
-  --slide-height: 19rem;
   --slide-spacing: 1rem;
   --slide-size: 100%;
-  background-color: #f2e2b7;
+  background-color: hsl(44, 69%, 83%);
   position: relative;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1034 / 534;
+  max-width: 100%;
+
+  @media (min-height: 1103px) {
+    height: 487px;
+  }
 }
 
 .prevButton {
@@ -30,11 +37,14 @@
 
 .viewport {
   overflow: hidden;
+  height: 100%;
+  max-width: 100%;
 }
 .container {
   display: flex;
   touch-action: pan-y pinch-zoom;
   margin-left: calc(var(--slide-spacing) * -1);
+  height: 100%;
 }
 .slide {
   flex: 0 0 var(--slide-size);
@@ -44,12 +54,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  height: auto;
   position: relative;
 }
 
 .slideContentWrapper {
-  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -60,7 +69,8 @@
 .slideImage {
   object-fit: contain;
   object-position: center;
-  width: 70%;
+  width: 50%;
+  height: auto;
 }
 
 .slideTitle {
@@ -73,6 +83,14 @@
   line-height: 140%;
   margin: 0;
   margin-bottom: 16px;
+
+  @media (max-width: 1200px) {
+    font-size: 20px;
+  }
+
+  @media (max-height: 731px) {
+    font-size: 20px;
+  }
 }
 .slideText {
   color: #1b1f2d;
@@ -82,18 +100,16 @@
   line-height: 140%;
   margin: 0;
   margin-top: 8px;
+
+  @media (max-width: 1200px) {
+    font-size: 16px;
+  }
+
+  @media (max-height: 731px) {
+    font-size: 16px;
+  }
 }
 
-.slideNumber {
-  border-radius: 1.8rem;
-  font-size: 4rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--slide-height);
-  user-select: none;
-}
 .controls {
   display: grid;
   grid-template-columns: auto 1fr;
