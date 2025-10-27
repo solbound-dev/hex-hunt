@@ -1,11 +1,33 @@
 .embla {
-  width: 60vw;
   margin: auto;
   --slide-height: 19rem;
   --slide-spacing: 1rem;
   --slide-size: 100%;
   background-color: #f2e2b7;
+  position: relative;
 }
+
+.prevButton {
+  position: absolute;
+  top: 50%;
+  left: -2rem;
+  transform: translateY(-50%);
+}
+
+.nextButton {
+  position: absolute;
+  top: 50%;
+  right: -2rem;
+  transform: translateY(-50%);
+}
+
+.slideCount {
+  position: absolute;
+  top: 10px;
+  right: 40px;
+  color: #1b1f2d;
+}
+
 .viewport {
   overflow: hidden;
 }
@@ -23,6 +45,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
+  position: relative;
 }
 
 .slideContentWrapper {
@@ -31,19 +54,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  border: 4px solid #1b1f2d;
 }
 
 .slideImage {
   object-fit: contain;
   object-position: center;
-  width: 100%;
+  width: 70%;
 }
 
 .slideTitle {
   color: #1b1f2d;
   text-align: center;
   font-family: 'ari-condensed-display';
-  font-size: 20px;
+  font-size: 30px;
   font-style: normal;
   font-weight: 400;
   line-height: 140%;
@@ -54,7 +78,7 @@
   color: #1b1f2d;
   text-align: center;
   font-family: 'Trebuchet MS', sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   line-height: 140%;
   margin: 0;
   margin-top: 8px;
@@ -86,7 +110,7 @@
   -webkit-tap-highlight-color: rgba(var(--text-high-contrast-rgb-value), 0.5);
   -webkit-appearance: none;
   appearance: none;
-  background-color: transparent;
+  background-color: #1b1f2d88;
   touch-action: manipulation;
   display: inline-flex;
   text-decoration: none;
@@ -95,8 +119,8 @@
   padding: 0;
   margin: 0;
   box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
-  width: 3rem;
-  height: 3rem;
+  width: 5.7rem;
+  height: 5.7rem;
   z-index: 1;
   border-radius: 50%;
   color: var(--text-body);
@@ -111,6 +135,23 @@
   width: 35%;
   height: 35%;
 }
+
+.prev {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  margin-left: 16px;
+}
+
+.next {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  margin-right: 16px;
+}
+
 .dots {
   display: flex;
   flex-wrap: wrap;

@@ -1,6 +1,5 @@
 import React from 'react';
 import type { EmblaOptionsType } from 'embla-carousel';
-// import { DotButton, useDotButton } from './EmblaCarouselDotButton';
 import {
   PrevButton,
   NextButton,
@@ -23,10 +22,6 @@ type PropType = {
 const EmblaCarousel: React.FC<PropType> = (props) => {
   const { slides, options } = props;
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
-
-  //   const { selectedIndex, scrollSnaps, onDotButtonClick } =
-  //     useDotButton(emblaApi);
-
   const {
     prevBtnDisabled,
     nextBtnDisabled,
@@ -38,36 +33,31 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
     <section className={c.embla}>
       <div className={c.viewport} ref={emblaRef}>
         <div className={c.container}>
-          {slides.map((s) => (
+          {slides.map((s, i) => (
             <div className={c.slide} key={s.text}>
-              {/* <div className={c.slideNumber}>{index + 1}</div> */}
               <div className={c.slideContentWrapper}>
-                <h3 className={c.slideTitle}>{s.title}</h3>
+                <div>
+                  <h3 className={c.slideTitle}>{s.title}</h3>
+                </div>
                 <img className={c.slideImage} src={s.img} alt={s.text} />
                 <p className={c.slideText}>{s.text}</p>
+              </div>
+              <div className={c.slideCount}>
+                {i + 1} / {slides.length}
               </div>
             </div>
           ))}
         </div>
+        {!prevBtnDisabled && (
+          <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
+        )}
+        {!nextBtnDisabled && (
+          <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
+        )}{' '}
       </div>
 
-      <div className={c.controls}>
-        <div className={c.buttons}>
-          <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
-          <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
-        </div>
-
-        {/* <div className={c.dots}>
-          {scrollSnaps.map((_, index) => (
-            <DotButton
-              key={index}
-              onClick={() => onDotButtonClick(index)}
-              className={'embla__dot'.concat(
-                index === selectedIndex ? ' embla__dot--selected' : '',
-              )}
-            />
-          ))}
-        </div> */}
+      <div className={c.controls} style={{ display: 'none' }}>
+        <div className={c.buttons}></div>
       </div>
     </section>
   );
