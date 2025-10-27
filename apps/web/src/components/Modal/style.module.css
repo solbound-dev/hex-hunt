@@ -30,7 +30,6 @@
   opacity: 0;
   transition: opacity 0.4s ease;
   max-height: 50%;
-  height: 100%;
   max-width: 900px;
 
   @media (max-width: 900px) {
@@ -42,6 +41,10 @@
     max-height: 70vh;
     /* height: 100%; */
   }
+}
+
+.h100 {
+  height: 100%;
 }
 
 .modalContainer.active {

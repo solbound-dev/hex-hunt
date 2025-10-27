@@ -26,36 +26,36 @@ import type { EmblaOptionsType } from 'embla-carousel';
 const OPTIONS: EmblaOptionsType = { containScroll: false };
 
 const SLIDES = [
-  // {
-  //   title: 'Move',
-  //   text: 'Click an adjacent hex to move your character before the timer runs out.',
-  //   img: tutorialMove,
-  // },
-  // {
-  //   title: 'Stardust',
-  //   text: 'Collect stardust by moving onto it to gain one-time immunity from shots.',
-  //   img: tutorialStardust,
-  // },
-  // {
-  //   title: 'Shoot',
-  //   text: 'Click "Shoot" and select an adjacent hex to fire in that direction. Shooting stardust moves it to a new location.',
-  //   img: tutorialShoot,
-  // },
-  // {
-  //   title: 'Win',
-  //   text: 'Collect 3 stardust and go to the middle or just be the last one standing.',
-  //   img: tutorialWin,
-  // },
-  // {
-  //   title: 'Collision',
-  //   text: 'If two players move to the same hex, they bounce back to their previous positions, and the hex is marked as last known for both.',
-  //   img: tutorialCollision,
-  // },
-  // {
-  //   title: 'Zone',
-  //   text: 'Every 8 moves, the grid shrinks. Players outside the zone die.',
-  //   img: tutorialZone,
-  // },
+  {
+    title: 'Move',
+    text: 'Click an adjacent hex to move your character before the timer runs out.',
+    img: tutorialMove,
+  },
+  {
+    title: 'Stardust',
+    text: 'Collect stardust by moving onto it to gain one-time immunity from shots.',
+    img: tutorialStardust,
+  },
+  {
+    title: 'Shoot',
+    text: 'Click "Shoot" and select an adjacent hex to fire in that direction. Shooting stardust moves it to a new location.',
+    img: tutorialShoot,
+  },
+  {
+    title: 'Win',
+    text: 'Collect 3 stardust and go to the middle or just be the last one standing.',
+    img: tutorialWin,
+  },
+  {
+    title: 'Collision',
+    text: 'If two players move to the same hex, they bounce back to their previous positions, and the hex is marked as last known for both.',
+    img: tutorialCollision,
+  },
+  {
+    title: 'Zone',
+    text: 'Every 8 moves, the grid shrinks. Players outside the zone die.',
+    img: tutorialZone,
+  },
   {
     title: 'Visibility',
     text: 'Opponents are only visible at their last known position (when they shoot or collect stardust).',
@@ -170,7 +170,10 @@ const FindGamePage = () => {
       </Modal>
 
       <div style={{ pointerEvents: !showInfo ? 'none' : 'auto' }}>
-        <Modal isOpen={showInfo} setIsOpen={() => setShowInfo(false)}>
+        <Modal
+          hasFullHeight={true}
+          isOpen={showInfo}
+          setIsOpen={() => setShowInfo(false)}>
           <Carousel slides={SLIDES} options={OPTIONS} />
         </Modal>
       </div>

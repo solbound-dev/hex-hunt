@@ -38,7 +38,7 @@
 .viewport {
   overflow: hidden;
   height: 100%;
-  max-width: 100%;
+  /* max-width: 100%; */
 }
 .container {
   display: flex;
@@ -69,8 +69,12 @@
 .slideImage {
   object-fit: contain;
   object-position: center;
-  width: 50%;
+  width: 30%;
   height: auto;
+
+  @media (min-height: 1072px) {
+    width: 70%;
+  }
 }
 
 .slideTitle {
@@ -84,12 +88,12 @@
   margin: 0;
   margin-bottom: 16px;
 
-  @media (max-width: 1200px) {
+  @media (max-height: 731px) {
     font-size: 20px;
   }
 
-  @media (max-height: 731px) {
-    font-size: 20px;
+  @media (max-height: 400px) {
+    font-size: 14px;
   }
 }
 .slideText {
@@ -101,12 +105,12 @@
   margin: 0;
   margin-top: 8px;
 
-  @media (max-width: 1200px) {
+  @media (max-height: 731px) {
     font-size: 16px;
   }
 
-  @media (max-height: 731px) {
-    font-size: 16px;
+  @media (max-height: 400px) {
+    font-size: 12px;
   }
 }
 
@@ -143,6 +147,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-height: 500px) {
+    display: none;
+  }
 }
 .button:disabled {
   color: var(--detail-high-contrast);

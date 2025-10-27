@@ -6,9 +6,15 @@ interface Props {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   children: ReactNode;
+  hasFullHeight?: boolean;
 }
 
-const Modal: React.FC<Props> = ({ isOpen, setIsOpen, children }) => {
+const Modal: React.FC<Props> = ({
+  isOpen,
+  setIsOpen,
+  children,
+  hasFullHeight,
+}) => {
   return (
     <>
       <div
@@ -16,7 +22,11 @@ const Modal: React.FC<Props> = ({ isOpen, setIsOpen, children }) => {
           [c.active]: isOpen,
         })}
         onClick={() => setIsOpen(false)}></div>
-      <div className={clsx(c.modalContainer, { [c.active]: isOpen })}>
+      <div
+        className={clsx(c.modalContainer, {
+          [c.active]: isOpen,
+          [c.h100]: hasFullHeight,
+        })}>
         {children}
         {/* <h2 className={c.modalTitle}>
             Select a wallet on Solana to continue...
