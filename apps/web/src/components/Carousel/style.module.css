@@ -69,7 +69,7 @@
 .slideImage {
   object-fit: contain;
   object-position: center;
-  width: 30%;
+  width: 35%;
   height: auto;
 
   @media (min-height: 1072px) {
