@@ -32,12 +32,11 @@ const LoginPage = () => {
             </div>
             <p className={c.infoParagraph}>
               Hextraction is a fast, turn-based strategy game on a shifting hex
-              grid.Play as an{' '}
+              grid. Play as an{' '}
               <span className={c.bold}> Astronaut, Alien, Robot,</span> or{' '}
               <span className={c.bold}>Wizard</span> and outsmart your rivals
-              before the map collapses. Hexes disappear, time runs out,and only
-              the sharpest survive. Easy to learn, endlessly replayable — a
-              modern, high-speed twist on classic strategy.
+              before the map collapses. Hexes disappear, time runs out, and only
+              the sharpest survive.
             </p>
             <WalletConnectButton />
           </div>
