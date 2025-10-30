@@ -157,13 +157,18 @@ export class GameService {
       return null;
     }
 
-    const playerTypeOrder = [
-      PlayerType.Astronaut,
-      PlayerType.Alien,
-      PlayerType.Robot,
-      PlayerType.Wizard,
-    ];
-    const newPlayerType = playerTypeOrder[game.players.length];
+    let newPlayerType = PlayerType.Astronaut;
+
+    if (game.players.some((p) => p.playerType === PlayerType.Astronaut)) {
+      newPlayerType = PlayerType.Alien;
+    }
+    if (game.players.some((p) => p.playerType === PlayerType.Alien)) {
+      newPlayerType = PlayerType.Robot;
+    }
+    if (game.players.some((p) => p.playerType === PlayerType.Robot)) {
+      newPlayerType = PlayerType.Wizard;
+    }
+
     const pos = game.getAvailablePlayerPos();
     const newPlayer = new Player(
       newPlayerType,
