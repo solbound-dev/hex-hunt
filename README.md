@@ -1,6 +1,6 @@
 # Hextraction: Battleship for degens :rocket:
 
-[Play it here!] (https://hextraction.xyz/login)
+[Play it here!](https://hextraction.xyz/login)
 
 ## Turn based PvP stealth game
 
