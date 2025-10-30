@@ -13,3 +13,5 @@ app-release*
 .gradle/
 
 android.keystore
+
+.DS_Store
