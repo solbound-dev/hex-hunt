@@ -15,3 +15,5 @@ app-release*
 android.keystore
 
 .DS_Store
+
+.env.local
