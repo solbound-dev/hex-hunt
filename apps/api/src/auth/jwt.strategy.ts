@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
       jwtFromRequest: (req: Request) => req?.cookies?.accessToken,
       ignoreExpiration: false,
-      secretOrKey: 'napridbili',
+      secretOrKey: process.env.JWT_SIGN_MESSAGE,
     });
   }
 
