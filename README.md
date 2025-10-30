@@ -1,1 +1,1 @@
-# hex-hunt
+# Hextraction: Battleship for degens :rocket:
