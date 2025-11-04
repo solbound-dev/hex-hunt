@@ -13,6 +13,7 @@ export class Game {
     public moves: number = 0,
     public grid: Hex[] = [],
     public cardPos: Hex | null = null,
+    public previousCardPos: Hex | null = null,
     public currentRadius: number = START_GRID_RADIUS,
     public started: boolean = false,
     public draw: boolean = false,
@@ -97,7 +98,7 @@ export class Game {
         position = new Hex(position.q + dir.q, position.r + dir.r);
         if (position.equals(this.cardPos!)) {
           shooter.lastBulletHex = this.cardPos;
-          console.log('shooter', shooter);
+          this.previousCardPos = this.cardPos;
           this.spawnCard();
           return;
         }
@@ -105,9 +106,7 @@ export class Game {
           p.isDead = true;
           p.diedAtMove = this.moves;
           p.lastSeenPos = new Hex(position.q, position.r);
-          console.log('shooter', shooter);
           shooter.lastBulletHex = p.pendingMove;
-          console.log('dead', p.playerType);
         }
       }
       if (!shooter.lastBulletHex) {
