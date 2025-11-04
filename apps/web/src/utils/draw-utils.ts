@@ -771,13 +771,15 @@ function paintInOrder(
           );
         }
       } else if (currentPlayer.isDead) {
-        drawDeadPlayerIsometric(
-          context,
-          currentPlayer.pos!,
-          imgRef.current.skull!,
-          canvasSize,
-          hexSize,
-        );
+        if (!isMovingAnimationActive) {
+          drawDeadPlayerIsometric(
+            context,
+            currentPlayer.pos!,
+            imgRef.current.skull!,
+            canvasSize,
+            hexSize,
+          );
+        }
       }
     } else if (asset.equals(gameState.cardPos!)) {
       drawCardIsometric(
@@ -797,16 +799,18 @@ function paintInOrder(
       });
 
       if (player?.isDead && player.diedAtMove === gameState.moves - 1) {
-        drawDeadPlayerIsometric(
-          context,
-          player.pos!,
-          imgRef.current.skull!,
-          canvasSize,
-          hexSize,
-          {
-            globalAlpha: true,
-          },
-        );
+        if (!isMovingAnimationActive) {
+          drawDeadPlayerIsometric(
+            context,
+            player.pos!,
+            imgRef.current.skull!,
+            canvasSize,
+            hexSize,
+            {
+              globalAlpha: true,
+            },
+          );
+        }
       } else {
         if (!player?.isDead) {
           drawLastSeenPlayerIsometric(
