@@ -89,12 +89,12 @@ function drawHexIsometric(
   ctx.restore();
   ctx.save();
 
-  // ctx.fillStyle = 'white';
-  // ctx.font = `${Math.floor(size / 4)}px Arial`;
-  // ctx.textAlign = 'center';
-  // ctx.textBaseline = 'middle';
-  // const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
-  // ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
+  ctx.fillStyle = 'white';
+  ctx.font = `${Math.floor(size / 4)}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
+  ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
 }
 
 export function drawPlayerIsometric(
@@ -474,7 +474,6 @@ export function repaintAnimationLoop(
   const finalHex = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);
 
   const { x: ix, y: iy } = hexToPixel(initialHex, canvasSize, hexSize);
-
   const { x: fx, y: fy } = hexToPixel(finalHex, canvasSize, hexSize);
 
   function moveAnimation(timestamp: number) {
@@ -488,7 +487,6 @@ export function repaintAnimationLoop(
         canvasRef.current!.width,
         canvasRef.current!.height,
       );
-
       repaint(
         canvasRef,
         imgRef,
@@ -502,13 +500,11 @@ export function repaintAnimationLoop(
         isMovingAnimationActive,
         walletId?.toString(),
       );
-
       const slopeX = fx - ix;
       const slopeY = fy - iy;
 
       const x = ix + slopeX * easeInOutSine(elapsed);
       const y = iy + slopeY * easeInOutSine(elapsed);
-
       const { ox, oy } = applyIsometricTransformation(x, y, hexSize);
 
       if (isMovingAnimationActive) {
@@ -518,12 +514,65 @@ export function repaintAnimationLoop(
         );
 
         drawPlayerMoving(context!, ox, oy, playerImage!);
+
+        //loop for drawing bullets
+        gameState?.players.forEach((p) => {
+          const { x: ixBullet, y: iyBullet } = hexToPixel(
+            p.pos!,
+            canvasSize,
+            hexSize,
+          );
+
+          if (!p.lastBulletHex) return;
+
+          const { x: fxBullet, y: fyBullet } = hexToPixel(
+            p.lastBulletHex,
+            canvasSize,
+            hexSize,
+          );
+
+          const slopeXBullet = fxBullet - ixBullet;
+          const slopeYBullet = fyBullet - iyBullet;
+
+          const xBullet = ixBullet + slopeXBullet * elapsed;
+          const yBullet = iyBullet + slopeYBullet * elapsed;
+          const { ox: oxBullet, oy: oyBullet } = applyIsometricTransformation(
+            xBullet,
+            yBullet,
+            hexSize,
+          );
+
+          drawBulletMoving(
+            context!,
+            oxBullet,
+            oyBullet,
+            imgRef.current.bullet!,
+          );
+        });
       }
 
       window.requestAnimationFrame(moveAnimation);
     }
   }
   window.requestAnimationFrame(moveAnimation);
+}
+
+function drawBulletMoving(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  image: HTMLImageElement,
+) {
+  if (!image) return;
+  if (image.complete) {
+    ctx.drawImage(
+      image,
+      x - image.width,
+      y - image.height,
+      image.width * 2,
+      image.height * 2,
+    );
+  }
 }
 
 function drawPlayerMoving(

@@ -18,6 +18,7 @@ export class Player {
     public isImmune: boolean = false,
     public didJustCollide: boolean = false,
     public diedAtMove: number | null = null,
+    public lastBulletHex: Hex | null = null,
   ) {}
 }
 

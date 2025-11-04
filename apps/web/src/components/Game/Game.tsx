@@ -170,8 +170,6 @@ const Game = () => {
 
   if (!imgRef) return;
 
-  console.log(isMovingAnimationActive);
-
   return (
     <div className={c.gameWrapper} style={{ objectFit: 'cover' }}>
       <GameStatus

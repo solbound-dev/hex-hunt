@@ -21,6 +21,7 @@ export type ImgRef = {
   wizard: HTMLImageElement | null;
   skull: HTMLImageElement | null;
   card: HTMLImageElement | null;
+  bullet: HTMLImageElement | null;
 };
 
 export const useInitializeGame = (canvasSize: number, hexSize: number) => {
@@ -31,6 +32,7 @@ export const useInitializeGame = (canvasSize: number, hexSize: number) => {
     wizard: null,
     skull: null,
     card: null,
+    bullet: null,
   });
 
   setImgRef(imgRef, canvasSize);

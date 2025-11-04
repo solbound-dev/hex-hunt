@@ -4,6 +4,7 @@ import robotSrc from '../assets/robot2.png';
 import wizardSrc from '../assets/wizard2.png';
 import cardSrc from '../assets/card2.png';
 import skullSrc from '../assets/skull2.png';
+import bulletSrc from '../assets/bullet.png';
 
 import { Hex } from './calculation-utils';
 import type { ImgRef } from '../hooks/game';
@@ -84,5 +85,13 @@ export function setImgRef(imgRef: React.RefObject<ImgRef>, canvasSize: number) {
   card.height = (43 / 1000) * canvasSize;
   card.onload = () => {
     imgRef.current.card = card;
+  };
+
+  const bullet = new Image();
+  bullet.src = bulletSrc;
+  bullet.width = (13 / 1000) * canvasSize;
+  bullet.height = (25 / 1000) * canvasSize;
+  bullet.onload = () => {
+    imgRef.current.bullet = bullet;
   };
 }

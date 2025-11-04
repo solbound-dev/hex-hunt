@@ -75,6 +75,7 @@ export class Game {
   }
 
   shootInDirection(directionHex: Hex, shooter: Player) {
+    shooter.previousPos = shooter.pos;
     const RANGE = 3;
 
     this.players.forEach((p) => {
@@ -95,6 +96,8 @@ export class Game {
       while (current.distanceTo(position) < RANGE && this.isInGrid(position)) {
         position = new Hex(position.q + dir.q, position.r + dir.r);
         if (position.equals(this.cardPos!)) {
+          shooter.lastBulletHex = this.cardPos;
+          console.log('shooter', shooter);
           this.spawnCard();
           return;
         }
@@ -102,8 +105,13 @@ export class Game {
           p.isDead = true;
           p.diedAtMove = this.moves;
           p.lastSeenPos = new Hex(position.q, position.r);
+          console.log('shooter', shooter);
+          shooter.lastBulletHex = p.pendingMove;
           console.log('dead', p.playerType);
         }
+      }
+      if (!shooter.lastBulletHex) {
+        shooter.lastBulletHex = new Hex(position.q, position.r);
       }
     });
   }
