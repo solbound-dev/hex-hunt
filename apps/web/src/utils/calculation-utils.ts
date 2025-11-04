@@ -1,6 +1,6 @@
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
-export const MOVE_DURATION_IN_SECONDS = 20;
+export const MOVE_DURATION_IN_SECONDS = 14;
 export const MOVE_ANIMATION_DURATION_IN_MS = 600;
 
 export type GameData = {

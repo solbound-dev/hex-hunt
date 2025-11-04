@@ -273,7 +273,7 @@ export class GameService {
   }
 
   calculateTurnOutcome(game: Game) {
-    game.previousCardPos = null;
+    game.previousCardPos = game.cardPos;
     game.players.forEach((p) => {
       if (p.isShooting) {
         p.lastSeenPos = p.pos;
