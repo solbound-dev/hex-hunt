@@ -451,7 +451,6 @@ export function repaintAnimationLoop(
   hexSize: number,
   canvasSize: number,
   isMovingAnimationActive: boolean,
-  setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
   walletId?: string,
 ) {
   if (!gameState) return;

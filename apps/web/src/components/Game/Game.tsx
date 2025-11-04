@@ -98,7 +98,6 @@ const Game = () => {
       hexSize,
       canvasSize,
       isMovingAnimationActive,
-      setIsMovingAnimationActive,
       walletId?.toString(),
     );
 

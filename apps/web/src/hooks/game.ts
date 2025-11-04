@@ -63,7 +63,6 @@ export const useInitializeSockets = (
   setGameId: (gameId: string) => void,
   setClickedHex: (hex: Hex | null) => void,
   setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
-  setIsMovingAnimationFinished: (isMovingAnimationFinished: boolean) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
   const [, navigate] = useLocation();
@@ -115,7 +114,6 @@ export const useInitializeSockets = (
       setMadeMove(false);
       setClickedHex(null);
       setIsMovingAnimationActive(true);
-      // setIsMovingAnimationFinished(false);
 
       setTimeout(() => {
         setIsMovingAnimationActive(false);
@@ -136,7 +134,6 @@ export const useInitializeSockets = (
     setGameId,
     setClickedHex,
     navigate,
-    setIsMovingAnimationFinished,
     setIsMovingAnimationActive,
   ]);
 
