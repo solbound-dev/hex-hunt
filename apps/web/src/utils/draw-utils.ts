@@ -542,11 +542,22 @@ export function repaintAnimationLoop(
             hexSize,
           );
 
+          const { ox: ixBulletIsometric, oy: iyBulletIsometric } =
+            applyIsometricTransformation(ixBullet, iyBullet, hexSize);
+
+          const { ox: fxBulletIsometric, oy: fyBulletIsometric } =
+            applyIsometricTransformation(fxBullet, fyBullet, hexSize);
+
           drawBulletMoving(
             context!,
             oxBullet,
             oyBullet,
             imgRef.current.bullet!,
+            Math.PI / 2 -
+              Math.atan2(
+                iyBulletIsometric - fyBulletIsometric,
+                fxBulletIsometric - ixBulletIsometric,
+              ),
           );
         });
       }
@@ -562,16 +573,23 @@ function drawBulletMoving(
   x: number,
   y: number,
   image: HTMLImageElement,
+  angle: number,
 ) {
   if (!image) return;
   if (image.complete) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+
     ctx.drawImage(
       image,
-      x - image.width,
-      y - image.height,
+      -image.width,
+      -image.height,
       image.width * 2,
       image.height * 2,
     );
+
+    ctx.restore();
   }
 }
 
