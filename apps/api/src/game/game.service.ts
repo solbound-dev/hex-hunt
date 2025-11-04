@@ -258,7 +258,11 @@ export class GameService {
     if (!waitingForMoves) {
       this.calculateTurnOutcome(game);
 
+      console.log(game.players);
       server.to(data.gameId).emit('gameState', game.serialize());
+      game.players.forEach((p) => {
+        p.lastBulletHex = null;
+      });
 
       if (game.interval) {
         clearInterval(game.interval);
@@ -326,6 +330,9 @@ export class GameService {
       console.log('------------------');
 
       server.to(gameId).emit('gameState', game.serialize());
+      game.players.forEach((p) => {
+        p.lastBulletHex = null;
+      });
     }, MOVE_DURATION_IN_SECONDS * 1000);
 
     return interval;

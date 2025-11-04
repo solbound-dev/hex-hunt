@@ -89,12 +89,12 @@ function drawHexIsometric(
   ctx.restore();
   ctx.save();
 
-  // ctx.fillStyle = 'white';
-  // ctx.font = `${Math.floor(size / 4)}px Arial`;
-  // ctx.textAlign = 'center';
-  // ctx.textBaseline = 'middle';
-  // const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
-  // ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
+  ctx.fillStyle = 'white';
+  ctx.font = `${Math.floor(size / 4)}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
+  ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
 }
 
 export function drawPlayerIsometric(
@@ -451,7 +451,6 @@ export function repaintAnimationLoop(
   hexSize: number,
   canvasSize: number,
   isMovingAnimationActive: boolean,
-  setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
   walletId?: string,
 ) {
   if (!gameState) return;
@@ -474,7 +473,6 @@ export function repaintAnimationLoop(
   const finalHex = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);
 
   const { x: ix, y: iy } = hexToPixel(initialHex, canvasSize, hexSize);
-
   const { x: fx, y: fy } = hexToPixel(finalHex, canvasSize, hexSize);
 
   function moveAnimation(timestamp: number) {
@@ -488,7 +486,6 @@ export function repaintAnimationLoop(
         canvasRef.current!.width,
         canvasRef.current!.height,
       );
-
       repaint(
         canvasRef,
         imgRef,
@@ -502,13 +499,11 @@ export function repaintAnimationLoop(
         isMovingAnimationActive,
         walletId?.toString(),
       );
-
       const slopeX = fx - ix;
       const slopeY = fy - iy;
 
       const x = ix + slopeX * easeInOutSine(elapsed);
       const y = iy + slopeY * easeInOutSine(elapsed);
-
       const { ox, oy } = applyIsometricTransformation(x, y, hexSize);
 
       if (isMovingAnimationActive) {
@@ -518,12 +513,83 @@ export function repaintAnimationLoop(
         );
 
         drawPlayerMoving(context!, ox, oy, playerImage!);
+
+        //loop for drawing bullets
+        gameState?.players.forEach((p) => {
+          const { x: ixBullet, y: iyBullet } = hexToPixel(
+            p.pos!,
+            canvasSize,
+            hexSize,
+          );
+
+          if (!p.lastBulletHex) return;
+
+          const { x: fxBullet, y: fyBullet } = hexToPixel(
+            p.lastBulletHex,
+            canvasSize,
+            hexSize,
+          );
+
+          const slopeXBullet = fxBullet - ixBullet;
+          const slopeYBullet = fyBullet - iyBullet;
+
+          const xBullet = ixBullet + slopeXBullet * elapsed;
+          const yBullet = iyBullet + slopeYBullet * elapsed;
+          const { ox: oxBullet, oy: oyBullet } = applyIsometricTransformation(
+            xBullet,
+            yBullet,
+            hexSize,
+          );
+
+          const { ox: ixBulletIsometric, oy: iyBulletIsometric } =
+            applyIsometricTransformation(ixBullet, iyBullet, hexSize);
+
+          const { ox: fxBulletIsometric, oy: fyBulletIsometric } =
+            applyIsometricTransformation(fxBullet, fyBullet, hexSize);
+
+          drawBulletMoving(
+            context!,
+            oxBullet,
+            oyBullet,
+            imgRef.current.bullet!,
+            Math.PI / 2 -
+              Math.atan2(
+                iyBulletIsometric - fyBulletIsometric,
+                fxBulletIsometric - ixBulletIsometric,
+              ),
+          );
+        });
       }
 
       window.requestAnimationFrame(moveAnimation);
     }
   }
   window.requestAnimationFrame(moveAnimation);
+}
+
+function drawBulletMoving(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  image: HTMLImageElement,
+  angle: number,
+) {
+  if (!image) return;
+  if (image.complete) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+
+    ctx.drawImage(
+      image,
+      -image.width,
+      -image.height,
+      image.width * 2,
+      image.height * 2,
+    );
+
+    ctx.restore();
+  }
 }
 
 function drawPlayerMoving(
@@ -704,13 +770,15 @@ function paintInOrder(
           );
         }
       } else if (currentPlayer.isDead) {
-        drawDeadPlayerIsometric(
-          context,
-          currentPlayer.pos!,
-          imgRef.current.skull!,
-          canvasSize,
-          hexSize,
-        );
+        if (!isMovingAnimationActive) {
+          drawDeadPlayerIsometric(
+            context,
+            currentPlayer.pos!,
+            imgRef.current.skull!,
+            canvasSize,
+            hexSize,
+          );
+        }
       }
     } else if (asset.equals(gameState.cardPos!)) {
       drawCardIsometric(
@@ -730,16 +798,18 @@ function paintInOrder(
       });
 
       if (player?.isDead && player.diedAtMove === gameState.moves - 1) {
-        drawDeadPlayerIsometric(
-          context,
-          player.pos!,
-          imgRef.current.skull!,
-          canvasSize,
-          hexSize,
-          {
-            globalAlpha: true,
-          },
-        );
+        if (!isMovingAnimationActive) {
+          drawDeadPlayerIsometric(
+            context,
+            player.pos!,
+            imgRef.current.skull!,
+            canvasSize,
+            hexSize,
+            {
+              globalAlpha: true,
+            },
+          );
+        }
       } else {
         if (!player?.isDead) {
           drawLastSeenPlayerIsometric(

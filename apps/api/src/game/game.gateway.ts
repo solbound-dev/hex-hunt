@@ -279,8 +279,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const game = this.gameService.updateGame(data, token, this.server);
     if (!game) return;
-
-    // this.server.to(data.gameId).emit('gameState', game);
   }
 
   // @SubscribeMessage('restartGame')
