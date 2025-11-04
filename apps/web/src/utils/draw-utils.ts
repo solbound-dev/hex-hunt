@@ -4,6 +4,7 @@ import {
   Hex,
   hexToPixel,
   isInGrid,
+  MOVE_ANIMATION_DURATION_IN_MS,
   PI,
   Player,
   PlayerType,
@@ -439,6 +440,111 @@ export function drawGridIsometric(
   );
 }
 
+export function repaintAnimationLoop(
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
+  imgRef: React.RefObject<ImgRef>,
+  gameState: GameData | undefined | null,
+  isCanvasHovered: boolean,
+  isShooting: boolean,
+  hoveredHex: Hex | null,
+  clickedHex: Hex | null,
+  hexSize: number,
+  canvasSize: number,
+  isMovingAnimationActive: boolean,
+  setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
+  walletId?: string,
+) {
+  if (!gameState) return;
+  if (!walletId) return;
+  if (!gameState.started) return;
+
+  const context = canvasRef.current?.getContext('2d');
+  if (!context) return;
+
+  const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
+
+  if (!currentPlayer || !currentPlayer.previousPos) return;
+
+  let animationStart: number | null = null;
+
+  const initialHex = new Hex(
+    currentPlayer.previousPos!.q,
+    currentPlayer.previousPos!.r,
+  );
+  const finalHex = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);
+
+  const { x: ix, y: iy } = hexToPixel(initialHex, canvasSize, hexSize);
+
+  const { x: fx, y: fy } = hexToPixel(finalHex, canvasSize, hexSize);
+
+  function moveAnimation(timestamp: number) {
+    if (!animationStart) animationStart = timestamp;
+    const elapsed =
+      (timestamp - animationStart) / MOVE_ANIMATION_DURATION_IN_MS;
+    if (elapsed <= 1) {
+      context!.clearRect(
+        0,
+        0,
+        canvasRef.current!.width,
+        canvasRef.current!.height,
+      );
+
+      repaint(
+        canvasRef,
+        imgRef,
+        gameState,
+        isCanvasHovered,
+        isShooting,
+        hoveredHex,
+        clickedHex,
+        hexSize,
+        canvasSize,
+        isMovingAnimationActive,
+        walletId?.toString(),
+      );
+
+      const slopeX = fx - ix;
+      const slopeY = fy - iy;
+
+      const x = ix + slopeX * easeInOutSine(elapsed);
+      const y = iy + slopeY * easeInOutSine(elapsed);
+
+      const { ox, oy } = applyIsometricTransformation(x, y, hexSize);
+
+      if (isMovingAnimationActive) {
+        const playerImage = mapPlayerTypeToImage(
+          currentPlayer!.playerType,
+          imgRef,
+        );
+
+        drawPlayerMoving(context!, ox, oy, playerImage!);
+      }
+
+      window.requestAnimationFrame(moveAnimation);
+    }
+  }
+  window.requestAnimationFrame(moveAnimation);
+}
+
+function drawPlayerMoving(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  image: HTMLImageElement,
+) {
+  if (!image) return;
+
+  if (image.complete) {
+    ctx.drawImage(
+      image,
+      x - image.width,
+      y - image.height * 1.5,
+      image.width * 2,
+      image.height * 2.1,
+    );
+  }
+}
+
 export function repaint(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   imgRef: React.RefObject<ImgRef>,
@@ -449,6 +555,7 @@ export function repaint(
   clickedHex: Hex | null,
   hexSize: number,
   canvasSize: number,
+  isMovingAnimationActive: boolean,
   walletId?: string,
 ) {
   if (!gameState) return;
@@ -457,7 +564,7 @@ export function repaint(
   const context = canvasRef.current?.getContext('2d');
   if (!context) return;
 
-  context.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
+  // context.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
 
   drawGridIsometric(context, generateGrid(GRID_RADIUS), hexSize, canvasSize);
 
@@ -534,6 +641,7 @@ export function repaint(
     clickedHex,
     hexSize,
     canvasSize,
+    isMovingAnimationActive,
   );
 }
 
@@ -547,9 +655,9 @@ function paintInOrder(
   clickedHex: Hex | null,
   hexSize: number,
   canvasSize: number,
+  isMovingAnimationActive: boolean,
 ) {
   const gameContainsWinner = gameState.players.some((p) => p.won);
-
   if (
     isCanvasHovered &&
     !clickedHex &&
@@ -570,12 +678,10 @@ function paintInOrder(
   otherPlayers.forEach((p) =>
     assets.push({ pos: p.lastSeenPos!, type: p.playerType }),
   );
-
   assets.push(
     { pos: currentPlayer.pos!, type: currentPlayer.playerType },
     { pos: gameState.cardPos!, type: 'card' },
   );
-
   const sortedAssets = assets.sort((a, b) => a.pos.r - b.pos.r);
   sortedAssets.forEach((sa) => {
     const asset = new Hex(sa.pos.q, sa.pos.r);
@@ -586,15 +692,17 @@ function paintInOrder(
         imgRef,
       );
       if (!currentPlayer.isDead) {
-        drawPlayerIsometric(
-          context,
-          currentPlayer.pos!,
-          currentPlayer.playerType,
-          currentPlayer.isImmune,
-          hexSize,
-          playerImage!,
-          canvasSize,
-        );
+        if (!isMovingAnimationActive) {
+          drawPlayerIsometric(
+            context,
+            currentPlayer.pos!,
+            currentPlayer.playerType,
+            currentPlayer.isImmune,
+            hexSize,
+            playerImage!,
+            canvasSize,
+          );
+        }
       } else if (currentPlayer.isDead) {
         drawDeadPlayerIsometric(
           context,
@@ -675,4 +783,8 @@ function mapPlayerTypeToImage(
   }
 
   return image;
+}
+
+function easeInOutSine(t: number): number {
+  return -(Math.cos(Math.PI * t) - 1) / 2;
 }

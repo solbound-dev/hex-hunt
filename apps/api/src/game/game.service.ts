@@ -176,6 +176,7 @@ export class GameService {
       token.walletId,
       pos,
       pos,
+      pos,
     );
     game.players.push(newPlayer);
 
@@ -257,8 +258,6 @@ export class GameService {
     if (!waitingForMoves) {
       this.calculateTurnOutcome(game);
 
-      // const gameHasWinner = game.players.some((p) => p.won);
-
       server.to(data.gameId).emit('gameState', game.serialize());
 
       if (game.interval) {
@@ -283,6 +282,7 @@ export class GameService {
       // if (!p.isShooting && !p.didJustCollide && !p.isDead) {
       if (!p.isShooting && !p.didJustCollide) {
         if (p.pendingMove) {
+          p.previousPos = p.pos;
           p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
         }
       }
@@ -324,6 +324,7 @@ export class GameService {
         ),
       );
       console.log('------------------');
+
       server.to(gameId).emit('gameState', game.serialize());
     }, MOVE_DURATION_IN_SECONDS * 1000);
 
