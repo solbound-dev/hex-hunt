@@ -9,6 +9,7 @@ export type GameData = {
   warningHexes: Hex[];
   moves: number;
   cardPos: Hex | null;
+  previousCardPos: Hex | null;
   currentRadius: number;
   started: boolean;
   won: boolean;

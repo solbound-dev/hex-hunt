@@ -781,9 +781,14 @@ function paintInOrder(
         }
       }
     } else if (asset.equals(gameState.cardPos!)) {
+      const cardPosToDraw =
+        isMovingAnimationActive && gameState.previousCardPos
+          ? gameState.previousCardPos
+          : gameState.cardPos;
+
       drawCardIsometric(
         context,
-        gameState.cardPos,
+        cardPosToDraw,
         imgRef.current.card!,
         hexSize,
         canvasSize,
