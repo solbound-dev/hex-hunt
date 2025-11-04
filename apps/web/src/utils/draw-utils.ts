@@ -89,12 +89,12 @@ function drawHexIsometric(
   ctx.restore();
   ctx.save();
 
-  ctx.fillStyle = 'white';
-  ctx.font = `${Math.floor(size / 4)}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
-  ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
+  // ctx.fillStyle = 'white';
+  // ctx.font = `${Math.floor(size / 4)}px Arial`;
+  // ctx.textAlign = 'center';
+  // ctx.textBaseline = 'middle';
+  // const { ox: ocx, oy: ocy } = applyIsometricTransformation(x, y, size);
+  // ctx.fillText(`${hex.q},${hex.r}`, ocx, ocy);
 }
 
 export function drawPlayerIsometric(
