@@ -1,4 +1,6 @@
 import {
+  easeInOutSine,
+  easeOutSine,
   generateGrid,
   GRID_RADIUS,
   Hex,
@@ -533,8 +535,8 @@ export function repaintAnimationLoop(
           const slopeXBullet = fxBullet - ixBullet;
           const slopeYBullet = fyBullet - iyBullet;
 
-          const xBullet = ixBullet + slopeXBullet * elapsed;
-          const yBullet = iyBullet + slopeYBullet * elapsed;
+          const xBullet = ixBullet + slopeXBullet * easeOutSine(elapsed);
+          const yBullet = iyBullet + slopeYBullet * easeOutSine(elapsed);
           const { ox: oxBullet, oy: oyBullet } = applyIsometricTransformation(
             xBullet,
             yBullet,
@@ -858,8 +860,4 @@ function mapPlayerTypeToImage(
   }
 
   return image;
-}
-
-function easeInOutSine(t: number): number {
-  return -(Math.cos(Math.PI * t) - 1) / 2;
 }
