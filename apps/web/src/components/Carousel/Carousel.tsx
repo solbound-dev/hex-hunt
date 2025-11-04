@@ -7,6 +7,7 @@ import {
 } from './CarouselArrowButtons';
 import useEmblaCarousel from 'embla-carousel-react';
 import c from './style.module.css';
+import clsx from 'clsx';
 
 type Slide = {
   title: string;
@@ -37,12 +38,18 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
             <div className={c.slide} key={s.text}>
               <div className={c.slideContentWrapper}>
                 <div>
-                  <h3 className={c.slideTitle}>{s.title}</h3>
+                  <h3 className={clsx(c.slideTitle, c.unselectable)}>
+                    {s.title}
+                  </h3>
                 </div>
-                <img className={c.slideImage} src={s.img} alt={s.text} />
-                <p className={c.slideText}>{s.text}</p>
+                <img
+                  className={clsx(c.slideImage, c.unselectable)}
+                  src={s.img}
+                  alt={s.text}
+                />
+                <p className={clsx(c.slideText, c.unselectable)}>{s.text}</p>
               </div>
-              <div className={c.slideCount}>
+              <div className={clsx(c.slideCount, c.unselectable)}>
                 {i + 1} / {slides.length}
               </div>
             </div>
