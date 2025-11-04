@@ -7,7 +7,7 @@ import {
   isSameMove,
   pixelToHex,
 } from '../../utils/calculation-utils';
-import { repaint } from '../../utils/draw-utils';
+import { repaintAnimationLoop } from '../../utils/draw-utils';
 
 import { isNeighbor } from '../../utils/utils';
 import { GameStatus } from './GameStatus';
@@ -49,6 +49,8 @@ const Game = () => {
     setClickedHex,
     canvasSize,
     hexSize,
+    isMovingAnimationActive,
+    setIsMovingAnimationActive,
   } = useGame();
 
   useEffect(() => {
@@ -77,13 +79,15 @@ const Game = () => {
 
       const nearest = getNearestHex(gameState, x, y, canvasSize, hexSize);
 
-      setHoveredHex(nearest);
+      if (!isMovingAnimationActive) {
+        setHoveredHex(nearest);
+      }
     };
     canvas.addEventListener('mousemove', handleMouseMove);
 
     if (!gameId || !gameState?.started) return;
 
-    repaint(
+    repaintAnimationLoop(
       canvasRef,
       imgRef,
       gameState,
@@ -93,6 +97,8 @@ const Game = () => {
       clickedHex,
       hexSize,
       canvasSize,
+      isMovingAnimationActive,
+      setIsMovingAnimationActive,
       walletId?.toString(),
     );
 
@@ -114,6 +120,8 @@ const Game = () => {
     clickedHex,
     canvasSize,
     hexSize,
+    isMovingAnimationActive,
+    setIsMovingAnimationActive,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -162,6 +170,8 @@ const Game = () => {
 
   if (!imgRef) return;
 
+  console.log(isMovingAnimationActive);
+
   return (
     <div className={c.gameWrapper} style={{ objectFit: 'cover' }}>
       <GameStatus
@@ -178,8 +188,16 @@ const Game = () => {
             className={c.canvas}
             ref={canvasRef}
             onClick={handleCanvasClick}
-            onMouseEnter={() => setIsCanvasHovered(true)}
-            onMouseLeave={() => setIsCanvasHovered(false)}
+            onMouseEnter={() => {
+              if (!isMovingAnimationActive) {
+                setIsCanvasHovered(true);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!isMovingAnimationActive) {
+                setIsCanvasHovered(false);
+              }
+            }}
           />
           <div className={c.shootButton}>
             <Button
@@ -193,6 +211,7 @@ const Game = () => {
               {isShooting ? 'Cancel Shooting' : 'Shoot'}
             </Button>
           </div>
+          {isMovingAnimationActive && <div className={c.cover}></div>}
         </div>
       </div>
     </div>

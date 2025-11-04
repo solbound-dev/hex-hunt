@@ -5,6 +5,7 @@ import {
   generateGrid,
   GRID_RADIUS,
   Hex,
+  MOVE_ANIMATION_DURATION_IN_MS,
   MOVE_DURATION_IN_SECONDS,
   type GameData,
 } from '../utils/calculation-utils';
@@ -59,6 +60,8 @@ export const useInitializeSockets = (
   setAvailableGames: (games: string[]) => void,
   setGameId: (gameId: string) => void,
   setClickedHex: (hex: Hex | null) => void,
+  setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
+  setIsMovingAnimationFinished: (isMovingAnimationFinished: boolean) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
   const [, navigate] = useLocation();
@@ -109,6 +112,12 @@ export const useInitializeSockets = (
       setIsShooting(false);
       setMadeMove(false);
       setClickedHex(null);
+      setIsMovingAnimationActive(true);
+      // setIsMovingAnimationFinished(false);
+
+      setTimeout(() => {
+        setIsMovingAnimationActive(false);
+      }, MOVE_ANIMATION_DURATION_IN_MS);
     });
 
     socketRef.current.on('reconnect', (data) => {
@@ -125,6 +134,8 @@ export const useInitializeSockets = (
     setGameId,
     setClickedHex,
     navigate,
+    setIsMovingAnimationFinished,
+    setIsMovingAnimationActive,
   ]);
 
   return socketRef;

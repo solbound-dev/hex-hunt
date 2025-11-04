@@ -1,13 +1,7 @@
-// const width = window.innerWidth;
-// const height = window.innerHeight;
-
-// export const CANVAS_SIZE =
-//   height / width > 2160 / 3840 ? height / 1.1 : width / 2;
-
-// export const HEX_SIZE = (CANVAS_SIZE / 70) * 5.8;
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
 export const MOVE_DURATION_IN_SECONDS = 20;
+export const MOVE_ANIMATION_DURATION_IN_MS = 300;
 
 export type GameData = {
   grid: Hex[];
@@ -46,6 +40,7 @@ export class Player {
     public won: boolean = false,
     public wins: number = 0,
     public diedAtMove: number | null = null,
+    public previousPos: Hex | null = null,
   ) {}
 }
 

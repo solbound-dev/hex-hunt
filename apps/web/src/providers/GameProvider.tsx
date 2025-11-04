@@ -31,6 +31,10 @@ interface GameContext {
   socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
   canvasSize: number;
   hexSize: number;
+  isMovingAnimationActive: boolean;
+  setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void;
+  isMovingAnimationFinished: boolean;
+  setIsMovingAnimationFinished: (isMovingAnimationFinished: boolean) => void;
 }
 
 const initialContextValue = {
@@ -55,6 +59,10 @@ const initialContextValue = {
   socketRef: { current: null },
   canvasSize: 0,
   hexSize: 0,
+  isMovingAnimationActive: false,
+  setIsMovingAnimationActive: () => {},
+  isMovingAnimationFinished: false,
+  setIsMovingAnimationFinished: () => {},
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -76,6 +84,9 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     MOVE_DURATION_IN_SECONDS,
   );
   const [availableGames, setAvailableGames] = useState<string[]>([]);
+  const [isMovingAnimationActive, setIsMovingAnimationActive] = useState(false);
+  const [isMovingAnimationFinished, setIsMovingAnimationFinished] =
+    useState(false);
 
   const size = useScreenSize();
   const canvasSize =
@@ -90,6 +101,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setAvailableGames,
     setGameId,
     setClickedHex,
+    setIsMovingAnimationActive,
+    setIsMovingAnimationFinished,
   );
   useTimer(
     gameState!,
@@ -122,6 +135,10 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setClickedHex,
     canvasSize,
     hexSize,
+    isMovingAnimationActive,
+    setIsMovingAnimationActive,
+    isMovingAnimationFinished,
+    setIsMovingAnimationFinished,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
