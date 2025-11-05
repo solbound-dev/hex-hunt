@@ -18,6 +18,7 @@ import { useLocation } from 'wouter';
 import { useGame } from '../../providers/GameProvider';
 import { useInitializeGame } from '../../hooks/game';
 import Button from '../Button';
+import AnimatedPopup from '../AnimatedPopup';
 
 const Game = () => {
   const { isAuthenticated, isCheckingAuth } = useAuth();
@@ -51,6 +52,9 @@ const Game = () => {
     hexSize,
     isMovingAnimationActive,
     setIsMovingAnimationActive,
+    showPopup,
+    setShowPopup,
+    popupEvents,
   } = useGame();
 
   useEffect(() => {
@@ -171,6 +175,13 @@ const Game = () => {
 
   return (
     <div className={c.gameWrapper} style={{ objectFit: 'cover' }}>
+      {showPopup && (
+        <AnimatedPopup
+          canvasSize={canvasSize}
+          setShowPopup={setShowPopup}
+          events={popupEvents}
+        />
+      )}
       <GameStatus
         timeRemaining={timeRemaining}
         madeMove={madeMove}
