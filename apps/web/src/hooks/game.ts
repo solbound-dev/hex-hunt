@@ -7,12 +7,14 @@ import {
   Hex,
   MOVE_ANIMATION_DURATION_IN_MS,
   MOVE_DURATION_IN_SECONDS,
+  PlayerType,
   type GameData,
 } from '../utils/calculation-utils';
 import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import toast from 'react-hot-toast';
 import { useLocation } from 'wouter';
+import { EventType } from '../components/AnimatedPopup/AnimatedPopup';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -63,6 +65,8 @@ export const useInitializeSockets = (
   setGameId: (gameId: string) => void,
   setClickedHex: (hex: Hex | null) => void,
   setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
+  setShowPopup: (showPopup: boolean) => void,
+  setPopupEvents: (popupEvents: EventType[]) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
   const [, navigate] = useLocation();
@@ -73,7 +77,7 @@ export const useInitializeSockets = (
     });
 
     socketRef.current.on('playerLeft', () => {
-      toast.error('Player left');
+      toast.error('Player left', { position: 'bottom-left' });
     });
 
     socketRef.current.on('availableGames', (data) => {
@@ -94,21 +98,41 @@ export const useInitializeSockets = (
     });
 
     socketRef.current.on('alreadyHasRoom', () => {
-      toast.error('You are already in another room');
+      toast.error('You are already in another room', {
+        position: 'bottom-left',
+      });
     });
 
     socketRef.current.on('playerJoined', (data) => {
       console.log('Player joined:', data);
-      toast.success('Joined!');
+      toast.success('Joined!', { position: 'bottom-left' });
       setGameId(data.gameId);
       setGameState(data.game);
     });
-    socketRef.current.on('gameState', (data) => {
+    socketRef.current.on('gameState', (data: GameData) => {
       console.log('Game state updated:', data);
-      toast.success(`Move made ${data.moves}`);
-      if ((data.moves + 1) % 8 === 0) {
+
+      const events: EventType[] = [];
+
+      if ((data.moves + 1) % 6 === 0) {
         toast.success('Zone contracting on next move!');
       }
+
+      data.players.forEach((p) => {
+        if (p.diedAtMove === data.moves - 1) {
+          if (p.playerType === PlayerType.Astronaut)
+            events.push(EventType.AstronautDied);
+          if (p.playerType === PlayerType.Alien)
+            events.push(EventType.AlienDied);
+          if (p.playerType === PlayerType.Robot)
+            events.push(EventType.RobotDied);
+          if (p.playerType === PlayerType.Wizard)
+            events.push(EventType.WizardDied);
+        }
+      });
+
+      setShowPopup(true);
+      setPopupEvents(events);
       setGameState(data);
       setIsShooting(false);
       setMadeMove(false);
@@ -135,6 +159,8 @@ export const useInitializeSockets = (
     setClickedHex,
     navigate,
     setIsMovingAnimationActive,
+    setShowPopup,
+    setPopupEvents,
   ]);
 
   return socketRef;

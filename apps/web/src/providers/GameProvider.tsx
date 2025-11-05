@@ -8,6 +8,7 @@ import {
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import type { Socket } from 'socket.io-client';
 import useScreenSize from '../hooks/useScreenSize';
+import type { EventType } from '../components/AnimatedPopup/AnimatedPopup';
 
 interface GameContext {
   gameId: string;
@@ -33,6 +34,10 @@ interface GameContext {
   hexSize: number;
   isMovingAnimationActive: boolean;
   setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void;
+  showPopup: boolean;
+  setShowPopup: (showPopup: boolean) => void;
+  popupEvents: EventType[];
+  setPopupEvents: (popupEvents: EventType[]) => void;
 }
 
 const initialContextValue = {
@@ -59,6 +64,10 @@ const initialContextValue = {
   hexSize: 0,
   isMovingAnimationActive: false,
   setIsMovingAnimationActive: () => {},
+  showPopup: false,
+  setShowPopup: () => {},
+  popupEvents: [],
+  setPopupEvents: () => {},
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -81,6 +90,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
   );
   const [availableGames, setAvailableGames] = useState<string[]>([]);
   const [isMovingAnimationActive, setIsMovingAnimationActive] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupEvents, setPopupEvents] = useState<EventType[]>([]);
 
   const size = useScreenSize();
   const canvasSize =
@@ -96,6 +107,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setGameId,
     setClickedHex,
     setIsMovingAnimationActive,
+    setShowPopup,
+    setPopupEvents,
   );
   useTimer(
     gameState!,
@@ -130,6 +143,10 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     hexSize,
     isMovingAnimationActive,
     setIsMovingAnimationActive,
+    showPopup,
+    setShowPopup,
+    popupEvents,
+    setPopupEvents,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
