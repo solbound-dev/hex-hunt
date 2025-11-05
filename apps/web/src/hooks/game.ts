@@ -77,7 +77,7 @@ export const useInitializeSockets = (
     });
 
     socketRef.current.on('playerLeft', () => {
-      toast.error('Player left');
+      toast.error('Player left', { position: 'bottom-left' });
     });
 
     socketRef.current.on('availableGames', (data) => {
@@ -98,7 +98,9 @@ export const useInitializeSockets = (
     });
 
     socketRef.current.on('alreadyHasRoom', () => {
-      toast.error('You are already in another room');
+      toast.error('You are already in another room', {
+        position: 'bottom-left',
+      });
     });
 
     socketRef.current.on('playerJoined', (data) => {

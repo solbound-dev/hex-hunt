@@ -24,7 +24,7 @@ const PopupImage: React.FC<Props> = ({ eventType, canvasSize }) => {
 
   return (
     <div
-      style={{ height: canvasSize * 0.25, width: canvasSize * 0.25 }}
+      style={{ height: canvasSize * 0.2, width: canvasSize * 0.2 }}
       className={c.imageWrapper}>
       <div className={c.crossSign}>
         <div className={c.crossBar}></div>
