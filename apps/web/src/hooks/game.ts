@@ -105,7 +105,7 @@ export const useInitializeSockets = (
 
     socketRef.current.on('playerJoined', (data) => {
       console.log('Player joined:', data);
-      toast.success('Joined!');
+      toast.success('Joined!', { position: 'bottom-left' });
       setGameId(data.gameId);
       setGameState(data.game);
     });

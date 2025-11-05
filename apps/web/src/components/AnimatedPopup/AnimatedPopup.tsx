@@ -26,7 +26,7 @@ const AnimatedPopup: React.FC<Props> = ({
   useEffect(() => {
     setTimeout(() => {
       setShowPopup(false);
-    }, 700);
+    }, 1200);
   }, [setShowPopup]);
 
   return (
