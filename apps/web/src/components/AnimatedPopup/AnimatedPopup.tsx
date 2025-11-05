@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import c from './style.module.css';
-import astronautImg from '../../assets/astronaut2.png';
-import alienImg from '../../assets/alien2.png';
-import robotImg from '../../assets/robot2.png';
-import wizardImg from '../../assets/wizard2.png';
+import PopupImage from './PopupImage';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export enum EventType {
@@ -12,6 +9,7 @@ export enum EventType {
   RobotDied = 'ROBOT_DIED',
   WizardDied = 'WIZARD_DIED',
   ZoneContraction = 'ZONE_CONTRACTION',
+  //TODO: AstronautWon, AlienWon, ...
 }
 
 type Props = {
@@ -32,39 +30,10 @@ const AnimatedPopup: React.FC<Props> = ({
   }, [setShowPopup]);
 
   return (
-    <div
-      style={{ height: canvasSize * 0.8, width: canvasSize * 0.8 }}
-      className={c.popup}>
-      <div>
-        {events.map((e) => {
-          if (e === EventType.AstronautDied)
-            return <img src={astronautImg} alt='' />;
-          if (e === EventType.AlienDied)
-            return (
-              <img
-                style={{ width: canvasSize * 0.4, height: canvasSize * 0.4 }}
-                src={alienImg}
-                alt=''
-              />
-            );
-          if (e === EventType.RobotDied)
-            return (
-              <img
-                style={{ width: canvasSize * 0.4, height: canvasSize * 0.4 }}
-                src={robotImg}
-                alt=''
-              />
-            );
-          if (e === EventType.WizardDied)
-            return (
-              <img
-                style={{ width: canvasSize * 0.4, height: canvasSize * 0.4 }}
-                src={wizardImg}
-                alt=''
-              />
-            );
-        })}
-      </div>
+    <div className={c.popup}>
+      {events.map((e) => (
+        <PopupImage eventType={e} canvasSize={canvasSize} />
+      ))}
     </div>
   );
 };
