@@ -111,11 +111,6 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data: GameData) => {
-      // console.log('Game state updated:', data);
-
-      console.log('didJustCollide');
-      data.players.forEach((p) => console.log(p.playerType, p.didJustCollide));
-
       const events: EventType[] = [];
 
       if ((data.moves + 1) % 6 === 0) {

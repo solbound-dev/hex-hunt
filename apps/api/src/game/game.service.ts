@@ -262,6 +262,7 @@ export class GameService {
       server.to(data.gameId).emit('gameState', game.serialize());
       game.players.forEach((p) => {
         p.lastBulletHex = null;
+        p.previousPos = null;
       });
 
       if (game.interval) {
@@ -335,6 +336,7 @@ export class GameService {
       server.to(gameId).emit('gameState', game.serialize());
       game.players.forEach((p) => {
         p.lastBulletHex = null;
+        p.previousPos = null;
       });
     }, MOVE_DURATION_IN_SECONDS * 1000);
 

@@ -7,7 +7,7 @@ import {
   isSameMove,
   pixelToHex,
 } from '../../utils/calculation-utils';
-import { repaintAnimationLoop } from '../../utils/draw-utils';
+import { repaint, repaintAnimationLoop } from '../../utils/draw-utils';
 
 import { isNeighbor } from '../../utils/utils';
 import { GameStatus } from './GameStatus';
@@ -51,7 +51,6 @@ const Game = () => {
     canvasSize,
     hexSize,
     isMovingAnimationActive,
-    isMovingAnimationFinished,
     showPopup,
     setShowPopup,
     popupEvents,
@@ -91,6 +90,23 @@ const Game = () => {
 
     if (!gameId || !gameState?.started) return;
 
+    if (!isMovingAnimationActive) {
+      repaint(
+        canvasRef,
+        imgRef,
+        gameState,
+        isCanvasHovered,
+        isShooting,
+        hoveredHex,
+        clickedHex,
+        hexSize,
+        canvasSize,
+        isMovingAnimationActive,
+        walletId?.toString(),
+        true,
+      );
+    }
+
     repaintAnimationLoop(
       canvasRef,
       imgRef,
@@ -102,7 +118,6 @@ const Game = () => {
       hexSize,
       canvasSize,
       isMovingAnimationActive,
-      isMovingAnimationFinished,
       walletId?.toString(),
     );
 
@@ -125,7 +140,6 @@ const Game = () => {
     canvasSize,
     hexSize,
     isMovingAnimationActive,
-    isMovingAnimationFinished,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
