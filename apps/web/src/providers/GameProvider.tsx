@@ -34,6 +34,8 @@ interface GameContext {
   hexSize: number;
   isMovingAnimationActive: boolean;
   setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void;
+  isMovingAnimationFinished: boolean;
+  setIsMovingAnimationFinished: (isMovingAnimationFinished: boolean) => void;
   showPopup: boolean;
   setShowPopup: (showPopup: boolean) => void;
   popupEvents: EventType[];
@@ -64,6 +66,8 @@ const initialContextValue = {
   hexSize: 0,
   isMovingAnimationActive: false,
   setIsMovingAnimationActive: () => {},
+  isMovingAnimationFinished: true,
+  setIsMovingAnimationFinished: () => {},
   showPopup: false,
   setShowPopup: () => {},
   popupEvents: [],
@@ -90,6 +94,9 @@ const GameProvider: React.FC<Props> = ({ children }) => {
   );
   const [availableGames, setAvailableGames] = useState<string[]>([]);
   const [isMovingAnimationActive, setIsMovingAnimationActive] = useState(false);
+  const [isMovingAnimationFinished, setIsMovingAnimationFinished] =
+    useState(false);
+
   const [showPopup, setShowPopup] = useState(false);
   const [popupEvents, setPopupEvents] = useState<EventType[]>([]);
 
@@ -107,6 +114,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setGameId,
     setClickedHex,
     setIsMovingAnimationActive,
+    setIsMovingAnimationFinished,
     setShowPopup,
     setPopupEvents,
   );
@@ -147,6 +155,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setShowPopup,
     popupEvents,
     setPopupEvents,
+    isMovingAnimationFinished,
+    setIsMovingAnimationFinished,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

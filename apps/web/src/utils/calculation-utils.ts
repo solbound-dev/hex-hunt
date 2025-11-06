@@ -43,6 +43,7 @@ export class Player {
     public diedAtMove: number | null = null,
     public previousPos: Hex | null = null,
     public lastBulletHex: Hex | null = null,
+    public didJustCollide: boolean = false,
   ) {}
 }
 

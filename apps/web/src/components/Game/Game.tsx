@@ -51,7 +51,7 @@ const Game = () => {
     canvasSize,
     hexSize,
     isMovingAnimationActive,
-    setIsMovingAnimationActive,
+    isMovingAnimationFinished,
     showPopup,
     setShowPopup,
     popupEvents,
@@ -102,6 +102,7 @@ const Game = () => {
       hexSize,
       canvasSize,
       isMovingAnimationActive,
+      isMovingAnimationFinished,
       walletId?.toString(),
     );
 
@@ -124,7 +125,7 @@ const Game = () => {
     canvasSize,
     hexSize,
     isMovingAnimationActive,
-    setIsMovingAnimationActive,
+    isMovingAnimationFinished,
   ]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {

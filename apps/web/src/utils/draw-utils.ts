@@ -453,6 +453,7 @@ export function repaintAnimationLoop(
   hexSize: number,
   canvasSize: number,
   isMovingAnimationActive: boolean,
+  isMovingAnimationFinished: boolean,
   walletId?: string,
 ) {
   if (!gameState) return;
@@ -482,6 +483,7 @@ export function repaintAnimationLoop(
     const elapsed =
       (timestamp - animationStart) / MOVE_ANIMATION_DURATION_IN_MS;
     if (elapsed <= 1) {
+      console.log('2');
       context!.clearRect(
         0,
         0,
@@ -631,8 +633,6 @@ export function repaint(
 
   const context = canvasRef.current?.getContext('2d');
   if (!context) return;
-
-  // context.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
 
   drawGridIsometric(context, generateGrid(GRID_RADIUS), hexSize, canvasSize);
 

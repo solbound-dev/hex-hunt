@@ -65,6 +65,7 @@ export const useInitializeSockets = (
   setGameId: (gameId: string) => void,
   setClickedHex: (hex: Hex | null) => void,
   setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
+  setIsMovingAnimationFinished: (isMovingAnimationFinished: boolean) => void,
   setShowPopup: (showPopup: boolean) => void,
   setPopupEvents: (popupEvents: EventType[]) => void,
 ) => {
@@ -110,7 +111,10 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data: GameData) => {
-      console.log('Game state updated:', data);
+      // console.log('Game state updated:', data);
+
+      console.log('didJustCollide');
+      data.players.forEach((p) => console.log(p.playerType, p.didJustCollide));
 
       const events: EventType[] = [];
 
@@ -138,6 +142,7 @@ export const useInitializeSockets = (
       setMadeMove(false);
       setClickedHex(null);
       setIsMovingAnimationActive(true);
+      setIsMovingAnimationFinished(false);
 
       setTimeout(() => {
         setIsMovingAnimationActive(false);
@@ -159,6 +164,7 @@ export const useInitializeSockets = (
     setClickedHex,
     navigate,
     setIsMovingAnimationActive,
+    setIsMovingAnimationFinished,
     setShowPopup,
     setPopupEvents,
   ]);
