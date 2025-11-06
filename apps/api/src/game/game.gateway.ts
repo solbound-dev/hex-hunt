@@ -64,13 +64,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const game = this.gameService.leaveGame(data.gameId, token);
     if (!game) return;
-    this.server.to(data.gameId).emit('playerLeft');
-    void client.leave(data.gameId);
+    if (!game.started) {
+      this.server.to(data.gameId).emit('playerLeft');
+    } else {
+      this.server.to(data.gameId).emit('playerLeft', game.serialize());
+    }
 
     console.log('rooms on leavegame', this.server.sockets.adapter.rooms);
-    if (game.started) {
-      this.server.to(data.gameId).emit('gameState', game.serialize());
-    }
+
+    void client.leave(data.gameId);
   }
 
   @SubscribeMessage('start')

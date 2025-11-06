@@ -77,8 +77,11 @@ export const useInitializeSockets = (
       transports: ['websocket'],
     });
 
-    socketRef.current.on('playerLeft', () => {
+    socketRef.current.on('playerLeft', (data) => {
       toast.error('Player left', { position: 'bottom-left' });
+      if (data) {
+        setGameState(data);
+      }
     });
 
     socketRef.current.on('availableGames', (data) => {
