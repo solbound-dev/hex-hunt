@@ -27,6 +27,7 @@
   border-bottom: 2px solid#f2e2b7;
   max-width: 770px;
   width: 100%;
+  border-radius: 5px;
 }
 
 .navigationText {

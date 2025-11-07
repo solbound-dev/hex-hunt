@@ -4,6 +4,7 @@
   background: #1b1f2d;
   justify-content: space-between;
   border-bottom: 2px solid#f2e2b7;
+  border-radius: 5px;
 }
 
 .darkContainer > * {

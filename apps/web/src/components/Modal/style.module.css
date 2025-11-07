@@ -19,6 +19,7 @@
 }
 
 .modalContainer {
+  border-radius: 5px;
   min-width: 503px;
   padding: 32px;
   background: #f2e2b7;

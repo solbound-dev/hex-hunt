@@ -198,7 +198,7 @@ export function repaint(
 
   if (
     gameState.moves &&
-    (gameState.moves % 6 === 5 || gameState.moves % 8 === 4) &&
+    (gameState.moves % 6 === 5 || gameState.moves % 6 === 4) &&
     gameState.currentRadius > 1
   ) {
     drawZoneContractionWarningIsometric(
