@@ -58,7 +58,7 @@ body {
     transform 0.2s,
     color 0.2s;
   font-family: 'ari-condensed-display' !important;
-  border-radius: 0 !important;
+  border-radius: 0px !important;
 }
 
 .wallet-adapter-button-trigger:hover {
@@ -85,7 +85,7 @@ body {
   top: 50vh !important;
   left: 50vw !important;
   transform: translate(-50%, -50%) !important;
-  border-radius: 0 !important;
+  border-radius: 5px !important;
 }
 
 .wallet-adapter-modal-button-close {

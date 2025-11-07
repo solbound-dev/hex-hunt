@@ -116,8 +116,12 @@ export const useInitializeSockets = (
     socketRef.current.on('gameState', (data: GameData) => {
       const events: EventType[] = [];
 
+      // if ((data.moves + 1) % 6 === 0) {
+      //   toast.success('Zone contracting on next move!');
+      // }
+
       if ((data.moves + 1) % 6 === 0) {
-        toast.success('Zone contracting on next move!');
+        events.push(EventType.ZoneContraction);
       }
 
       data.players.forEach((p) => {
