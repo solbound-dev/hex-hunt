@@ -4,9 +4,9 @@ import type { Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import Button from '../Button';
 import { useGame } from '../../providers/GameProvider';
-import type { Player } from '../../utils/calculation-utils';
 import { useLocation } from 'wouter';
 import DarkContainer from '../DarkContainer';
+import type { Player } from '../../utils/Player';
 
 const getColor = (time: number) => {
   if (time > 5000) return 'lightgreen';
