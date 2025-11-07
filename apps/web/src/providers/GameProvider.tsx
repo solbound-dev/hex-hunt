@@ -1,14 +1,12 @@
 import { createContext, useContext, useState } from 'react';
 import { useInitializeSockets, useTimer } from '../hooks/game';
-import {
-  MOVE_DURATION_IN_SECONDS,
-  type GameData,
-  type Hex,
-} from '../utils/calculation-utils';
+import { MOVE_DURATION_IN_SECONDS } from '../utils/calculation-utils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import type { Socket } from 'socket.io-client';
 import useScreenSize from '../hooks/useScreenSize';
 import type { EventType } from '../components/AnimatedPopup/AnimatedPopup';
+import type { GameData } from '../utils/GameData';
+import type { Hex } from '../utils/Hex';
 
 interface GameContext {
   gameId: string;

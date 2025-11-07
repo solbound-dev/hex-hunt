@@ -103,7 +103,6 @@ const Game = () => {
         canvasSize,
         isMovingAnimationActive,
         walletId?.toString(),
-        true,
       );
     }
 
