@@ -2,8 +2,8 @@ import type { ImgRef } from '../hooks/game';
 import {
   applyIsometricTransformation,
   easeInOutSine,
-  easeOutSine,
   generateGrid,
+  getBulletCoordinatesAndAngle,
   GRID_RADIUS,
   hexToPixel,
   MOVE_ANIMATION_DURATION_IN_MS,
@@ -44,25 +44,20 @@ export function repaintAnimationLoop(
   if (!gameState) return;
   if (!walletId) return;
   if (!gameState.started) return;
-
   const context = canvasRef.current?.getContext('2d');
   if (!context) return;
-
   const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
-
   if (!currentPlayer || !currentPlayer.previousPos) return;
-
-  let animationStart: number | null = null;
 
   const initialHex = new Hex(
     currentPlayer.previousPos!.q,
     currentPlayer.previousPos!.r,
   );
   const finalHex = new Hex(currentPlayer.pos!.q, currentPlayer.pos!.r);
-
   const { x: ix, y: iy } = hexToPixel(initialHex, canvasSize, hexSize);
   const { x: fx, y: fy } = hexToPixel(finalHex, canvasSize, hexSize);
 
+  let animationStart: number | null = null;
   function moveAnimation(timestamp: number) {
     if (!animationStart) animationStart = timestamp;
     const elapsed =
@@ -104,47 +99,21 @@ export function repaintAnimationLoop(
 
         //loop for drawing bullets
         gameState?.players.forEach((p) => {
-          const { x: ixBullet, y: iyBullet } = hexToPixel(
-            p.pos!,
+          const bulletCoordinatesAndAngle = getBulletCoordinatesAndAngle(
+            p,
             canvasSize,
             hexSize,
+            elapsed,
           );
-
-          if (!p.lastBulletHex) return;
-
-          const { x: fxBullet, y: fyBullet } = hexToPixel(
-            p.lastBulletHex,
-            canvasSize,
-            hexSize,
-          );
-
-          const slopeXBullet = fxBullet - ixBullet;
-          const slopeYBullet = fyBullet - iyBullet;
-
-          const xBullet = ixBullet + slopeXBullet * easeOutSine(elapsed);
-          const yBullet = iyBullet + slopeYBullet * easeOutSine(elapsed);
-          const { ox: oxBullet, oy: oyBullet } = applyIsometricTransformation(
-            xBullet,
-            yBullet,
-            hexSize,
-          );
-
-          const { ox: ixBulletIsometric, oy: iyBulletIsometric } =
-            applyIsometricTransformation(ixBullet, iyBullet, hexSize);
-
-          const { ox: fxBulletIsometric, oy: fyBulletIsometric } =
-            applyIsometricTransformation(fxBullet, fyBullet, hexSize);
+          if (!bulletCoordinatesAndAngle) return;
+          const { oxBullet, oyBullet, angle } = bulletCoordinatesAndAngle;
 
           drawBulletMoving(
             context!,
             oxBullet,
             oyBullet,
             imgRef.current.bullet!,
-            Math.PI / 2 -
-              Math.atan2(
-                iyBulletIsometric - fyBulletIsometric,
-                fxBulletIsometric - ixBulletIsometric,
-              ),
+            angle,
           );
         });
       }

@@ -1,5 +1,6 @@
 import type { GameData } from './GameData';
 import { Hex } from './Hex';
+import type { Player } from './Player';
 
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
@@ -126,4 +127,51 @@ export function applyIsometricTransformation(
     ox: x * 0.7 - y * 0.7 + 6.1 * hexSize,
     oy: 0.5 * x * 0.7 + 0.5 * y * 0.7 - 0.6 * hexSize,
   };
+}
+
+export function getBulletCoordinatesAndAngle(
+  player: Player,
+  canvasSize: number,
+  hexSize: number,
+  elapsed: number,
+) {
+  const { x: ixBullet, y: iyBullet } = hexToPixel(
+    player.pos!,
+    canvasSize,
+    hexSize,
+  );
+
+  if (!player.lastBulletHex) return;
+
+  const { x: fxBullet, y: fyBullet } = hexToPixel(
+    player.lastBulletHex,
+    canvasSize,
+    hexSize,
+  );
+
+  const slopeXBullet = fxBullet - ixBullet;
+  const slopeYBullet = fyBullet - iyBullet;
+
+  const xBullet = ixBullet + slopeXBullet * easeOutSine(elapsed);
+  const yBullet = iyBullet + slopeYBullet * easeOutSine(elapsed);
+  const { ox: oxBullet, oy: oyBullet } = applyIsometricTransformation(
+    xBullet,
+    yBullet,
+    hexSize,
+  );
+
+  const { ox: ixBulletIsometric, oy: iyBulletIsometric } =
+    applyIsometricTransformation(ixBullet, iyBullet, hexSize);
+
+  const { ox: fxBulletIsometric, oy: fyBulletIsometric } =
+    applyIsometricTransformation(fxBullet, fyBullet, hexSize);
+
+  const angle =
+    Math.PI / 2 -
+    Math.atan2(
+      iyBulletIsometric - fyBulletIsometric,
+      fxBulletIsometric - ixBulletIsometric,
+    );
+
+  return { oxBullet, oyBullet, angle };
 }
