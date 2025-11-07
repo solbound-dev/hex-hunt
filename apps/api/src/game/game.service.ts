@@ -262,6 +262,7 @@ export class GameService {
       server.to(data.gameId).emit('gameState', game.serialize());
       game.players.forEach((p) => {
         p.lastBulletHex = null;
+        p.previousPos = null;
       });
 
       if (game.interval) {
@@ -284,7 +285,6 @@ export class GameService {
     game.players.forEach((p) => game.checkCollisionAndUpdate(p));
 
     game.players.forEach((p) => {
-      // if (!p.isShooting && !p.didJustCollide && !p.isDead) {
       if (!p.isShooting && !p.didJustCollide) {
         if (p.pendingMove) {
           p.previousPos = p.pos;
@@ -299,6 +299,9 @@ export class GameService {
   }
 
   getInterval(gameId: string, game: Game, server: Server) {
+    game.players.forEach((p) => {
+      p.didJustCollide = false;
+    });
     const gameContainsWinner = game.players.some((p) => p.won);
     if (gameContainsWinner || game.draw) return null;
 
@@ -333,50 +336,10 @@ export class GameService {
       server.to(gameId).emit('gameState', game.serialize());
       game.players.forEach((p) => {
         p.lastBulletHex = null;
+        p.previousPos = null;
       });
     }, MOVE_DURATION_IN_SECONDS * 1000);
 
     return interval;
   }
-
-  // restartGame(clientId: string, gameId: string, tokenString: string) {
-  //   const token = JSON.parse(
-  //     Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-  //   ) as Token;
-  //   if (!token) return;
-
-  //   const game = this.games[gameId];
-  //   if (!game) return null;
-
-  //   const gameContainsClient = game.players.some(
-  //     (p) => p.walletId === token.walletId,
-  //   );
-  //   if (!gameContainsClient) return null;
-
-  //   const gameContainsWinner = game.players.some((p) => p.won);
-  //   if (!gameContainsWinner) return null;
-
-  //   game.disappearedHexes = [];
-  //   game.warningHexes = [];
-  //   game.moves = 0;
-  //   game.cardPos = null;
-  //   game.currentRadius = START_GRID_RADIUS;
-
-  //   game.players.forEach((p) => {
-  //     p.pos = game.getAvailablePlayerPos();
-  //     p.lastSeenPos = p.pos;
-  //     p.won = false;
-  //     p.cards = 0;
-  //     p.pendingMove = null;
-  //     p.isDead = false;
-  //     p.justPickedCard = false;
-  //     p.isShooting = null;
-  //     p.isImmune = false;
-  //     p.didJustCollide = false;
-  //   });
-
-  //   game.spawnCard();
-
-  //   return game;
-  // }
 }

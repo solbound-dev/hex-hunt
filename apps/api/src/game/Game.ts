@@ -153,6 +153,7 @@ export class Game {
           currentPlayer.pendingMove!.q,
           currentPlayer.pendingMove!.r,
         );
+        currentPlayer.previousPos = currentPlayer.pos;
         currentPlayer.didJustCollide = true;
       }
     });
@@ -232,7 +233,6 @@ export class Game {
       }
       p.pendingMove = null;
       p.isShooting = null;
-      p.didJustCollide = false;
     });
   }
 

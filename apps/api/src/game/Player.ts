@@ -7,7 +7,7 @@ export class Player {
     public walletId: string,
     public pos: Hex,
     public lastSeenPos: Hex,
-    public previousPos: Hex,
+    public previousPos: Hex | null,
     public won: boolean = false,
     public wins: number = 0,
     public cards: number = 0,

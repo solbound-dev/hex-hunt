@@ -65,6 +65,7 @@ export const useInitializeSockets = (
   setGameId: (gameId: string) => void,
   setClickedHex: (hex: Hex | null) => void,
   setIsMovingAnimationActive: (isMovingAnimationActive: boolean) => void,
+  setIsMovingAnimationFinished: (isMovingAnimationFinished: boolean) => void,
   setShowPopup: (showPopup: boolean) => void,
   setPopupEvents: (popupEvents: EventType[]) => void,
 ) => {
@@ -76,8 +77,11 @@ export const useInitializeSockets = (
       transports: ['websocket'],
     });
 
-    socketRef.current.on('playerLeft', () => {
+    socketRef.current.on('playerLeft', (data) => {
       toast.error('Player left', { position: 'bottom-left' });
+      if (data) {
+        setGameState(data);
+      }
     });
 
     socketRef.current.on('availableGames', (data) => {
@@ -110,8 +114,6 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data: GameData) => {
-      console.log('Game state updated:', data);
-
       const events: EventType[] = [];
 
       if ((data.moves + 1) % 6 === 0) {
@@ -138,6 +140,7 @@ export const useInitializeSockets = (
       setMadeMove(false);
       setClickedHex(null);
       setIsMovingAnimationActive(true);
+      setIsMovingAnimationFinished(false);
 
       setTimeout(() => {
         setIsMovingAnimationActive(false);
@@ -159,6 +162,7 @@ export const useInitializeSockets = (
     setClickedHex,
     navigate,
     setIsMovingAnimationActive,
+    setIsMovingAnimationFinished,
     setShowPopup,
     setPopupEvents,
   ]);
