@@ -4,17 +4,17 @@ import { getContext, setCanvasRef, setImgRef } from '../utils/utils';
 import {
   generateGrid,
   GRID_RADIUS,
-  Hex,
   MOVE_ANIMATION_DURATION_IN_MS,
   MOVE_DURATION_IN_SECONDS,
-  PlayerType,
-  type GameData,
 } from '../utils/calculation-utils';
 import { io, type Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import toast from 'react-hot-toast';
 import { useLocation } from 'wouter';
 import { EventType } from '../components/AnimatedPopup/AnimatedPopup';
+import type { GameData } from '../utils/GameData';
+import { PlayerType } from '../utils/Player';
+import type { Hex } from '../utils/Hex';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;

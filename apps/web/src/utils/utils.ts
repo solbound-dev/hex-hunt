@@ -6,8 +6,8 @@ import cardSrc from '../assets/card2.png';
 import skullSrc from '../assets/skull2.png';
 import bulletSrc from '../assets/bullet.png';
 
-import { Hex } from './calculation-utils';
 import type { ImgRef } from '../hooks/game';
+import { Hex } from './Hex';
 
 export function setCanvasRef(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,

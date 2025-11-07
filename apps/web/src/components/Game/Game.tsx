@@ -7,7 +7,7 @@ import {
   isSameMove,
   pixelToHex,
 } from '../../utils/calculation-utils';
-import { repaint, repaintAnimationLoop } from '../../utils/draw-utils';
+import { repaint, repaintAnimationLoop } from '../../utils/repaint';
 
 import { isNeighbor } from '../../utils/utils';
 import { GameStatus } from './GameStatus';
