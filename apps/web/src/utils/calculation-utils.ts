@@ -199,3 +199,14 @@ export function easeInOutSine(t: number): number {
 export function easeOutSine(t: number): number {
   return Math.sin((t * Math.PI) / 2);
 }
+
+export function applyIsometricTransformation(
+  x: number,
+  y: number,
+  hexSize: number,
+) {
+  return {
+    ox: x * 0.7 - y * 0.7 + 6.1 * hexSize,
+    oy: 0.5 * x * 0.7 + 0.5 * y * 0.7 - 0.6 * hexSize,
+  };
+}
