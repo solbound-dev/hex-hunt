@@ -5,11 +5,8 @@ import {
   easeOutSine,
   generateGrid,
   GRID_RADIUS,
-  Hex,
   hexToPixel,
   MOVE_ANIMATION_DURATION_IN_MS,
-  Player,
-  type GameData,
 } from './calculation-utils';
 import {
   drawAvailableMovesHighlightIsometric,
@@ -27,6 +24,9 @@ import {
   mapPlayerTypeToImage,
   type Asset,
 } from './draw-utils';
+import type { GameData } from './GameData';
+import { Hex } from './Hex';
+import type { Player } from './Player';
 
 export function repaintAnimationLoop(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -226,6 +226,7 @@ export function repaint(
     },
     canvasSize,
   );
+
   if (
     gameState.moves &&
     (gameState.moves % 6 === 5 || gameState.moves % 8 === 4) &&

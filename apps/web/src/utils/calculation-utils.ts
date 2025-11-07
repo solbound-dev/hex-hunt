@@ -1,93 +1,10 @@
+import type { GameData } from './GameData';
+import { Hex } from './Hex';
+
 export const PI = 3.14159;
 export const GRID_RADIUS = 3;
 export const MOVE_DURATION_IN_SECONDS = 15;
 export const MOVE_ANIMATION_DURATION_IN_MS = 600;
-
-export type GameData = {
-  grid: Hex[];
-  disappearedHexes: Hex[];
-  warningHexes: Hex[];
-  moves: number;
-  cardPos: Hex | null;
-  previousCardPos: Hex | null;
-  currentRadius: number;
-  started: boolean;
-  won: boolean;
-  draw: boolean;
-  //this should not get sent to both players:
-  players: Player[];
-};
-
-export enum PlayerType {
-  Astronaut = 'Astronaut',
-  Alien = 'Alien',
-  Robot = 'Robot',
-  Wizard = 'Wizard',
-}
-
-export class Player {
-  constructor(
-    public playerType: PlayerType,
-    public id: string | null = null,
-    public walletId: string | null = null,
-    public lastSeenPos: Hex | null = null,
-    public cards: number = 0,
-    public pendingMove: Hex | null = null,
-    public isDead: boolean = false,
-    public justPickedCard: boolean = false,
-    public pos: Hex | null = null,
-    public isShooting: boolean | null = null,
-    public isImmune: boolean = false,
-    public won: boolean = false,
-    public wins: number = 0,
-    public diedAtMove: number | null = null,
-    public previousPos: Hex | null = null,
-    public lastBulletHex: Hex | null = null,
-  ) {}
-}
-
-export class Hex {
-  q: number;
-  r: number;
-  s: number;
-
-  constructor(q: number, r: number) {
-    this.q = q;
-    this.r = r;
-    this.s = -q - r;
-  }
-
-  equals(other: Hex) {
-    return other
-      ? this.q === other.q && this.r === other.r && this.s === other.s
-      : false;
-  }
-
-  distanceTo(other: Hex) {
-    return (
-      (Math.abs(this.q - other.q) +
-        Math.abs(this.r - other.r) +
-        Math.abs(this.s - other.s)) /
-      2
-    );
-  }
-
-  neighbors() {
-    const directions = [
-      new Hex(1, 0),
-      new Hex(1, -1),
-      new Hex(0, -1),
-      new Hex(-1, 0),
-      new Hex(-1, 1),
-      new Hex(0, 1),
-    ];
-    return directions.map((dir) => new Hex(this.q + dir.q, this.r + dir.r));
-  }
-
-  toString() {
-    return `${this.q},${this.r}`;
-  }
-}
 
 export function generateGrid(currentRadius: number) {
   const grid: Hex[] = [];

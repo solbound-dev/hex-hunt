@@ -1,13 +1,12 @@
 import {
   applyIsometricTransformation,
-  Hex,
   hexToPixel,
   isInGrid,
   PI,
-  Player,
-  PlayerType,
 } from './calculation-utils';
 import type { ImgRef } from '../hooks/game';
+import { Hex } from './Hex';
+import { Player, PlayerType } from './Player';
 
 type StyleOptions = {
   strokeStyle?: string;
