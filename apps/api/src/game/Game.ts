@@ -202,7 +202,7 @@ export class Game {
     this.players.forEach((p) => {
       if (p.cards === 3 && p.pos?.equals(new Hex(0, 0))) {
         this.players.forEach((op) => {
-          if (op.walletId !== p.walletId) {
+          if (op.walletId !== p.walletId && !p.isDead) {
             op.isDead = true;
           }
         });
