@@ -258,7 +258,6 @@ export class GameService {
     if (!waitingForMoves) {
       this.calculateTurnOutcome(game);
 
-      console.log(game.players);
       server.to(data.gameId).emit('gameState', game.serialize());
       game.players.forEach((p) => {
         p.lastBulletHex = null;
@@ -287,12 +286,18 @@ export class GameService {
       }
     });
 
+    let someoneShotCard = false;
     game.players.forEach((p) => {
       if (p.isShooting) {
         p.lastSeenPos = p.pos;
-        game.shootInDirection(p.pendingMove!, p);
+        const playerShotCard = game.shootInDirection(p.pendingMove!, p);
+        if (playerShotCard) {
+          someoneShotCard = true;
+        }
       }
     });
+
+    if (someoneShotCard) game.spawnCard();
 
     game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
 
