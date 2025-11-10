@@ -142,7 +142,7 @@ export function repaint(
 
   const context = canvasRef.current?.getContext('2d');
   if (!context) return;
-
+  context!.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
   drawGridIsometric(context, generateGrid(GRID_RADIUS), hexSize, canvasSize);
 
   const currentPlayer = gameState.players.find((p) => p.walletId === walletId);
