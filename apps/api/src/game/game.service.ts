@@ -275,12 +275,6 @@ export class GameService {
 
   calculateTurnOutcome(game: Game) {
     game.previousCardPos = game.cardPos;
-    game.players.forEach((p) => {
-      if (p.isShooting) {
-        p.lastSeenPos = p.pos;
-        game.shootInDirection(p.pendingMove!, p);
-      }
-    });
 
     game.players.forEach((p) => game.checkCollisionAndUpdate(p));
 
@@ -290,6 +284,13 @@ export class GameService {
           p.previousPos = p.pos;
           p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
         }
+      }
+    });
+
+    game.players.forEach((p) => {
+      if (p.isShooting) {
+        p.lastSeenPos = p.pos;
+        game.shootInDirection(p.pendingMove!, p);
       }
     });
 

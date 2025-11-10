@@ -82,12 +82,12 @@ export class Game {
     this.players.forEach((p) => {
       if (p.walletId === shooter.walletId) return;
 
-      let targetPos: Hex;
-      if (p.isShooting) {
-        targetPos = p.pos;
-      } else {
-        targetPos = p.pendingMove!;
-      }
+      const targetPos: Hex = p.pos;
+      // if (p.isShooting) {
+      //   targetPos = p.pos;
+      // } else {
+      //   targetPos = p.pendingMove!;
+      // }
       const current = shooter.pos;
       const dir = new Hex(
         directionHex.q - current.q,
@@ -106,7 +106,7 @@ export class Game {
           p.isDead = true;
           p.diedAtMove = this.moves;
           p.lastSeenPos = new Hex(position.q, position.r);
-          shooter.lastBulletHex = p.pendingMove;
+          shooter.lastBulletHex = p.pos;
         }
       }
       if (!shooter.lastBulletHex) {
