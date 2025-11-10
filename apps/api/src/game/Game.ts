@@ -106,7 +106,7 @@ export class Game {
           p.isDead = true;
           p.diedAtMove = this.moves;
           p.lastSeenPos = new Hex(position.q, position.r);
-          shooter.lastBulletHex = p.pendingMove;
+          shooter.lastBulletHex = p.pos;
         }
       }
       if (!shooter.lastBulletHex) {
