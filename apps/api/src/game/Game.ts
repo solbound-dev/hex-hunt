@@ -76,18 +76,14 @@ export class Game {
   }
 
   shootInDirection(directionHex: Hex, shooter: Player) {
+    let shotCard = false;
     shooter.previousPos = shooter.pos;
     const RANGE = 3;
 
     this.players.forEach((p) => {
-      if (p.walletId === shooter.walletId) return;
+      if (p.walletId === shooter.walletId) return false;
 
       const targetPos: Hex = p.pos;
-      // if (p.isShooting) {
-      //   targetPos = p.pos;
-      // } else {
-      //   targetPos = p.pendingMove!;
-      // }
       const current = shooter.pos;
       const dir = new Hex(
         directionHex.q - current.q,
@@ -99,10 +95,12 @@ export class Game {
         if (position.equals(this.cardPos!)) {
           shooter.lastBulletHex = this.cardPos;
           this.previousCardPos = this.cardPos;
-          this.spawnCard();
-          return;
+          // this.spawnCard();
+          shotCard = true;
+          return shotCard;
         }
         if (position.equals(targetPos) && !p.isImmune) {
+          console.log(shooter.playerType, 'killed', p.playerType);
           p.isDead = true;
           p.diedAtMove = this.moves;
           p.lastSeenPos = new Hex(position.q, position.r);
@@ -113,6 +111,8 @@ export class Game {
         shooter.lastBulletHex = new Hex(position.q, position.r);
       }
     });
+
+    return shotCard;
   }
 
   contractZone() {
