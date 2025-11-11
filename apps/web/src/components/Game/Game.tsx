@@ -18,15 +18,7 @@ import Button from '../Button';
 import AnimatedPopup from '../AnimatedPopup';
 
 const Game = () => {
-  // const { isAuthenticated, isCheckingAuth } = useAuth();
   const [, navigate] = useLocation();
-
-  // useEffect(() => {
-  //   if (!isAuthenticated && !isCheckingAuth) {
-  //     navigate('/login');
-  //   }
-  // }, [isAuthenticated, isCheckingAuth, navigate]);
-
   const { publicKey: walletId } = useWallet();
 
   const {
