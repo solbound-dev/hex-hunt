@@ -1,0 +1,33 @@
+.tagWrapper {
+  display: flex;
+  right: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.text {
+  color: #f2e2b7;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 200;
+  line-height: 140%;
+  text-align: right;
+}
+
+.imageContainer {
+  height: 50px;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 4px solid #f2e2b7;
+  overflow: hidden;
+}
+
+.image {
+  max-width: 110%;
+  max-height: 110%;
+}
