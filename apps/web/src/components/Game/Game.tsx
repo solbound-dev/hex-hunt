@@ -4,7 +4,6 @@ import {
   getMousePosition,
   getNearestHex,
   isInGrid,
-  isSameMove,
   pixelToHex,
 } from '../../utils/calculation-utils';
 import { repaint, repaintAnimationLoop } from '../../utils/repaint';
@@ -154,8 +153,7 @@ const Game = () => {
     if (
       currentPlayer &&
       (!isNeighbor(move, currentPlayer.pos) ||
-        !isInGrid(move, gameState.grid, gameState.disappearedHexes) ||
-        isSameMove(move, currentPlayer.pos))
+        !isInGrid(move, gameState.grid, gameState.disappearedHexes))
     ) {
       return;
     }
