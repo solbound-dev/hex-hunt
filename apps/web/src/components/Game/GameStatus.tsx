@@ -1,12 +1,11 @@
-import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import c from './style.module.css';
-import type { Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import Button from '../Button';
 import { useGame } from '../../providers/GameProvider';
 import { useLocation } from 'wouter';
 import DarkContainer from '../DarkContainer';
 import type { Player } from '../../utils/Player';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 const getColor = (time: number) => {
   if (time > 5000) return 'lightgreen';
@@ -20,24 +19,20 @@ const getTextDecoration = (p: Player, walletId: string | undefined) => {
   return 'none';
 };
 
-type GameStatusProps = {
-  timeRemaining: number;
-  madeMove: boolean;
-  socketRef: React.RefObject<Socket<DefaultEventsMap, DefaultEventsMap> | null>;
-  setGameId: (gameId: string) => void;
-  walletId?: string;
-};
-
-export const GameStatus: React.FC<GameStatusProps> = ({
-  timeRemaining,
-  madeMove,
-  socketRef,
-  walletId,
-}) => {
+export const GameStatus = () => {
   const queryClient = useQueryClient();
+  const { publicKey: walletId } = useWallet();
 
-  const { gameState, gameId, setGameId, setGameState, setClickedHex } =
-    useGame();
+  const {
+    gameState,
+    gameId,
+    setGameId,
+    setGameState,
+    setClickedHex,
+    timeRemaining,
+    madeMove,
+    socketRef,
+  } = useGame();
 
   const [, navigate] = useLocation();
 
@@ -103,7 +98,7 @@ export const GameStatus: React.FC<GameStatusProps> = ({
           <div
             key={p.walletId}
             style={{
-              textDecoration: getTextDecoration(p, walletId),
+              textDecoration: getTextDecoration(p, walletId?.toString()),
               fontSize: p.won ? '20px' : '16px',
             }}>
             {p.playerType} {p.walletId === walletId ? ' (you)' : ''} | {p.cards}{' '}

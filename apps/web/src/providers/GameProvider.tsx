@@ -38,6 +38,8 @@ interface GameContext {
   setShowPopup: (showPopup: boolean) => void;
   popupEvents: EventType[];
   setPopupEvents: (popupEvents: EventType[]) => void;
+  shouldResetEventDate: boolean;
+  setShouldResetEventDate: (shouldResetEventDate: boolean) => void;
 }
 
 const initialContextValue = {
@@ -70,6 +72,8 @@ const initialContextValue = {
   setShowPopup: () => {},
   popupEvents: [],
   setPopupEvents: () => {},
+  shouldResetEventDate: false,
+  setShouldResetEventDate: () => {},
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -90,6 +94,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
   const [timeRemaining, setTimeRemaining] = useState<number>(
     MOVE_DURATION_IN_SECONDS,
   );
+  const [shouldResetEventDate, setShouldResetEventDate] = useState(false);
+
   const [availableGames, setAvailableGames] = useState<string[]>([]);
   const [isMovingAnimationActive, setIsMovingAnimationActive] = useState(false);
   const [isMovingAnimationFinished, setIsMovingAnimationFinished] =
@@ -115,6 +121,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setIsMovingAnimationFinished,
     setShowPopup,
     setPopupEvents,
+    setShouldResetEventDate,
   );
   useTimer(
     gameState!,
@@ -123,6 +130,7 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     gameId,
     timeRemaining,
     setTimeRemaining,
+    shouldResetEventDate,
   );
 
   const value = {
@@ -155,6 +163,8 @@ const GameProvider: React.FC<Props> = ({ children }) => {
     setPopupEvents,
     isMovingAnimationFinished,
     setIsMovingAnimationFinished,
+    shouldResetEventDate,
+    setShouldResetEventDate,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

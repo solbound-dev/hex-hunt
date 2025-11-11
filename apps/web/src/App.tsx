@@ -1,7 +1,6 @@
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 import { Route, Switch } from 'wouter';
-import Game from './components/Game';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import WalletWrapper from './components/Wallet/WalletProvider';
 import { ConnectionProvider } from '@solana/wallet-adapter-react';
@@ -12,6 +11,7 @@ import FindGamePage from './pages/FindGamePage';
 import GameProvider from './providers/GameProvider';
 import WindowSizeProvider from './providers/WindowSizeProvider';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import GamePage from './pages/GamePage';
 
 const queryClient = new QueryClient();
 
@@ -31,7 +31,7 @@ function App() {
                       component={() => <div>Select Game</div>}
                     />
                     <Route path={'/'} component={() => <FindGamePage />} />
-                    <Route path={'/game'} component={() => <Game />} />
+                    <Route path={'/game'} component={() => <GamePage />} />
                     <Route
                       path={'/privacy-policy'}
                       component={() => <PrivacyPolicyPage />}

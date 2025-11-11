@@ -8,12 +8,9 @@ import {
   pixelToHex,
 } from '../../utils/calculation-utils';
 import { repaint, repaintAnimationLoop } from '../../utils/repaint';
-
 import { isNeighbor } from '../../utils/utils';
-import { GameStatus } from './GameStatus';
 import toast from 'react-hot-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useAuth } from '../../providers/AuthProvider';
 import { useLocation } from 'wouter';
 import { useGame } from '../../providers/GameProvider';
 import { useInitializeGame } from '../../hooks/game';
@@ -21,20 +18,11 @@ import Button from '../Button';
 import AnimatedPopup from '../AnimatedPopup';
 
 const Game = () => {
-  const { isAuthenticated, isCheckingAuth } = useAuth();
   const [, navigate] = useLocation();
-
-  useEffect(() => {
-    if (!isAuthenticated && !isCheckingAuth) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, isCheckingAuth, navigate]);
-
   const { publicKey: walletId } = useWallet();
 
   const {
     gameId,
-    setGameId,
     gameState,
     isShooting,
     setIsShooting,
@@ -44,7 +32,6 @@ const Game = () => {
     setIsCanvasHovered,
     hoveredHex,
     setHoveredHex,
-    timeRemaining,
     socketRef,
     clickedHex,
     setClickedHex,
@@ -196,13 +183,6 @@ const Game = () => {
           events={popupEvents}
         />
       )}
-      <GameStatus
-        timeRemaining={timeRemaining}
-        madeMove={madeMove}
-        socketRef={socketRef}
-        setGameId={setGameId}
-        walletId={walletId?.toString() || ''}
-      />
 
       <div className={c.canvasContainer}>
         <div className={c.rel}>
