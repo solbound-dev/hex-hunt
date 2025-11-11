@@ -104,7 +104,15 @@ export class Game {
           p.isDead = true;
           p.diedAtMove = this.moves;
           p.lastSeenPos = new Hex(position.q, position.r);
-          shooter.lastBulletHex = p.pos;
+
+          if (!shooter.lastBulletHex) shooter.lastBulletHex = p.pos;
+          else {
+            shooter.lastBulletHex =
+              shooter.lastBulletHex.distanceTo(shooter.pos) >
+              p.pos.distanceTo(shooter.pos)
+                ? shooter.lastBulletHex
+                : p.pos;
+          }
         }
       }
       if (!shooter.lastBulletHex) {
