@@ -247,19 +247,12 @@ export class GameService {
               return;
           } else {
             if (p.pendingMove === null && !isNeighbor(p.pos, data.move)) {
-              console.log('hit', data.move, p.pendingMove);
               return;
             }
           }
-          console.log('pendig move set');
           p.pendingMove = new Hex(data.move.q, data.move.r);
         }
       }
-    });
-
-    console.log('=============================');
-    game.players.forEach((p) => {
-      console.log(p.playerType, p.pendingMove);
     });
 
     game.players.forEach((p) => (p.justPickedCard = false));
@@ -303,7 +296,6 @@ export class GameService {
     game.players.forEach((p) => {
       if (p.isShooting) {
         p.lastSeenPos = p.pos;
-        console.log('shoot', p.playerType, p.pendingMove);
         const playerShotCard = game.shootInDirection(p.pendingMove!, p);
         if (playerShotCard) {
           someoneShotCard = true;
