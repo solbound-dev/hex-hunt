@@ -32,7 +32,7 @@ const AnimatedPopup: React.FC<Props> = ({
   return (
     <div className={c.popup}>
       {events.map((e) => (
-        <PopupImage eventType={e} canvasSize={canvasSize} />
+        <PopupImage key={e} eventType={e} canvasSize={canvasSize} />
       ))}
     </div>
   );

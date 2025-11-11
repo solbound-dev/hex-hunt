@@ -239,10 +239,16 @@ export class GameService {
           if (p.pendingMove !== null) {
             console.log("pending move wasn't null", p.playerType);
           }
-
-          if (p.pendingMove === null) {
-            if (p.pos.equals(data.move)) return;
-            if (!isNeighbor(p.pos, data.move)) return;
+          if (!data.isShooting) {
+            if (
+              p.pendingMove === null &&
+              !(isNeighbor(p.pos, data.move) || p.pos.equals(data.move))
+            )
+              return;
+          } else {
+            if (p.pendingMove === null && !isNeighbor(p.pos, data.move)) {
+              return;
+            }
           }
           p.pendingMove = new Hex(data.move.q, data.move.r);
         }

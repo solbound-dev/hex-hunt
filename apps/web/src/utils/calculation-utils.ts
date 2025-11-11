@@ -60,10 +60,7 @@ export function isInGrid(hex: Hex, grid: Hex[], disappearedHexes: Hex[]) {
 }
 
 export function isSameMove(move: Hex, pos: Hex | null) {
-  if (move.q === pos?.q && move.r === pos?.r) {
-    return true;
-  }
-  return false;
+  return move.q === pos?.q && move.r === pos?.r;
 }
 
 export function inverseIsometricTransformation(

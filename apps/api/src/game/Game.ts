@@ -76,6 +76,7 @@ export class Game {
   }
 
   shootInDirection(directionHex: Hex, shooter: Player) {
+    if (shooter.pos.equals(directionHex)) return false;
     let shotCard = false;
     shooter.previousPos = shooter.pos;
     const RANGE = 3;
@@ -95,7 +96,6 @@ export class Game {
         if (position.equals(this.cardPos!)) {
           shooter.lastBulletHex = this.cardPos;
           this.previousCardPos = this.cardPos;
-          // this.spawnCard();
           shotCard = true;
           return shotCard;
         }

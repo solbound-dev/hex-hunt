@@ -151,13 +151,24 @@ const Game = () => {
       (p) => p.walletId === walletId?.toString(),
     )!;
 
-    if (
-      currentPlayer &&
-      (!isNeighbor(move, currentPlayer.pos) ||
+    if (!isShooting) {
+      if (
+        !(
+          isNeighbor(move, currentPlayer.pos) ||
+          isSameMove(move, currentPlayer.pos)
+        ) ||
+        !isInGrid(move, gameState.grid, gameState.disappearedHexes)
+      ) {
+        return;
+      }
+    } else {
+      if (
+        !isNeighbor(move, currentPlayer.pos) ||
         !isInGrid(move, gameState.grid, gameState.disappearedHexes) ||
-        isSameMove(move, currentPlayer.pos))
-    ) {
-      return;
+        isSameMove(move, currentPlayer.pos)
+      ) {
+        return;
+      }
     }
     setClickedHex(hoveredHex);
     setMadeMove(true);
