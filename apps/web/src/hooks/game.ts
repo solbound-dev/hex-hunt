@@ -68,6 +68,7 @@ export const useInitializeSockets = (
   setIsMovingAnimationFinished: (isMovingAnimationFinished: boolean) => void,
   setShowPopup: (showPopup: boolean) => void,
   setPopupEvents: (popupEvents: EventType[]) => void,
+  setShouldResetEventDate: (shouldResetEventDate: boolean) => void,
 ) => {
   const socketRef = useRef<Socket | null>(null);
   const [, navigate] = useLocation();
@@ -81,6 +82,7 @@ export const useInitializeSockets = (
       toast.error('Player left', { position: 'bottom-left' });
       if (data) {
         setGameState(data);
+        setShouldResetEventDate(false);
       }
     });
 
@@ -99,6 +101,7 @@ export const useInitializeSockets = (
       setTimeRemaining(MOVE_DURATION_IN_SECONDS * 1000);
       setIsShooting(false);
       setMadeMove(false);
+      setShouldResetEventDate(true);
     });
 
     socketRef.current.on('alreadyHasRoom', () => {
@@ -145,6 +148,7 @@ export const useInitializeSockets = (
       setClickedHex(null);
       setIsMovingAnimationActive(true);
       setIsMovingAnimationFinished(false);
+      setShouldResetEventDate(true);
 
       setTimeout(() => {
         setIsMovingAnimationActive(false);
@@ -152,7 +156,6 @@ export const useInitializeSockets = (
     });
 
     socketRef.current.on('reconnect', (data) => {
-      console.log('now', new Date().toISOString());
       setGameId(data.gameId);
       setGameState(data.game);
     });
@@ -169,6 +172,7 @@ export const useInitializeSockets = (
     setIsMovingAnimationFinished,
     setShowPopup,
     setPopupEvents,
+    setShouldResetEventDate,
   ]);
 
   return socketRef;
@@ -181,6 +185,7 @@ export const useTimer = (
   gameId: string,
   timeRemaining: number,
   setTimeRemaining: (time: number) => void,
+  shouldResetEventDate: boolean,
   walletId?: string,
 ) => {
   const [eventDate, setEventDate] = useState('');
@@ -196,15 +201,17 @@ export const useTimer = (
       return;
     }
 
-    setEventDate(
-      new Date(
-        new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
-      ).toISOString(),
-    );
+    if (shouldResetEventDate) {
+      setEventDate(
+        new Date(
+          new Date().getTime() + MOVE_DURATION_IN_SECONDS * 1000,
+        ).toISOString(),
+      );
+    }
     if (gameState?.started) {
       setCountdownStarted(true);
     }
-  }, [gameState, socketRef, walletId]);
+  }, [shouldResetEventDate, socketRef, walletId, gameState]);
 
   //timer logic
   useEffect(() => {
@@ -213,6 +220,7 @@ export const useTimer = (
         const currentTime = new Date().getTime();
         const eventTime = new Date(eventDate).getTime();
         let remainingTime = eventTime - currentTime;
+
         if (remainingTime <= 0) {
           remainingTime = 0;
           clearInterval(countdownInterval);
