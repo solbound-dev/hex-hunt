@@ -7,3 +7,7 @@ export const MOVE_DURATION_IN_SECONDS = 15;
 export function isNeighbor(hex: Hex, other: Hex) {
   return hex.neighbors().some((n) => n.equals(other));
 }
+
+export function isSameMove(move: Hex, pos: Hex | null) {
+  return move.q === pos?.q && move.r === pos?.r;
+}
