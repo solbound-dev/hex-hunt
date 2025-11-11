@@ -6,7 +6,7 @@ import { useLocation } from 'wouter';
 import DarkContainer from '../DarkContainer';
 import type { Player } from '../../utils/Player';
 import { useWallet } from '@solana/wallet-adapter-react';
-import PlayerTag from '../PlayerTag/PlayerTag';
+import PlayerTagContainer from '../PlayerTag';
 
 const getColor = (time: number) => {
   if (time > 5000) return 'lightgreen';
@@ -94,7 +94,7 @@ export const GameStatus = () => {
           </Button>
         }
       </DarkContainer>
-      <DarkContainer className={c.rightFixed}>
+      {/* <DarkContainer className={c.rightFixed}>
         {gameState?.players.map((p) => (
           <div
             key={p.walletId}
@@ -106,14 +106,10 @@ export const GameStatus = () => {
             / 3{p.won && ' WON!'}
           </div>
         ))}
-      </DarkContainer>
+      </DarkContainer> */}
       <div></div>
       {/* </div> */}
-      <div>
-        {gameState?.players.map((p) => (
-          <PlayerTag player={p} />
-        ))}
-      </div>
+      <PlayerTagContainer gameState={gameState} />
     </div>
   );
 };

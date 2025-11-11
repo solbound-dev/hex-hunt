@@ -22,7 +22,9 @@ const PlayerTag: React.FC<PlayerTagProps> = ({ player }) => {
   }
   return (
     <div className={c.tagWrapper}>
-      <p className={c.text}>{player.playerType}</p>
+      <p className={c.text}>
+        {player.playerType} {player.cards}/3
+      </p>
       <div className={c.imageContainer}>
         <img className={c.image} src={image} alt='' />
       </div>
