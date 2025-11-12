@@ -4,6 +4,7 @@ import alienImg from '../../assets/alien2.png';
 import robotImg from '../../assets/robot2.png';
 import wizardImg from '../../assets/wizard2.png';
 import c from './style.module.css';
+import clsx from 'clsx';
 
 type PlayerTagProps = {
   player: Player;
@@ -21,7 +22,7 @@ const PlayerTag: React.FC<PlayerTagProps> = ({ player }) => {
     image = wizardImg;
   }
   return (
-    <div className={c.tagWrapper}>
+    <div className={clsx(c.tagWrapper, { [c.grayscale]: player.isDead })}>
       <p className={c.text}>
         {player.playerType} {player.cards}/3
       </p>
