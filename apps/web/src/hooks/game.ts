@@ -118,11 +118,6 @@ export const useInitializeSockets = (
     });
     socketRef.current.on('gameState', (data: GameData) => {
       const events: EventType[] = [];
-
-      // if ((data.moves + 1) % 6 === 0) {
-      //   toast.success('Zone contracting on next move!');
-      // }
-
       if ((data.moves + 1) % 6 === 0) {
         events.push(EventType.ZoneContraction);
       }
@@ -227,7 +222,7 @@ export const useTimer = (
           setCountdownStarted(false);
         }
         setTimeRemaining(remainingTime);
-      }, 1000);
+      }, 10);
 
       return () => clearInterval(countdownInterval);
     }

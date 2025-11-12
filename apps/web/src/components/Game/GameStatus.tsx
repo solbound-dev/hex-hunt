@@ -5,12 +5,7 @@ import { useGame } from '../../providers/GameProvider';
 import { useLocation } from 'wouter';
 import DarkContainer from '../DarkContainer';
 import PlayerTagContainer from '../PlayerTag';
-
-const getColor = (time: number) => {
-  if (time > 5000) return 'lightgreen';
-  if (time > 2000) return 'orange';
-  return 'red';
-};
+import ProgressBarTimer from '../ProgressBarTimer';
 
 export const GameStatus = () => {
   const queryClient = useQueryClient();
@@ -38,11 +33,7 @@ export const GameStatus = () => {
   return (
     <div className={c.statusWrapper}>
       {gameState?.started && !gameState.draw && !gameContainsWinner && (
-        <span
-          className={c.timerText}
-          style={{ color: getColor(timeRemaining) }}>
-          {Math.round(timeRemaining / 1000)}
-        </span>
+        <ProgressBarTimer timeRemaining={timeRemaining} />
       )}
       {!gameState?.started && (
         <DarkContainer className={c.fixedTop}>
