@@ -4,8 +4,7 @@ import Button from '../Button';
 import { useGame } from '../../providers/GameProvider';
 import { useLocation } from 'wouter';
 import DarkContainer from '../DarkContainer';
-import type { Player } from '../../utils/Player';
-import { useWallet } from '@solana/wallet-adapter-react';
+import PlayerTagContainer from '../PlayerTag';
 
 const getColor = (time: number) => {
   if (time > 5000) return 'lightgreen';
@@ -13,15 +12,8 @@ const getColor = (time: number) => {
   return 'red';
 };
 
-const getTextDecoration = (p: Player, walletId: string | undefined) => {
-  if (p.isDead) return 'line-through';
-  if (p.walletId === walletId) return 'underline';
-  return 'none';
-};
-
 export const GameStatus = () => {
   const queryClient = useQueryClient();
-  const { publicKey: walletId } = useWallet();
 
   const {
     gameState,
@@ -93,20 +85,7 @@ export const GameStatus = () => {
           </Button>
         }
       </DarkContainer>
-      <DarkContainer className={c.rightFixed}>
-        {gameState?.players.map((p) => (
-          <div
-            key={p.walletId}
-            style={{
-              textDecoration: getTextDecoration(p, walletId?.toString()),
-              fontSize: p.won ? '20px' : '16px',
-            }}>
-            {p.playerType} {p.walletId === walletId ? ' (you)' : ''} | {p.cards}{' '}
-            / 3{p.won && ' WON!'}
-          </div>
-        ))}
-      </DarkContainer>
-      {/* </div> */}
+      <PlayerTagContainer gameState={gameState} />
     </div>
   );
 };
