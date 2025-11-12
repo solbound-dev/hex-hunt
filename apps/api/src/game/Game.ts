@@ -99,14 +99,17 @@ export class Game {
           shotCard = true;
           return shotCard;
         }
-        if (position.equals(targetPos) && !p.isImmune) {
+        if (position.equals(targetPos) && !p.isImmune && !p.isDead) {
           console.log(shooter.playerType, 'killed', p.playerType);
+          console.log('lastBulletHex', shooter.lastBulletHex);
           p.isDead = true;
           p.diedAtMove = this.moves;
           p.lastSeenPos = new Hex(position.q, position.r);
 
-          if (!shooter.lastBulletHex) shooter.lastBulletHex = p.pos;
-          else {
+          if (!shooter.lastBulletHex) {
+            console.log('stavljamo na playera', position);
+            shooter.lastBulletHex = p.pos;
+          } else {
             shooter.lastBulletHex =
               shooter.lastBulletHex.distanceTo(shooter.pos) >
               p.pos.distanceTo(shooter.pos)
@@ -115,11 +118,24 @@ export class Game {
           }
         }
       }
-      if (!shooter.lastBulletHex) {
-        shooter.lastBulletHex = new Hex(position.q, position.r);
-      }
     });
 
+    //if we didn't hit anyone, set lastBulletHex to the farthest point
+    if (!shooter.lastBulletHex) {
+      const current = shooter.pos;
+      let position = new Hex(current.q, current.r);
+      let prevPosition = position;
+      const dir = new Hex(
+        directionHex.q - current.q,
+        directionHex.r - current.r,
+      );
+      while (current.distanceTo(position) < RANGE && this.isInGrid(position)) {
+        prevPosition = position;
+        position = new Hex(position.q + dir.q, position.r + dir.r);
+      }
+
+      shooter.lastBulletHex = this.isInGrid(position) ? position : prevPosition;
+    }
     return shotCard;
   }
 
