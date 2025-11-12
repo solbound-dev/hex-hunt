@@ -117,6 +117,24 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data: GameData) => {
+      toast('Next move', {
+        style: {
+          background: '#1b1f2d',
+          color: '#f2e2b7',
+          fontSize: '20px',
+          fontWeight: 700,
+          padding: '14px 22px',
+          border: '2px solid #f2e2b7',
+          boxShadow: '0 10px 30px rgba(27,31,45,0.85)',
+          borderRadius: '12px',
+          minWidth: '280px',
+          textAlign: 'center',
+          letterSpacing: '0.4px',
+          zIndex: 99,
+        },
+        duration: 4000,
+      });
+
       const events: EventType[] = [];
       if ((data.moves + 1) % 6 === 0) {
         events.push(EventType.ZoneContraction);
