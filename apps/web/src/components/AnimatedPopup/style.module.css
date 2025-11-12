@@ -1,11 +1,11 @@
 .popup {
   position: fixed;
-  top: 10px;
+  top: 50%;
   left: 50%;
   z-index: 1000;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   opacity: 0;
-  animation: fadeInOut 2s ease-in-out forwards;
+  animation: fadeInOut 2.2s ease-in-out forwards;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,10 +15,10 @@
   0% {
     opacity: 0;
   }
-  30% {
+  35% {
     opacity: 0;
   }
-  45% {
+  50% {
     opacity: 0.9;
   }
   85% {

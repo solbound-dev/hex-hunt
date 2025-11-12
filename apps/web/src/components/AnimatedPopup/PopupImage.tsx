@@ -37,7 +37,7 @@ const PopupImage: React.FC<Props> = ({ eventType, canvasSize }) => {
 
   return (
     <div
-      style={{ height: canvasSize * 0.2, width: canvasSize * 0.2 }}
+      style={{ height: canvasSize * 0.4, width: canvasSize * 0.4 }}
       className={c.imageWrapper}>
       {shouldShowCrossSign(eventType) && (
         <div className={c.crossSign}>
