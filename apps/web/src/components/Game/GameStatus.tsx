@@ -85,21 +85,6 @@ export const GameStatus = () => {
           </Button>
         }
       </DarkContainer>
-      {/* <DarkContainer className={c.rightFixed}>
-        {gameState?.players.map((p) => (
-          <div
-            key={p.walletId}
-            style={{
-              textDecoration: getTextDecoration(p, walletId?.toString()),
-              fontSize: p.won ? '20px' : '16px',
-            }}>
-            {p.playerType} {p.walletId === walletId ? ' (you)' : ''} | {p.cards}{' '}
-            / 3{p.won && ' WON!'}
-          </div>
-        ))}
-      </DarkContainer> */}
-      <div></div>
-      {/* </div> */}
       <PlayerTagContainer gameState={gameState} />
     </div>
   );
