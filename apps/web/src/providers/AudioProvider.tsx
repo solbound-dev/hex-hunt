@@ -1,41 +1,69 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { Howl } from 'howler';
 
 type AudioContextType = {
   setSound: (src: string | null) => void;
+  setMove: (move: number) => void;
 };
 
-const AudioContext = createContext<AudioContextType | undefined>(undefined);
+const initialContextValue: AudioContextType = {
+  setSound: () => {},
+  setMove: () => {},
+};
 
-const AudioProvider = () => {
+const AudioContext = createContext<AudioContextType>(initialContextValue);
+
+type Props = {
+  children: React.ReactNode;
+};
+
+const AudioProvider: React.FC<Props> = ({ children }) => {
   const soundRef = useRef<Howl | null>(null);
   const [sound, setSound] = useState<string | null>(null);
+  const [move, setMove] = useState<number>(0);
 
   const playNewSound = (src: string) => {
     const newSound = new Howl({
       src: [src],
       autoplay: true,
-      loop: true,
+      loop: false,
+      volume: 0.5,
+      onload: () => console.log('sound loaded'),
+      onplayerror: (id, error) => console.error('sound play error', id, error),
+      onloaderror: (id, error) => console.error('sound load error', id, error),
     });
+
+    console.log('newSound', newSound);
 
     newSound.play();
     soundRef.current = newSound;
   };
 
   useEffect(() => {
-    if (!soundRef.current) return;
+    playNewSound('/public/audio/next-move.mp3');
+  }, []);
 
-    const oldSound = soundRef.current;
+  useEffect(() => {
+    if (soundRef.current) {
+      const oldSound = soundRef.current;
+      oldSound.stop();
+      oldSound.unload();
+    }
 
-    oldSound.stop();
-    oldSound.unload();
     if (sound) playNewSound(sound);
-  }, [sound]);
+  }, [sound, move]);
 
   const value = {
     setSound,
+    setMove,
   };
 
-  return <AudioContext.Provider value={value}></AudioContext.Provider>;
+  return (
+    <AudioContext.Provider value={value}>{children}</AudioContext.Provider>
+  );
 };
 
 export default AudioProvider;
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAudio = () => useContext(AudioContext);
