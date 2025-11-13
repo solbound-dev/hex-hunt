@@ -5052,6 +5052,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/howler@npm:^2.2.12":
+  version: 2.2.12
+  resolution: "@types/howler@npm:2.2.12"
+  checksum: 0f8b88abd9b0607db50c4fbc91cc6646a9eee4a337f3e8b9c39696e78eff1eb0b3f5913bf32cccc7a96d2be2af8544376ce3afa5de4b1ba9873d0287abe97a5b
+  languageName: node
+  linkType: hard
+
 "@types/http-cache-semantics@npm:^4.0.2":
   version: 4.0.4
   resolution: "@types/http-cache-semantics@npm:4.0.4"
@@ -10043,6 +10050,13 @@ __metadata:
     minimalistic-assert: ^1.0.0
     minimalistic-crypto-utils: ^1.0.1
   checksum: bd30b6a68d7f22d63f10e1888aee497d7c2c5c0bb469e66bbdac99f143904d1dfe95f8131f95b3e86c86dd239963c9d972fcbe147e7cffa00e55d18585c43fe0
+  languageName: node
+  linkType: hard
+
+"howler@npm:^2.2.4":
+  version: 2.2.4
+  resolution: "howler@npm:2.2.4"
+  checksum: 14ad7ed8825ac4439a63429d25f3ba6f44daca1d6df4ad6b04f33e342269b80db5608d9f1e6e980e2d47027c7ceba7811068eba7f56e8e75f2601086e07f0b73
   languageName: node
   linkType: hard
 
@@ -15745,6 +15759,7 @@ __metadata:
     "@solana/wallet-adapter-wallets": ^0.19.37
     "@solana/web3.js": ^1.98.4
     "@tanstack/react-query": ^5.84.1
+    "@types/howler": ^2.2.12
     "@types/react": ^19.1.8
     "@types/react-dom": ^19.1.6
     "@types/socket.io": ^3.0.2
@@ -15759,6 +15774,7 @@ __metadata:
     eslint-plugin-react-hooks: ^5.2.0
     eslint-plugin-react-refresh: ^0.4.20
     globals: ^16.3.0
+    howler: ^2.2.4
     react: ^19.1.0
     react-countup: ^6.5.3
     react-dom: ^19.1.0
