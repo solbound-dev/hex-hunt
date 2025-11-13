@@ -39,8 +39,6 @@ const AudioProvider: React.FC<Props> = ({ children }) => {
       onloaderror: (id, error) => console.error('sound load error', id, error),
     });
 
-    console.log('newSound', newSound);
-
     newSound.play();
     soundRef.current = newSound;
   };
