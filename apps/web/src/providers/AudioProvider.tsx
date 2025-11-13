@@ -1,6 +1,12 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Howl } from 'howler';
 
+// eslint-disable-next-line react-refresh/only-export-components
+export enum SoundSource {
+  NEW_TURN = '/audio/next-move.mp3',
+  SCI_FI_GUN_SHOT = '/audio/sci-fi-gun-shot.mp3',
+}
+
 type AudioContextType = {
   setSound: (src: string | null) => void;
   setMove: (move: number) => void;
@@ -38,10 +44,6 @@ const AudioProvider: React.FC<Props> = ({ children }) => {
     newSound.play();
     soundRef.current = newSound;
   };
-
-  useEffect(() => {
-    playNewSound('/public/audio/next-move.mp3');
-  }, []);
 
   useEffect(() => {
     if (soundRef.current) {

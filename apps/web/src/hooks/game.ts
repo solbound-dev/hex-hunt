@@ -15,7 +15,7 @@ import { EventType } from '../components/AnimatedPopup/AnimatedPopup';
 import type { GameData } from '../utils/GameData';
 import { PlayerType } from '../utils/Player';
 import type { Hex } from '../utils/Hex';
-import { useAudio } from '../providers/AudioProvider';
+import { SoundSource, useAudio } from '../providers/AudioProvider';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -124,9 +124,9 @@ export const useInitializeSockets = (
       );
 
       if (someoneDied) {
-        setSound('/audio/sci-fi-gun-shot.mp3');
+        setSound(SoundSource.SCI_FI_GUN_SHOT);
       } else {
-        setSound('/audio/next-move.mp3');
+        setSound(SoundSource.NEW_TURN);
       }
 
       setMove(data.moves);
