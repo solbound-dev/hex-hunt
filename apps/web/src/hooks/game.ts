@@ -15,6 +15,7 @@ import { EventType } from '../components/AnimatedPopup/AnimatedPopup';
 import type { GameData } from '../utils/GameData';
 import { PlayerType } from '../utils/Player';
 import type { Hex } from '../utils/Hex';
+import { SoundSource, useAudio } from '../providers/AudioProvider';
 
 export type ImgRef = {
   astronaut: HTMLImageElement | null;
@@ -72,6 +73,7 @@ export const useInitializeSockets = (
 ) => {
   const socketRef = useRef<Socket | null>(null);
   const [, navigate] = useLocation();
+  const { setSound, setMove } = useAudio();
 
   useEffect(() => {
     socketRef.current = io(import.meta.env.VITE_API_URL, {
@@ -117,6 +119,18 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data: GameData) => {
+      const someoneDied = data.players.some(
+        (p) => p.diedAtMove === data.moves - 1,
+      );
+
+      if (someoneDied) {
+        setSound(SoundSource.SCI_FI_GUN_SHOT);
+      } else {
+        setSound(SoundSource.NEW_TURN);
+      }
+
+      setMove(data.moves);
+
       toast('Next move', {
         style: {
           background: '#1b1f2d',
@@ -186,6 +200,8 @@ export const useInitializeSockets = (
     setShowPopup,
     setPopupEvents,
     setShouldResetEventDate,
+    setSound,
+    setMove,
   ]);
 
   return socketRef;

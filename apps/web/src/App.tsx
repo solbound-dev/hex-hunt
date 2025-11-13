@@ -12,6 +12,7 @@ import GameProvider from './providers/GameProvider';
 import WindowSizeProvider from './providers/WindowSizeProvider';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import GamePage from './pages/GamePage';
+import AudioProvider from './providers/AudioProvider';
 
 const queryClient = new QueryClient();
 
@@ -23,22 +24,27 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <WindowSizeProvider>
-                <GameProvider>
-                  <Switch>
-                    <Route path={'/login'} component={() => <LoginPage />} />
-                    <Route
-                      path={'/select-game'}
-                      component={() => <div>Select Game</div>}
-                    />
-                    <Route path={'/'} component={() => <FindGamePage />} />
-                    <Route path={'/game'} component={() => <GamePage />} />
-                    <Route
-                      path={'/privacy-policy'}
-                      component={() => <PrivacyPolicyPage />}
-                    />
-                    <Route path={'*'} component={() => <div>Error page</div>} />
-                  </Switch>{' '}
-                </GameProvider>
+                <AudioProvider>
+                  <GameProvider>
+                    <Switch>
+                      <Route path={'/login'} component={() => <LoginPage />} />
+                      <Route
+                        path={'/select-game'}
+                        component={() => <div>Select Game</div>}
+                      />
+                      <Route path={'/'} component={() => <FindGamePage />} />
+                      <Route path={'/game'} component={() => <GamePage />} />
+                      <Route
+                        path={'/privacy-policy'}
+                        component={() => <PrivacyPolicyPage />}
+                      />
+                      <Route
+                        path={'*'}
+                        component={() => <div>Error page</div>}
+                      />
+                    </Switch>{' '}
+                  </GameProvider>
+                </AudioProvider>
               </WindowSizeProvider>
             </AuthProvider>
           </QueryClientProvider>
