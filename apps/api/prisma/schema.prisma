@@ -16,4 +16,60 @@ datasource db {
 model Wallet {
   id         String  @id
   loginNonce String?
+  games      Game[]
+
+  gamePlayers GamePlayer[]
+}
+
+model Game {
+  id     Int    @id @default(autoincrement())
+  gameId String
+
+  players     Wallet[]
+  gamePlayers GamePlayer[]
+  turns       Turn[]
+}
+
+model GamePlayer {
+  id Int @id @default(autoincrement())
+
+  playerType PlayerType
+
+  game            Game             @relation(fields: [gameId], references: [id])
+  gameId          Int
+  player          Wallet           @relation(fields: [playerId], references: [id])
+  playerId        String
+  gamePlayerTurns GamePlayerTurn[]
+}
+
+model Turn {
+  id Int @id @default(autoincrement())
+
+  move     Int
+  cardPosQ Int
+  cardPosR Int
+
+  gamePlayerTurns GamePlayerTurn[]
+  game            Game?            @relation(fields: [gameId], references: [id])
+  gameId          Int?
+}
+
+model GamePlayerTurn {
+  id Int @id @default(autoincrement())
+
+  pendingQ   Int
+  pendingR   Int
+  isShooting Boolean @default(false)
+
+  gamePlayer   GamePlayer @relation(fields: [gamePlayerId], references: [id])
+  gamePlayerId Int
+  turn         Turn       @relation(fields: [turnId], references: [id])
+  turnId       Int
+}
+
+enum PlayerType {
+  Astronaut
+  Alien
+  Robot
+  Wizard
 }
