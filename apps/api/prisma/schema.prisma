@@ -16,14 +16,15 @@ datasource db {
 model Wallet {
   id         String  @id
   loginNonce String?
-  games      Game[]
 
   gamePlayers GamePlayer[]
+  game        Game?        @relation(fields: [gameId], references: [id])
+  gameId      Int?
 }
 
 model Game {
-  id     Int    @id @default(autoincrement())
-  gameId String
+  id       Int    @id @default(autoincrement())
+  gameCode String
 
   players     Wallet[]
   gamePlayers GamePlayer[]
@@ -34,6 +35,8 @@ model GamePlayer {
   id Int @id @default(autoincrement())
 
   playerType PlayerType
+  initialQ   Int
+  initialR   Int
 
   game            Game             @relation(fields: [gameId], references: [id])
   gameId          Int
@@ -45,13 +48,13 @@ model GamePlayer {
 model Turn {
   id Int @id @default(autoincrement())
 
-  move     Int
-  cardPosQ Int
-  cardPosR Int
+  turnNumber Int
+  cardPosQ   Int
+  cardPosR   Int
 
   gamePlayerTurns GamePlayerTurn[]
-  game            Game?            @relation(fields: [gameId], references: [id])
-  gameId          Int?
+  game            Game             @relation(fields: [gameId], references: [id])
+  gameId          Int
 }
 
 model GamePlayerTurn {
