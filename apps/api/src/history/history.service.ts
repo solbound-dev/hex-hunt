@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { HistoryPlayer } from './history.dto';
+import { HistoryPlayer, HistoryTurn } from './history.dto';
 
 @Injectable()
 export class HistoryService {
@@ -37,9 +37,22 @@ export class HistoryService {
     });
   }
 
-  addTurn() {}
+  addTurn(turn: HistoryTurn) {
+    return this.prisma.turn.create({
+      data: {
+        gameId: turn.gameId,
+        turnNumber: turn.turnNumber,
+        cardPosQ: turn.cardPos.q,
+        cardPosR: turn.cardPos.r,
+      },
+    });
+  }
 
   writePlayerPendingMove() {}
 
   updateCardPos() {}
+
+  //when a player leaves a game but the game hasn't started yet
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  removePlayerFromGame(gameId: string, playerId: string) {}
 }

@@ -119,6 +119,8 @@ export const useInitializeSockets = (
       setGameState(data.game);
     });
     socketRef.current.on('gameState', (data: GameData) => {
+      console.log(data);
+
       const someoneDied = data.players.some(
         (p) => p.diedAtMove === data.moves - 1,
       );

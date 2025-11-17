@@ -197,6 +197,7 @@ export class Game {
 
   updateState() {
     this.moves++;
+
     if (this.moves % 6 === 0 && this.currentRadius > 1) {
       this.currentRadius--;
       this.contractZone();

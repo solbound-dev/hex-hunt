@@ -193,7 +193,7 @@ export class GameService {
     return { gameId, game, newPlayer };
   }
 
-  updateGame(
+  async updateGame(
     data: {
       gameId: string;
       move: Hex | null;
@@ -273,6 +273,14 @@ export class GameService {
 
     if (!waitingForMoves) {
       this.calculateTurnOutcome(game);
+
+      console.log('waiting for moves', game.moves, game.cardPos);
+
+      await this.historyService.addTurn({
+        gameId: data.gameId,
+        turnNumber: game.moves,
+        cardPos: game.previousCardPos!,
+      });
 
       server.to(data.gameId).emit('gameState', game.serialize());
       game.players.forEach((p) => {
@@ -354,6 +362,8 @@ export class GameService {
         ),
       );
       console.log('------------------');
+
+      console.log('interval moves', game.moves, game.cardPos);
 
       server.to(gameId).emit('gameState', game.serialize());
       game.players.forEach((p) => {
