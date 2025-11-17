@@ -1,13 +1,19 @@
 -- CreateEnum
 CREATE TYPE "public"."PlayerType" AS ENUM ('Astronaut', 'Alien', 'Robot', 'Wizard');
 
--- AlterTable
-ALTER TABLE "public"."Wallet" ADD COLUMN     "gameId" INTEGER;
+-- CreateTable
+CREATE TABLE "public"."Wallet" (
+    "id" TEXT NOT NULL,
+    "loginNonce" TEXT,
+    "gameId" UUID,
+
+    CONSTRAINT "Wallet_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "public"."Game" (
-    "id" SERIAL NOT NULL,
-    "gameCode" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
 );
@@ -18,8 +24,8 @@ CREATE TABLE "public"."GamePlayer" (
     "playerType" "public"."PlayerType" NOT NULL,
     "initialQ" INTEGER NOT NULL,
     "initialR" INTEGER NOT NULL,
-    "gameId" INTEGER NOT NULL,
     "playerId" TEXT NOT NULL,
+    "gameId" UUID NOT NULL,
 
     CONSTRAINT "GamePlayer_pkey" PRIMARY KEY ("id")
 );
@@ -30,7 +36,7 @@ CREATE TABLE "public"."Turn" (
     "turnNumber" INTEGER NOT NULL,
     "cardPosQ" INTEGER NOT NULL,
     "cardPosR" INTEGER NOT NULL,
-    "gameId" INTEGER NOT NULL,
+    "gameId" UUID NOT NULL,
 
     CONSTRAINT "Turn_pkey" PRIMARY KEY ("id")
 );
@@ -46,6 +52,9 @@ CREATE TABLE "public"."GamePlayerTurn" (
 
     CONSTRAINT "GamePlayerTurn_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "GamePlayer_gameId_playerId_key" ON "public"."GamePlayer"("gameId", "playerId");
 
 -- AddForeignKey
 ALTER TABLE "public"."Wallet" ADD CONSTRAINT "Wallet_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "public"."Game"("id") ON DELETE SET NULL ON UPDATE CASCADE;

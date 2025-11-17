@@ -114,7 +114,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const result = this.gameService.hostPrivateGame(client.id, tier, token);
+    const result = await this.gameService.hostPrivateGame(
+      client.id,
+      tier,
+      token,
+    );
     if (!result) {
       console.log('No available game found and failed to create a new one.');
       return;
@@ -176,7 +180,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const result = this.gameService.quickJoinGame(client.id, tier, token);
+    const result = await this.gameService.quickJoinGame(client.id, tier, token);
 
     if (!result) {
       console.log('No available game found and failed to create a new one.');
@@ -236,7 +240,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const result = this.gameService.joinPrivateGame(client.id, gameId, token);
+    const result = await this.gameService.joinPrivateGame(
+      client.id,
+      gameId,
+      token,
+    );
     if (!result) {
       client.emit('gameFull');
       return;

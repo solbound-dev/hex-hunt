@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,60 +8,54 @@ datasource db {
 }
 
 model Wallet {
-  id         String  @id
-  loginNonce String?
-
+  id          String       @id
+  loginNonce  String?
+  gameId      String?      @db.Uuid
   gamePlayers GamePlayer[]
   game        Game?        @relation(fields: [gameId], references: [id])
-  gameId      Int?
 }
 
 model Game {
-  id       Int    @id @default(autoincrement())
-  gameCode String
-
-  players     Wallet[]
+  id          String       @id @default(uuid()) @db.Uuid
+  createdAt   DateTime     @default(now())
   gamePlayers GamePlayer[]
   turns       Turn[]
+  players     Wallet[]
 }
 
 model GamePlayer {
-  id Int @id @default(autoincrement())
-
-  playerType PlayerType
-  initialQ   Int
-  initialR   Int
-
-  game            Game             @relation(fields: [gameId], references: [id])
-  gameId          Int
-  player          Wallet           @relation(fields: [playerId], references: [id])
+  id              Int              @id @default(autoincrement())
+  playerType      PlayerType
+  initialQ        Int
+  initialR        Int
   playerId        String
+  gameId          String           @db.Uuid
+  game            Game             @relation(fields: [gameId], references: [id])
+  player          Wallet           @relation(fields: [playerId], references: [id])
   gamePlayerTurns GamePlayerTurn[]
+
+  @@unique([gameId, playerId])
 }
 
 model Turn {
-  id Int @id @default(autoincrement())
-
-  turnNumber Int
-  cardPosQ   Int
-  cardPosR   Int
-
+  id              Int              @id @default(autoincrement())
+  turnNumber      Int
+  cardPosQ        Int
+  cardPosR        Int
+  gameId          String           @db.Uuid
   gamePlayerTurns GamePlayerTurn[]
   game            Game             @relation(fields: [gameId], references: [id])
-  gameId          Int
 }
 
 model GamePlayerTurn {
-  id Int @id @default(autoincrement())
-
-  pendingQ   Int
-  pendingR   Int
-  isShooting Boolean @default(false)
-
-  gamePlayer   GamePlayer @relation(fields: [gamePlayerId], references: [id])
+  id           Int        @id @default(autoincrement())
+  pendingQ     Int
+  pendingR     Int
+  isShooting   Boolean    @default(false)
   gamePlayerId Int
-  turn         Turn       @relation(fields: [turnId], references: [id])
   turnId       Int
+  gamePlayer   GamePlayer @relation(fields: [gamePlayerId], references: [id])
+  turn         Turn       @relation(fields: [turnId], references: [id])
 }
 
 enum PlayerType {

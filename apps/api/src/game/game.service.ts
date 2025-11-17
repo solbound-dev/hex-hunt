@@ -9,6 +9,7 @@ import {
 } from './game-utils';
 import { Player, PlayerType } from './Player';
 import { Hex } from './Hex';
+import { HistoryService } from 'src/history/history.service';
 
 type Token = {
   walletId: string;
@@ -19,6 +20,8 @@ type Token = {
 
 @Injectable()
 export class GameService {
+  constructor(private readonly historyService: HistoryService) {}
+
   public games: Record<string, Game> = {};
 
   getAvailableGames() {
@@ -94,7 +97,7 @@ export class GameService {
     return game;
   }
 
-  quickJoinGame(clientId: string, tier: number, tokenString: string) {
+  async quickJoinGame(clientId: string, tier: number, tokenString: string) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
     ) as Token;
@@ -113,19 +116,19 @@ export class GameService {
       return this.joinGame(clientId, availableGameId, tokenString, tier, false);
     }
 
-    const newGameId = Math.random().toString(36).substring(2, 7);
-    return this.joinGame(clientId, newGameId, tokenString, tier, false);
+    const historyGame = await this.historyService.createGame();
+
+    return this.joinGame(clientId, historyGame.id, tokenString, tier, false);
   }
 
-  hostPrivateGame(clientId: string, tier: number, tokenString: string) {
+  async hostPrivateGame(clientId: string, tier: number, tokenString: string) {
     const token = JSON.parse(
       Buffer.from(tokenString.split('.')[1], 'base64').toString(),
     ) as Token;
     if (!token) return;
 
-    //possible that that gameId already exists but there is a lot of combinations
-    const newGameId = Math.random().toString(36).substring(2, 7);
-    return this.joinGame(clientId, newGameId, tokenString, tier, true);
+    const historyGame = await this.historyService.createGame();
+    return this.joinGame(clientId, historyGame.id, tokenString, tier, true);
   }
 
   joinPrivateGame(clientId: string, gameId: string, tokenString: string) {
@@ -135,7 +138,7 @@ export class GameService {
     return this.joinGame(clientId, gameId, tokenString, game.tier, true);
   }
 
-  joinGame(
+  async joinGame(
     clientId: string,
     gameId: string,
     tokenString: string,
@@ -178,7 +181,14 @@ export class GameService {
       pos,
       pos,
     );
+
     game.players.push(newPlayer);
+
+    await this.historyService.addPlayerToGame(gameId, {
+      playerId: newPlayer.walletId,
+      playerType: newPlayer.playerType,
+      initialPos: newPlayer.pos,
+    });
 
     return { gameId, game, newPlayer };
   }
