@@ -336,39 +336,49 @@ export class GameService {
     if (gameContainsWinner || game.draw) return null;
 
     const interval = setInterval(() => {
-      game.players.forEach((p) => {
-        if (!p.pendingMove && !p.isDead) {
-          p.pendingMove = p.pos;
+      (async () => {
+        game.players.forEach((p) => {
+          if (!p.pendingMove && !p.isDead) {
+            p.pendingMove = p.pos;
+          }
+        });
+
+        this.calculateTurnOutcome(game);
+
+        const gameHasWinner = game.players.some((p) => p.won);
+
+        if (game.draw || gameHasWinner) {
+          clearInterval(interval);
         }
-      });
 
-      this.calculateTurnOutcome(game);
+        console.log('\nfinal state:');
+        game.players.forEach((p) =>
+          console.log(
+            '-',
+            p.walletId.slice(0, 6),
+            p.playerType,
+            '\n  ',
+            'pos: ',
+            p.pos,
+          ),
+        );
+        console.log('------------------');
 
-      const gameHasWinner = game.players.some((p) => p.won);
+        console.log('interval moves', game.moves, game.cardPos);
 
-      if (game.draw || gameHasWinner) {
-        clearInterval(interval);
-      }
+        await this.historyService.addTurn({
+          gameId: gameId,
+          turnNumber: game.moves,
+          cardPos: game.previousCardPos!,
+        });
 
-      console.log('\nfinal state:');
-      game.players.forEach((p) =>
-        console.log(
-          '-',
-          p.walletId.slice(0, 6),
-          p.playerType,
-          '\n  ',
-          'pos: ',
-          p.pos,
-        ),
-      );
-      console.log('------------------');
-
-      console.log('interval moves', game.moves, game.cardPos);
-
-      server.to(gameId).emit('gameState', game.serialize());
-      game.players.forEach((p) => {
-        p.lastBulletHex = null;
-        p.previousPos = null;
+        server.to(gameId).emit('gameState', game.serialize());
+        game.players.forEach((p) => {
+          p.lastBulletHex = null;
+          p.previousPos = null;
+        });
+      })().catch((err) => {
+        console.error('Error in game interval:', err);
       });
     }, MOVE_DURATION_IN_SECONDS * 1000);
 
