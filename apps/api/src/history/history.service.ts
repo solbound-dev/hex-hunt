@@ -38,6 +38,8 @@ export class HistoryService {
   }
 
   addTurn(turn: HistoryTurn) {
+    console.log('addturn', turn.turnNumber, turn.cardPos);
+
     return this.prisma.turn.create({
       data: {
         gameId: turn.gameId,

@@ -279,7 +279,7 @@ export class GameService {
       await this.historyService.addTurn({
         gameId: data.gameId,
         turnNumber: game.moves,
-        cardPos: game.previousCardPos!,
+        cardPos: game.cardPos!,
       });
 
       server.to(data.gameId).emit('gameState', game.serialize());
@@ -369,7 +369,7 @@ export class GameService {
         await this.historyService.addTurn({
           gameId: gameId,
           turnNumber: game.moves,
-          cardPos: game.previousCardPos!,
+          cardPos: game.cardPos!,
         });
 
         server.to(gameId).emit('gameState', game.serialize());
