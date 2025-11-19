@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HistoryPlayer, HistoryTurn } from './history.dto';
+import { Game } from 'src/game/Game';
 
 @Injectable()
 export class HistoryService {
@@ -37,9 +38,16 @@ export class HistoryService {
     });
   }
 
-  addTurn(turn: HistoryTurn) {
-    console.log('addturn', turn.turnNumber, turn.cardPos);
+  getTurnByNumber(gameId: string, turnNumber: number) {
+    return this.prisma.turn.findFirst({
+      where: {
+        gameId: gameId,
+        turnNumber: turnNumber,
+      },
+    });
+  }
 
+  addTurn(turn: HistoryTurn) {
     return this.prisma.turn.create({
       data: {
         gameId: turn.gameId,
@@ -50,7 +58,36 @@ export class HistoryService {
     });
   }
 
-  writePlayerPendingMove() {}
+  async writePendingMoves(turnId: number, gameId: string, game: Game) {
+    const gamePlayers = await this.prisma.gamePlayer.findMany({
+      where: {
+        gameId: gameId,
+      },
+    });
+
+    console.log('gp', gamePlayers);
+
+    const gamePlayerTurns = gamePlayers.map((gp) => {
+      const player = game.players.find((p) => p.walletId === gp.playerId);
+      if (!player) {
+        throw new Error(`Player with id ${gp.playerId} not found in game.`);
+      }
+
+      return {
+        gamePlayerId: gp.id,
+        pendingQ: player.pendingMove ? player.pendingMove.q : null,
+        pendingR: player.pendingMove ? player.pendingMove.r : null,
+        isShooting: player.isShooting,
+        turnId: turnId,
+      };
+    });
+
+    console.log('gpt', gamePlayerTurns);
+
+    return this.prisma.gamePlayerTurn.createMany({
+      data: gamePlayerTurns,
+    });
+  }
 
   updateCardPos() {}
 

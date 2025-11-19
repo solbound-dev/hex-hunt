@@ -76,10 +76,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('start')
-  handleStart(@MessageBody() data: { gameId: string }) {
+  async handleStart(@MessageBody() data: { gameId: string }) {
     const { gameId } = data;
 
-    const game = this.gameService.startGame(gameId, this.server);
+    const game = await this.gameService.startGame(gameId, this.server);
     if (!game) {
       console.log(`Game ${gameId} does not exist or is already started`);
       return;
@@ -200,7 +200,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (game.players.length === MAX_PLAYERS) {
       console.log('fourth player joined, game supposed to be initialized');
 
-      const game = this.gameService.startGame(gameId, this.server);
+      const game = await this.gameService.startGame(gameId, this.server);
       if (!game) {
         console.log(`Game ${gameId} does not exist or is already started`);
         return;
@@ -270,7 +270,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('updateGame')
-  handleUpdateGame(
+  async handleUpdateGame(
     @ConnectedSocket() client: Socket,
     @MessageBody()
     data: {
@@ -287,8 +287,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const game = this.gameService.updateGame(data, token, this.server);
-    if (!game) return;
+    await this.gameService.updateGame(data, token, this.server);
   }
 
   // @SubscribeMessage('restartGame')

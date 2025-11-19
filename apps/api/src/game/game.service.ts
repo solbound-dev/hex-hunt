@@ -48,7 +48,7 @@ export class GameService {
     delete this.games[id];
   }
 
-  startGame(gameId: string, server: Server) {
+  async startGame(gameId: string, server: Server) {
     const game = this.games[gameId];
     if (!game || game.started) return;
 
@@ -59,6 +59,14 @@ export class GameService {
     const interval = this.getInterval(gameId, game, server);
 
     game.interval = interval;
+
+    console.log('moves on start game', game.moves);
+
+    await this.historyService.addTurn({
+      gameId: gameId,
+      turnNumber: game.moves,
+      cardPos: game.cardPos!,
+    });
 
     return game;
   }
@@ -228,16 +236,16 @@ export class GameService {
 
     if (game.draw) return null;
 
-    console.log(
-      '---\n',
-      new Date().toLocaleTimeString('en-GB', { hour12: false }),
-      'updateGame start',
-      token.walletId.slice(0, 6),
-      game.getPlayerTypeByWalletId(token.walletId),
-      '\n',
-      data.move,
-      data.isShooting,
-    );
+    // console.log(
+    //   '---\n',
+    //   new Date().toLocaleTimeString('en-GB', { hour12: false }),
+    //   'updateGame start',
+    //   token.walletId.slice(0, 6),
+    //   game.getPlayerTypeByWalletId(token.walletId),
+    //   '\n',
+    //   data.move,
+    //   data.isShooting,
+    // );
 
     game.players.forEach((p) => {
       if (token.walletId === p.walletId) {
@@ -267,6 +275,8 @@ export class GameService {
 
     game.players.forEach((p) => (p.justPickedCard = false));
 
+    console.log('update', game.moves);
+
     const waitingForMoves = game.players.some(
       (p) => p.pendingMove === null && !p.isDead,
     );
@@ -274,7 +284,17 @@ export class GameService {
     if (!waitingForMoves) {
       this.calculateTurnOutcome(game);
 
-      console.log('waiting for moves', game.moves, game.cardPos);
+      const turn = await this.historyService.getTurnByNumber(
+        data.gameId,
+        game.moves - 1,
+      );
+      if (!turn) {
+        throw new Error(
+          `Turn ${game.moves - 1} for game ${data.gameId} not found in history.`,
+        );
+      }
+
+      await this.historyService.writePendingMoves(turn.id, data.gameId, game);
 
       await this.historyService.addTurn({
         gameId: data.gameId,
@@ -286,6 +306,8 @@ export class GameService {
       game.players.forEach((p) => {
         p.lastBulletHex = null;
         p.previousPos = null;
+        p.pendingMove = null;
+        p.isShooting = null;
       });
 
       if (game.interval) {
@@ -351,20 +373,32 @@ export class GameService {
           clearInterval(interval);
         }
 
-        console.log('\nfinal state:');
-        game.players.forEach((p) =>
-          console.log(
-            '-',
-            p.walletId.slice(0, 6),
-            p.playerType,
-            '\n  ',
-            'pos: ',
-            p.pos,
-          ),
-        );
-        console.log('------------------');
+        // console.log('\nfinal state:');
+        // game.players.forEach((p) =>
+        //   console.log(
+        //     '-',
+        //     p.walletId.slice(0, 6),
+        //     p.playerType,
+        //     '\n  ',
+        //     'pos: ',
+        //     p.pos,
+        //   ),
+        // );
+        // console.log('------------------');
 
-        console.log('interval moves', game.moves, game.cardPos);
+        // console.log('interval moves', game.moves, game.cardPos);
+
+        const turn = await this.historyService.getTurnByNumber(
+          gameId,
+          game.moves - 1,
+        );
+        if (!turn) {
+          throw new Error(
+            `Turn ${game.moves - 1} for game ${gameId} not found in history.`,
+          );
+        }
+
+        await this.historyService.writePendingMoves(turn.id, gameId, game);
 
         await this.historyService.addTurn({
           gameId: gameId,
@@ -372,10 +406,14 @@ export class GameService {
           cardPos: game.cardPos!,
         });
 
+        console.log('turn starts here interval', game.moves);
+
         server.to(gameId).emit('gameState', game.serialize());
         game.players.forEach((p) => {
           p.lastBulletHex = null;
           p.previousPos = null;
+          p.pendingMove = null;
+          p.isShooting = null;
         });
       })().catch((err) => {
         console.error('Error in game interval:', err);

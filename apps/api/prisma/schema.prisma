@@ -51,11 +51,13 @@ model GamePlayerTurn {
   id           Int        @id @default(autoincrement())
   pendingQ     Int?
   pendingR     Int?
-  isShooting   Boolean    @default(false)
+  isShooting   Boolean?   @default(false)
   gamePlayerId Int
   turnId       Int
   gamePlayer   GamePlayer @relation(fields: [gamePlayerId], references: [id])
   turn         Turn       @relation(fields: [turnId], references: [id])
+
+  @@unique([gamePlayerId, turnId])
 }
 
 enum PlayerType {

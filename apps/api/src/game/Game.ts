@@ -256,8 +256,8 @@ export class Game {
       if (!p.justPickedCard) {
         p.isImmune = false;
       }
-      p.pendingMove = null;
-      p.isShooting = null;
+      // p.pendingMove = null;
+      // p.isShooting = null;
     });
   }
 
