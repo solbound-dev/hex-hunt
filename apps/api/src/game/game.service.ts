@@ -60,8 +60,6 @@ export class GameService {
 
     game.interval = interval;
 
-    console.log('moves on start game', game.moves);
-
     await this.historyService.addTurn({
       gameId: gameId,
       turnNumber: game.moves,
@@ -120,6 +118,7 @@ export class GameService {
       if (this.games[gameId].isPrivate) continue;
       availableGameId = gameId;
     }
+
     if (availableGameId) {
       return this.joinGame(clientId, availableGameId, tokenString, tier, false);
     }
@@ -275,8 +274,6 @@ export class GameService {
 
     game.players.forEach((p) => (p.justPickedCard = false));
 
-    console.log('update', game.moves);
-
     const waitingForMoves = game.players.some(
       (p) => p.pendingMove === null && !p.isDead,
     );
@@ -405,8 +402,6 @@ export class GameService {
           turnNumber: game.moves,
           cardPos: game.cardPos!,
         });
-
-        console.log('turn starts here interval', game.moves);
 
         server.to(gameId).emit('gameState', game.serialize());
         game.players.forEach((p) => {

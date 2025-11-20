@@ -65,8 +65,6 @@ export class HistoryService {
       },
     });
 
-    console.log('gp', gamePlayers);
-
     const gamePlayerTurns = gamePlayers.map((gp) => {
       const player = game.players.find((p) => p.walletId === gp.playerId);
       if (!player) {
@@ -81,8 +79,6 @@ export class HistoryService {
         turnId: turnId,
       };
     });
-
-    console.log('gpt', gamePlayerTurns);
 
     return this.prisma.gamePlayerTurn.createMany({
       data: gamePlayerTurns,
