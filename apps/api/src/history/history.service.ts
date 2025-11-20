@@ -85,7 +85,24 @@ export class HistoryService {
     });
   }
 
-  updateCardPos() {}
+  getGamePlayer() {}
+
+  getHistoryForGame(gameId: string) {
+    return this.prisma.game.findUnique({
+      where: {
+        id: gameId,
+      },
+      include: {
+        gamePlayers: true,
+        turns: {
+          include: {
+            gamePlayerTurns: true,
+          },
+          orderBy: { turnNumber: 'asc' },
+        },
+      },
+    });
+  }
 
   //when a player leaves a game but the game hasn't started yet
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
