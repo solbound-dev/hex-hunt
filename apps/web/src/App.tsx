@@ -13,6 +13,7 @@ import WindowSizeProvider from './providers/WindowSizeProvider';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import GamePage from './pages/GamePage';
 import AudioProvider from './providers/AudioProvider';
+import HistoryPage from './pages/HistoryPage';
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,10 @@ function App() {
                       <Route
                         path={'/privacy-policy'}
                         component={() => <PrivacyPolicyPage />}
+                      />
+                      <Route
+                        path={'/history'}
+                        component={() => <HistoryPage />}
                       />
                       <Route
                         path={'*'}

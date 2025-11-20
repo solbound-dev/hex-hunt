@@ -16,23 +16,25 @@ model Wallet {
 }
 
 model Game {
-  id          String       @id @default(uuid()) @db.Uuid
-  createdAt   DateTime     @default(now())
-  gamePlayers GamePlayer[]
-  turns       Turn[]
-  players     Wallet[]
+  id            String         @id @default(uuid()) @db.Uuid
+  createdAt     DateTime       @default(now())
+  gamePlayers   GamePlayer[]
+  turns         Turn[]
+  players       Wallet[]
+  turnsResolved TurnResolved[]
 }
 
 model GamePlayer {
-  id              Int              @id @default(autoincrement())
-  playerType      PlayerType
-  initialQ        Int
-  initialR        Int
-  playerId        String
-  gameId          String           @db.Uuid
-  game            Game             @relation(fields: [gameId], references: [id])
-  player          Wallet           @relation(fields: [playerId], references: [id])
-  gamePlayerTurns GamePlayerTurn[]
+  id                      Int                      @id @default(autoincrement())
+  playerType              PlayerType
+  initialQ                Int
+  initialR                Int
+  playerId                String
+  gameId                  String                   @db.Uuid
+  game                    Game                     @relation(fields: [gameId], references: [id])
+  player                  Wallet                   @relation(fields: [playerId], references: [id])
+  gamePlayerTurns         GamePlayerTurn[]
+  gamePlayerTurnResolveds GamePlayerTurnResolved[]
 
   @@unique([gameId, playerId])
 }
@@ -58,6 +60,37 @@ model GamePlayerTurn {
   turn         Turn       @relation(fields: [turnId], references: [id])
 
   @@unique([gamePlayerId, turnId])
+}
+
+model TurnResolved {
+  id                      Int                      @id @default(autoincrement())
+  turnNumber              Int
+  cardPosQ                Int
+  cardPosR                Int
+  gameId                  String                   @db.Uuid
+  game                    Game                     @relation(fields: [gameId], references: [id])
+  gamePlayerTurnsResolved GamePlayerTurnResolved[]
+}
+
+model GamePlayerTurnResolved {
+  id             Int          @id @default(autoincrement())
+  posQ           Int
+  posR           Int
+  lastSeenPosQ   Int
+  lastSeenPosR   Int
+  previousPosQ   Int?
+  previousPosR   Int?
+  won            Boolean      @default(false)
+  cards          Int          @default(0)
+  isDead         Boolean      @default(false)
+  isImmune       Boolean      @default(false)
+  diedAtMove     Int?
+  lastBulletQ    Int?
+  lastBulletR    Int?
+  gamePlayerId   Int
+  turnResolvedId Int
+  gamePlayer     GamePlayer   @relation(fields: [gamePlayerId], references: [id])
+  turnResolved   TurnResolved @relation(fields: [turnResolvedId], references: [id])
 }
 
 enum PlayerType {

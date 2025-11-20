@@ -58,6 +58,17 @@ export class HistoryService {
     });
   }
 
+  addResolvedTurn(turn: HistoryTurn) {
+    return this.prisma.turnResolved.create({
+      data: {
+        gameId: turn.gameId,
+        turnNumber: turn.turnNumber,
+        cardPosQ: turn.cardPos.q,
+        cardPosR: turn.cardPos.r,
+      },
+    });
+  }
+
   async writePendingMoves(turnId: number, gameId: string, game: Game) {
     const gamePlayers = await this.prisma.gamePlayer.findMany({
       where: {
