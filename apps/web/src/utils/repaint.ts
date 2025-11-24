@@ -39,6 +39,7 @@ export function repaintAnimationLoop(
     hexSize: number,
     canvasSize: number,
     isMovingAnimationActive: boolean,
+    isHistoryViewActive: boolean,
     walletId?: string,
 ) {
     console.log('repaintAnimationLoop started');
@@ -84,7 +85,7 @@ export function repaintAnimationLoop(
                 hexSize,
                 canvasSize,
                 isMovingAnimationActive,
-                true,
+                isHistoryViewActive,
                 walletId?.toString(),
             );
             const slopeX = fx - ix;
@@ -138,7 +139,7 @@ export function repaintAnimationLoop(
                 hexSize,
                 canvasSize,
                 false,
-                true,
+                isHistoryViewActive,
                 walletId?.toString(),
             );
         }

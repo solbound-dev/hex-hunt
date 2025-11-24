@@ -10,9 +10,18 @@ const HistoryPage = () => {
         '335a54a9-8330-4791-85e8-ca289d3590f6',
     );
 
-    const { setGameState, setGameId, gameId, setIsMovingAnimationActive } =
-        useGame();
+    const {
+        setGameState,
+        setGameId,
+        gameId,
+        setIsMovingAnimationActive,
+        setIsHistoryViewActive,
+    } = useGame();
     const { data: turn } = useGetResolvedTurn(gameId, turnNumber);
+
+    useEffect(() => {
+        setIsHistoryViewActive(true);
+    }, [setIsHistoryViewActive]);
 
     useEffect(() => {
         setGameState(turn);

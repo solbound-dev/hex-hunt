@@ -39,6 +39,7 @@ const Game = () => {
         showPopup,
         setShowPopup,
         popupEvents,
+        isHistoryViewActive,
     } = useGame();
 
     const { imgRef, canvasRef } = useInitializeGame(canvasSize, hexSize);
@@ -80,7 +81,7 @@ const Game = () => {
                 hexSize,
                 canvasSize,
                 isMovingAnimationActive,
-                true,
+                isHistoryViewActive,
                 walletId?.toString(),
             );
         } else {
@@ -95,6 +96,7 @@ const Game = () => {
                 hexSize,
                 canvasSize,
                 isMovingAnimationActive,
+                isHistoryViewActive,
                 walletId?.toString(),
             );
         }
