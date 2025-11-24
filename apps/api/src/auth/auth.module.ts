@@ -9,19 +9,19 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-  imports: [
-    UserModule,
-    PasswordModule,
-    PrismaModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SIGN_MESSAGE,
-      signOptions: { expiresIn: '10000s' },
-    }),
-  ],
-  providers: [AuthService, JwtStrategy],
-  controllers: [AuthController],
-  exports: [AuthService, PassportModule],
+    imports: [
+        UserModule,
+        PasswordModule,
+        PrismaModule,
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        JwtModule.register({
+            global: true,
+            secret: process.env.JWT_SIGN_MESSAGE,
+            signOptions: { expiresIn: '10000s' },
+        }),
+    ],
+    providers: [AuthService, JwtStrategy],
+    controllers: [AuthController],
+    exports: [AuthService, PassportModule],
 })
 export class AuthModule {}

@@ -70,6 +70,8 @@ model TurnResolved {
   gameId                  String                   @db.Uuid
   game                    Game                     @relation(fields: [gameId], references: [id])
   gamePlayerTurnsResolved GamePlayerTurnResolved[]
+
+  @@unique([gameId, turnNumber])
 }
 
 model GamePlayerTurnResolved {

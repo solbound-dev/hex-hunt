@@ -3,23 +3,32 @@ import { useAuth } from '../../providers/AuthProvider';
 import { useEffect } from 'react';
 import Game from '../../components/Game';
 import { GameStatus } from '../../components/Game/GameStatus';
+import { useGame } from '../../providers/GameProvider';
 
 const GamePage = () => {
-  const { isAuthenticated, isCheckingAuth } = useAuth();
-  const [, navigate] = useLocation();
+    const { isAuthenticated, isCheckingAuth } = useAuth();
+    const [, navigate] = useLocation();
 
-  useEffect(() => {
-    if (!isAuthenticated && !isCheckingAuth) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, isCheckingAuth, navigate]);
+    const { gameId, gameState } = useGame();
 
-  return (
-    <>
-      <GameStatus />
-      <Game />
-    </>
-  );
+    useEffect(() => {
+        if (!isAuthenticated && !isCheckingAuth) {
+            navigate('/login');
+        }
+    }, [isAuthenticated, isCheckingAuth, navigate]);
+
+    useEffect(() => {
+        if (!gameId || !gameState) {
+            navigate('/');
+        }
+    }, [gameId, gameState, navigate]);
+
+    return (
+        <>
+            <GameStatus />
+            <Game />
+        </>
+    );
 };
 
 export default GamePage;

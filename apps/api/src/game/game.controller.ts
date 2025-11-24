@@ -4,16 +4,16 @@ import { Game } from './Game';
 
 @Controller('games')
 export class GameController {
-  constructor(private readonly gameService: GameService) {}
+    constructor(private readonly gameService: GameService) {}
 
-  @Get()
-  getGames() {
-    console.log('getGames controller');
-    return this.gameService.getAvailableGames();
-  }
+    @Get()
+    getGames() {
+        console.log('getGames controller');
+        return this.gameService.getAvailableGames();
+    }
 
-  @Get(':id')
-  getGame(@Param('id') id: string): Game | undefined {
-    return this.gameService.getGame(id);
-  }
+    @Get(':id')
+    getGame(@Param('id') id: string): Game | undefined {
+        return this.gameService.getGame(id);
+    }
 }

@@ -3,418 +3,482 @@ import { Server } from 'socket.io';
 
 import { Game } from './Game';
 import {
-  isNeighbor,
-  MAX_PLAYERS,
-  MOVE_DURATION_IN_SECONDS,
+    isNeighbor,
+    MAX_PLAYERS,
+    MOVE_DURATION_IN_SECONDS,
 } from './game-utils';
 import { Player, PlayerType } from './Player';
 import { Hex } from './Hex';
 import { HistoryService } from 'src/history/history.service';
 
 type Token = {
-  walletId: string;
-  sub: string;
-  iat: number;
-  exp: number;
+    walletId: string;
+    sub: string;
+    iat: number;
+    exp: number;
 };
 
 @Injectable()
 export class GameService {
-  constructor(private readonly historyService: HistoryService) {}
+    constructor(private readonly historyService: HistoryService) {}
 
-  public games: Record<string, Game> = {};
+    public games: Record<string, Game> = {};
 
-  getAvailableGames() {
-    const availableGames: string[] = [];
+    getAvailableGames() {
+        const availableGames: string[] = [];
 
-    for (const key in this.games) {
-      if (!this.games[key].started) {
-        availableGames.push(key);
-      }
-    }
-
-    return availableGames;
-  }
-
-  getGame(id: string) {
-    return this.games[id];
-  }
-
-  createGame(id: string, game: Game) {
-    this.games[id] = game;
-  }
-
-  removeGame(id: string) {
-    delete this.games[id];
-  }
-
-  async startGame(gameId: string, server: Server) {
-    const game = this.games[gameId];
-    if (!game || game.started) return;
-
-    game.started = true;
-    game.spawnCard();
-    game.players.forEach((p) => (p.pendingMove = null));
-
-    const interval = this.getInterval(gameId, game, server);
-
-    game.interval = interval;
-
-    await this.historyService.addTurn({
-      gameId: gameId,
-      turnNumber: game.moves,
-      cardPos: game.cardPos!,
-    });
-
-    return game;
-  }
-
-  getGameByToken(tokenString: string, clientId: string) {
-    const token = JSON.parse(
-      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    ) as Token;
-
-    for (const game in this.games) {
-      const gameContainsWallet = this.games[game].players.some(
-        (p) => p.walletId === token.walletId,
-      );
-      if (gameContainsWallet) {
-        this.games[game].players.forEach((p) => {
-          if (p.walletId === token.walletId) {
-            p.id = clientId;
-          }
-        });
-        return { gameId: game, gameObject: this.games[game] };
-      }
-    }
-  }
-
-  leaveGame(gameId: string, tokenString: string) {
-    const token = JSON.parse(
-      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    ) as Token;
-    if (!token) return;
-
-    const game = this.games[gameId];
-    if (!game) return;
-    game.players = game.players.filter((p) => {
-      return p.walletId !== token.walletId;
-    });
-    return game;
-  }
-
-  async quickJoinGame(clientId: string, tier: number, tokenString: string) {
-    const token = JSON.parse(
-      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    ) as Token;
-    if (!token) return;
-
-    let availableGameId = '';
-
-    for (const gameId in this.games) {
-      if (this.games[gameId].started) continue;
-      if (this.games[gameId].tier !== tier) continue;
-      if (this.games[gameId].players.length >= MAX_PLAYERS) continue;
-      if (this.games[gameId].isPrivate) continue;
-      availableGameId = gameId;
-    }
-
-    if (availableGameId) {
-      return this.joinGame(clientId, availableGameId, tokenString, tier, false);
-    }
-
-    const historyGame = await this.historyService.createGame();
-
-    return this.joinGame(clientId, historyGame.id, tokenString, tier, false);
-  }
-
-  async hostPrivateGame(clientId: string, tier: number, tokenString: string) {
-    const token = JSON.parse(
-      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    ) as Token;
-    if (!token) return;
-
-    const historyGame = await this.historyService.createGame();
-    return this.joinGame(clientId, historyGame.id, tokenString, tier, true);
-  }
-
-  joinPrivateGame(clientId: string, gameId: string, tokenString: string) {
-    const game = this.games[gameId];
-    if (!game) return;
-
-    return this.joinGame(clientId, gameId, tokenString, game.tier, true);
-  }
-
-  async joinGame(
-    clientId: string,
-    gameId: string,
-    tokenString: string,
-    tier: number,
-    isPrivate: boolean,
-  ) {
-    const token = JSON.parse(
-      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    ) as Token;
-
-    if (!this.games[gameId]) {
-      this.games[gameId] = new Game(tier, isPrivate);
-      this.games[gameId].generateGrid();
-    }
-
-    const game = this.games[gameId];
-
-    if (game.players.length >= MAX_PLAYERS || game.started) {
-      return null;
-    }
-
-    let newPlayerType = PlayerType.Astronaut;
-
-    if (game.players.some((p) => p.playerType === PlayerType.Astronaut)) {
-      newPlayerType = PlayerType.Alien;
-    }
-    if (game.players.some((p) => p.playerType === PlayerType.Alien)) {
-      newPlayerType = PlayerType.Robot;
-    }
-    if (game.players.some((p) => p.playerType === PlayerType.Robot)) {
-      newPlayerType = PlayerType.Wizard;
-    }
-
-    const pos = game.getAvailablePlayerPos();
-    const newPlayer = new Player(
-      newPlayerType,
-      clientId,
-      token.walletId,
-      pos,
-      pos,
-      pos,
-    );
-
-    game.players.push(newPlayer);
-
-    await this.historyService.addPlayerToGame(gameId, {
-      playerId: newPlayer.walletId,
-      playerType: newPlayer.playerType,
-      initialPos: newPlayer.pos,
-    });
-
-    return { gameId, game, newPlayer };
-  }
-
-  async updateGame(
-    data: {
-      gameId: string;
-      move: Hex | null;
-      isShooting: boolean;
-      didRunOutOfTime: boolean;
-    },
-    tokenString: string,
-    server: Server,
-  ) {
-    const token = JSON.parse(
-      Buffer.from(tokenString.split('.')[1], 'base64').toString(),
-    ) as Token;
-
-    if (!token) return;
-
-    const game = this.games[data.gameId];
-    if (!game) return null;
-
-    const gameContainsClient = game.players.some(
-      (p) => p.walletId === token.walletId,
-    );
-    if (!gameContainsClient) return null;
-
-    if (data.move) {
-      if (!game.isInGrid(data.move)) {
-        return null;
-      }
-    }
-
-    const gameContainsWinner = game.players.some((p) => p.won);
-    if (gameContainsWinner) return null;
-
-    if (game.draw) return null;
-
-    // console.log(
-    //   '---\n',
-    //   new Date().toLocaleTimeString('en-GB', { hour12: false }),
-    //   'updateGame start',
-    //   token.walletId.slice(0, 6),
-    //   game.getPlayerTypeByWalletId(token.walletId),
-    //   '\n',
-    //   data.move,
-    //   data.isShooting,
-    // );
-
-    game.players.forEach((p) => {
-      if (token.walletId === p.walletId) {
-        if (p.isShooting === null) {
-          p.isShooting = data.isShooting;
-        }
-
-        if (data.move) {
-          if (p.pendingMove !== null) {
-            console.log("pending move wasn't null", p.playerType);
-          }
-          if (!data.isShooting) {
-            if (
-              p.pendingMove === null &&
-              !(isNeighbor(p.pos, data.move) || p.pos.equals(data.move))
-            )
-              return;
-          } else {
-            if (p.pendingMove === null && !isNeighbor(p.pos, data.move)) {
-              return;
+        for (const key in this.games) {
+            if (!this.games[key].started) {
+                availableGames.push(key);
             }
-          }
-          p.pendingMove = new Hex(data.move.q, data.move.r);
         }
-      }
-    });
 
-    game.players.forEach((p) => (p.justPickedCard = false));
-
-    const waitingForMoves = game.players.some(
-      (p) => p.pendingMove === null && !p.isDead,
-    );
-
-    if (!waitingForMoves) {
-      this.calculateTurnOutcome(game);
-
-      const turn = await this.historyService.getTurnByNumber(
-        data.gameId,
-        game.moves - 1,
-      );
-      if (!turn) {
-        throw new Error(
-          `Turn ${game.moves - 1} for game ${data.gameId} not found in history.`,
-        );
-      }
-
-      await this.historyService.writePendingMoves(turn.id, data.gameId, game);
-
-      await this.historyService.addTurn({
-        gameId: data.gameId,
-        turnNumber: game.moves,
-        cardPos: game.cardPos!,
-      });
-
-      server.to(data.gameId).emit('gameState', game.serialize());
-      game.players.forEach((p) => {
-        p.lastBulletHex = null;
-        p.previousPos = null;
-        p.pendingMove = null;
-        p.isShooting = null;
-      });
-
-      if (game.interval) {
-        clearInterval(game.interval);
-      }
-      const interval = this.getInterval(data.gameId, game, server);
-      game.interval = interval;
+        return availableGames;
     }
-  }
 
-  calculateTurnOutcome(game: Game) {
-    game.previousCardPos = game.cardPos;
+    getGame(id: string) {
+        return this.games[id];
+    }
 
-    game.players.forEach((p) => game.checkCollisionAndUpdate(p));
+    createGame(id: string, game: Game) {
+        this.games[id] = game;
+    }
 
-    game.players.forEach((p) => {
-      if (!p.isShooting && !p.didJustCollide) {
-        if (p.pendingMove) {
-          p.previousPos = p.pos;
-          p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
-        }
-      }
-    });
+    removeGame(id: string) {
+        delete this.games[id];
+    }
 
-    let someoneShotCard = false;
-    game.players.forEach((p) => {
-      if (p.isShooting) {
-        p.lastSeenPos = p.pos;
-        const playerShotCard = game.shootInDirection(p.pendingMove!, p);
-        if (playerShotCard) {
-          someoneShotCard = true;
-        }
-      }
-    });
+    async startGame(gameId: string, server: Server) {
+        const game = this.games[gameId];
+        if (!game || game.started) return;
 
-    if (someoneShotCard) game.spawnCard();
+        game.started = true;
+        game.spawnCard();
+        game.players.forEach((p) => (p.pendingMove = null));
 
-    game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
+        const interval = this.getInterval(gameId, game, server);
 
-    game.updateState();
-  }
-
-  getInterval(gameId: string, game: Game, server: Server) {
-    game.players.forEach((p) => {
-      p.didJustCollide = false;
-    });
-    const gameContainsWinner = game.players.some((p) => p.won);
-    if (gameContainsWinner || game.draw) return null;
-
-    const interval = setInterval(() => {
-      (async () => {
-        game.players.forEach((p) => {
-          if (!p.pendingMove && !p.isDead) {
-            p.pendingMove = p.pos;
-          }
-        });
-
-        this.calculateTurnOutcome(game);
-
-        const gameHasWinner = game.players.some((p) => p.won);
-
-        if (game.draw || gameHasWinner) {
-          clearInterval(interval);
-        }
-
-        // console.log('\nfinal state:');
-        // game.players.forEach((p) =>
-        //   console.log(
-        //     '-',
-        //     p.walletId.slice(0, 6),
-        //     p.playerType,
-        //     '\n  ',
-        //     'pos: ',
-        //     p.pos,
-        //   ),
-        // );
-        // console.log('------------------');
-
-        // console.log('interval moves', game.moves, game.cardPos);
-
-        const turn = await this.historyService.getTurnByNumber(
-          gameId,
-          game.moves - 1,
-        );
-        if (!turn) {
-          throw new Error(
-            `Turn ${game.moves - 1} for game ${gameId} not found in history.`,
-          );
-        }
-
-        await this.historyService.writePendingMoves(turn.id, gameId, game);
+        game.interval = interval;
 
         await this.historyService.addTurn({
-          gameId: gameId,
-          turnNumber: game.moves,
-          cardPos: game.cardPos!,
+            gameId: gameId,
+            turnNumber: game.moves,
+            cardPos: game.cardPos!,
         });
 
-        server.to(gameId).emit('gameState', game.serialize());
+        //navigating
+        const newResolvedTurn = await this.historyService.addResolvedTurn({
+            gameId: gameId,
+            turnNumber: game.moves,
+            cardPos: game.cardPos!,
+        });
+
+        await this.historyService.writeResolvedTurns(
+            newResolvedTurn.id,
+            gameId,
+            game,
+        );
+
+        return game;
+    }
+
+    getGameByToken(tokenString: string, clientId: string) {
+        const token = JSON.parse(
+            Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+        ) as Token;
+
+        for (const game in this.games) {
+            const gameContainsWallet = this.games[game].players.some(
+                (p) => p.walletId === token.walletId,
+            );
+            if (gameContainsWallet) {
+                this.games[game].players.forEach((p) => {
+                    if (p.walletId === token.walletId) {
+                        p.id = clientId;
+                    }
+                });
+                return { gameId: game, gameObject: this.games[game] };
+            }
+        }
+    }
+
+    leaveGame(gameId: string, tokenString: string) {
+        const token = JSON.parse(
+            Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+        ) as Token;
+        if (!token) return;
+
+        const game = this.games[gameId];
+        if (!game) return;
+        game.players = game.players.filter((p) => {
+            return p.walletId !== token.walletId;
+        });
+        return game;
+    }
+
+    async quickJoinGame(clientId: string, tier: number, tokenString: string) {
+        const token = JSON.parse(
+            Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+        ) as Token;
+        if (!token) return;
+
+        let availableGameId = '';
+
+        for (const gameId in this.games) {
+            if (this.games[gameId].started) continue;
+            if (this.games[gameId].tier !== tier) continue;
+            if (this.games[gameId].players.length >= MAX_PLAYERS) continue;
+            if (this.games[gameId].isPrivate) continue;
+            availableGameId = gameId;
+        }
+
+        if (availableGameId) {
+            return this.joinGame(
+                clientId,
+                availableGameId,
+                tokenString,
+                tier,
+                false,
+            );
+        }
+
+        const historyGame = await this.historyService.createGame();
+
+        return this.joinGame(
+            clientId,
+            historyGame.id,
+            tokenString,
+            tier,
+            false,
+        );
+    }
+
+    async hostPrivateGame(clientId: string, tier: number, tokenString: string) {
+        const token = JSON.parse(
+            Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+        ) as Token;
+        if (!token) return;
+
+        const historyGame = await this.historyService.createGame();
+        return this.joinGame(clientId, historyGame.id, tokenString, tier, true);
+    }
+
+    joinPrivateGame(clientId: string, gameId: string, tokenString: string) {
+        const game = this.games[gameId];
+        if (!game) return;
+
+        return this.joinGame(clientId, gameId, tokenString, game.tier, true);
+    }
+
+    async joinGame(
+        clientId: string,
+        gameId: string,
+        tokenString: string,
+        tier: number,
+        isPrivate: boolean,
+    ) {
+        const token = JSON.parse(
+            Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+        ) as Token;
+
+        if (!this.games[gameId]) {
+            this.games[gameId] = new Game(tier, isPrivate);
+            this.games[gameId].generateGrid();
+        }
+
+        const game = this.games[gameId];
+
+        if (game.players.length >= MAX_PLAYERS || game.started) {
+            return null;
+        }
+
+        let newPlayerType = PlayerType.Astronaut;
+
+        if (game.players.some((p) => p.playerType === PlayerType.Astronaut)) {
+            newPlayerType = PlayerType.Alien;
+        }
+        if (game.players.some((p) => p.playerType === PlayerType.Alien)) {
+            newPlayerType = PlayerType.Robot;
+        }
+        if (game.players.some((p) => p.playerType === PlayerType.Robot)) {
+            newPlayerType = PlayerType.Wizard;
+        }
+
+        const pos = game.getAvailablePlayerPos();
+        const newPlayer = new Player(
+            newPlayerType,
+            clientId,
+            token.walletId,
+            pos,
+            pos,
+            pos,
+        );
+
+        game.players.push(newPlayer);
+
+        await this.historyService.addPlayerToGame(gameId, {
+            playerId: newPlayer.walletId,
+            playerType: newPlayer.playerType,
+            initialPos: newPlayer.pos,
+        });
+
+        return { gameId, game, newPlayer };
+    }
+
+    async updateGame(
+        data: {
+            gameId: string;
+            move: Hex | null;
+            isShooting: boolean;
+            didRunOutOfTime: boolean;
+        },
+        tokenString: string,
+        server: Server,
+    ) {
+        const token = JSON.parse(
+            Buffer.from(tokenString.split('.')[1], 'base64').toString(),
+        ) as Token;
+
+        if (!token) return;
+
+        const game = this.games[data.gameId];
+        if (!game) return null;
+
+        const gameContainsClient = game.players.some(
+            (p) => p.walletId === token.walletId,
+        );
+        if (!gameContainsClient) return null;
+
+        if (data.move) {
+            if (!game.isInGrid(data.move)) {
+                return null;
+            }
+        }
+
+        const gameContainsWinner = game.players.some((p) => p.won);
+        if (gameContainsWinner) return null;
+
+        if (game.draw) return null;
+
+        // console.log(
+        //   '---\n',
+        //   new Date().toLocaleTimeString('en-GB', { hour12: false }),
+        //   'updateGame start',
+        //   token.walletId.slice(0, 6),
+        //   game.getPlayerTypeByWalletId(token.walletId),
+        //   '\n',
+        //   data.move,
+        //   data.isShooting,
+        // );
+
         game.players.forEach((p) => {
-          p.lastBulletHex = null;
-          p.previousPos = null;
-          p.pendingMove = null;
-          p.isShooting = null;
-        });
-      })().catch((err) => {
-        console.error('Error in game interval:', err);
-      });
-    }, MOVE_DURATION_IN_SECONDS * 1000);
+            if (token.walletId === p.walletId) {
+                if (p.isShooting === null) {
+                    p.isShooting = data.isShooting;
+                }
 
-    return interval;
-  }
+                if (data.move) {
+                    if (p.pendingMove !== null) {
+                        console.log("pending move wasn't null", p.playerType);
+                    }
+                    if (!data.isShooting) {
+                        if (
+                            p.pendingMove === null &&
+                            !(
+                                isNeighbor(p.pos, data.move) ||
+                                p.pos.equals(data.move)
+                            )
+                        )
+                            return;
+                    } else {
+                        if (
+                            p.pendingMove === null &&
+                            !isNeighbor(p.pos, data.move)
+                        ) {
+                            return;
+                        }
+                    }
+                    p.pendingMove = new Hex(data.move.q, data.move.r);
+                }
+            }
+        });
+
+        game.players.forEach((p) => (p.justPickedCard = false));
+
+        const waitingForMoves = game.players.some(
+            (p) => p.pendingMove === null && !p.isDead,
+        );
+
+        if (!waitingForMoves) {
+            this.calculateTurnOutcome(game);
+
+            const turn = await this.historyService.getTurnByNumber(
+                data.gameId,
+                game.moves - 1,
+            );
+            if (!turn) {
+                throw new Error(
+                    `Turn ${game.moves - 1} for game ${data.gameId} not found in history.`,
+                );
+            }
+
+            await this.historyService.writePendingMoves(
+                turn.id,
+                data.gameId,
+                game,
+            );
+
+            await this.historyService.addTurn({
+                gameId: data.gameId,
+                turnNumber: game.moves,
+                cardPos: game.cardPos!,
+            });
+
+            const newResolvedTurn = await this.historyService.addResolvedTurn({
+                gameId: data.gameId,
+                turnNumber: game.moves,
+                cardPos: game.cardPos!,
+            });
+
+            await this.historyService.writeResolvedTurns(
+                newResolvedTurn.id,
+                data.gameId,
+                game,
+            );
+
+            server.to(data.gameId).emit('gameState', game.serialize());
+            game.players.forEach((p) => {
+                p.lastBulletHex = null;
+                p.previousPos = null;
+                p.pendingMove = null;
+                p.isShooting = null;
+            });
+
+            if (game.interval) {
+                clearInterval(game.interval);
+            }
+            const interval = this.getInterval(data.gameId, game, server);
+            game.interval = interval;
+        }
+    }
+
+    calculateTurnOutcome(game: Game) {
+        game.previousCardPos = game.cardPos;
+
+        game.players.forEach((p) => game.checkCollisionAndUpdate(p));
+
+        game.players.forEach((p) => {
+            if (!p.isShooting && !p.didJustCollide) {
+                if (p.pendingMove) {
+                    p.previousPos = p.pos;
+                    p.pos = new Hex(p.pendingMove.q, p.pendingMove.r);
+                }
+            }
+        });
+
+        let someoneShotCard = false;
+        game.players.forEach((p) => {
+            if (p.isShooting) {
+                p.lastSeenPos = p.pos;
+                const playerShotCard = game.shootInDirection(p.pendingMove!, p);
+                if (playerShotCard) {
+                    someoneShotCard = true;
+                }
+            }
+        });
+
+        if (someoneShotCard) game.spawnCard();
+
+        game.players.forEach((p) => game.checkDidPlayerCollectCardAndUpdate(p));
+
+        game.updateState();
+    }
+
+    getInterval(gameId: string, game: Game, server: Server) {
+        game.players.forEach((p) => {
+            p.didJustCollide = false;
+        });
+        const gameContainsWinner = game.players.some((p) => p.won);
+        if (gameContainsWinner || game.draw) return null;
+
+        const interval = setInterval(() => {
+            (async () => {
+                game.players.forEach((p) => {
+                    if (!p.pendingMove && !p.isDead) {
+                        p.pendingMove = p.pos;
+                    }
+                });
+
+                this.calculateTurnOutcome(game);
+
+                const gameHasWinner = game.players.some((p) => p.won);
+
+                if (game.draw || gameHasWinner) {
+                    clearInterval(interval);
+                }
+
+                // console.log('\nfinal state:');
+                // game.players.forEach((p) =>
+                //   console.log(
+                //     '-',
+                //     p.walletId.slice(0, 6),
+                //     p.playerType,
+                //     '\n  ',
+                //     'pos: ',
+                //     p.pos,
+                //   ),
+                // );
+                // console.log('------------------');
+
+                // console.log('interval moves', game.moves, game.cardPos);
+
+                const turn = await this.historyService.getTurnByNumber(
+                    gameId,
+                    game.moves - 1,
+                );
+                if (!turn) {
+                    throw new Error(
+                        `Turn ${game.moves - 1} for game ${gameId} not found in history.`,
+                    );
+                }
+
+                await this.historyService.writePendingMoves(
+                    turn.id,
+                    gameId,
+                    game,
+                );
+
+                await this.historyService.addTurn({
+                    gameId: gameId,
+                    turnNumber: game.moves,
+                    cardPos: game.cardPos!,
+                });
+
+                const newResolvedTurn =
+                    await this.historyService.addResolvedTurn({
+                        gameId: gameId,
+                        turnNumber: game.moves,
+                        cardPos: game.cardPos!,
+                    });
+
+                await this.historyService.writeResolvedTurns(
+                    newResolvedTurn.id,
+                    gameId,
+                    game,
+                );
+
+                server.to(gameId).emit('gameState', game.serialize());
+                game.players.forEach((p) => {
+                    p.lastBulletHex = null;
+                    p.previousPos = null;
+                    p.pendingMove = null;
+                    p.isShooting = null;
+                });
+            })().catch((err) => {
+                console.error('Error in game interval:', err);
+            });
+        }, MOVE_DURATION_IN_SECONDS * 1000);
+
+        return interval;
+    }
 }

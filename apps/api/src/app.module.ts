@@ -8,8 +8,8 @@ import { GameModule } from './game/game.module';
 import { HistoryModule } from './history/history.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, GameModule, HistoryModule],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [PrismaModule, AuthModule, UserModule, GameModule, HistoryModule],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}
