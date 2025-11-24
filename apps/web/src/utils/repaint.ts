@@ -41,6 +41,7 @@ export function repaintAnimationLoop(
     isMovingAnimationActive: boolean,
     walletId?: string,
 ) {
+    console.log('repaintAnimationLoop started');
     if (!gameState) return;
     if (!walletId) return;
     if (!gameState.started) return;
@@ -83,6 +84,7 @@ export function repaintAnimationLoop(
                 hexSize,
                 canvasSize,
                 isMovingAnimationActive,
+                true,
                 walletId?.toString(),
             );
             const slopeX = fx - ix;
@@ -124,6 +126,21 @@ export function repaintAnimationLoop(
             }
 
             window.requestAnimationFrame(moveAnimation);
+        } else {
+            repaint(
+                canvasRef,
+                imgRef,
+                gameState,
+                isCanvasHovered,
+                isShooting,
+                hoveredHex,
+                clickedHex,
+                hexSize,
+                canvasSize,
+                false,
+                true,
+                walletId?.toString(),
+            );
         }
     }
     window.requestAnimationFrame(moveAnimation);
@@ -140,6 +157,7 @@ export function repaint(
     hexSize: number,
     canvasSize: number,
     isMovingAnimationActive: boolean,
+    isHistoryViewActive: boolean,
     walletId?: string,
 ) {
     if (!gameState) return;
@@ -235,6 +253,7 @@ export function repaint(
         hexSize,
         canvasSize,
         isMovingAnimationActive,
+        isHistoryViewActive,
     );
 }
 
@@ -249,6 +268,7 @@ function paintInOrder(
     hexSize: number,
     canvasSize: number,
     isMovingAnimationActive: boolean,
+    isHistoryViewActive: boolean,
 ) {
     const gameContainsWinner = gameState.players.some((p) => p.won);
     if (
@@ -276,10 +296,12 @@ function paintInOrder(
         { pos: currentPlayer.pos!, type: currentPlayer.playerType },
         { pos: gameState.cardPos!, type: 'card' },
     );
+
     const sortedAssets = assets.sort((a, b) => a.pos.r - b.pos.r);
     sortedAssets.forEach((sa) => {
         const asset = new Hex(sa.pos.q, sa.pos.r);
 
+        // CURRENT PLAYER
         if (asset.equals(currentPlayer.pos!)) {
             const playerImage = mapPlayerTypeToImage(
                 currentPlayer.playerType,
@@ -308,7 +330,9 @@ function paintInOrder(
                     );
                 }
             }
-        } else if (asset.equals(gameState.cardPos!)) {
+        }
+        // CARD
+        else if (asset.equals(gameState.cardPos!)) {
             const cardPosToDraw = isMovingAnimationActive
                 ? gameState.previousCardPos
                 : gameState.cardPos;
@@ -320,59 +344,56 @@ function paintInOrder(
                 hexSize,
                 canvasSize,
             );
-        } else {
-            const lastSeenPlayerImage = mapPlayerTypeToImage(sa.type, imgRef);
-
-            // const player = otherPlayers.find((p) => {
-            //     const lastSeenPos = new Hex(p.lastSeenPos!.q, p.lastSeenPos!.r);
-            //     const pos = new Hex(sa.pos.q, sa.pos.r);
-            //     return lastSeenPos.equals(pos);
-            // });
-
-            // if (!player) return;
-
-            // if (player?.isDead && player.diedAtMove === gameState.moves - 1) {
-            //     if (!isMovingAnimationActive) {
-            //         drawDeadPlayerIsometric(
-            //             context,
-            //             player.pos!,
-            //             imgRef.current.skull!,
-            //             canvasSize,
-            //             hexSize,
-            //             {
-            //                 globalAlpha: true,
-            //             },
-            //         );
-            //     }
-            // } else {
-            //     if (!player?.isDead) {
-            //         drawLastSeenPlayerIsometric(
-            //             context,
-            //             player!,
-            //             hexSize,
-            //             lastSeenPlayerImage!,
-            //             canvasSize,
-            //         );
-            //     }
-            // }
+        }
+        // OTHER PLAYERS
+        else {
+            const img = mapPlayerTypeToImage(sa.type, imgRef);
 
             const player = otherPlayers.find((p) => {
-                const pos = new Hex(p.pos!.q, p.pos!.r);
-                const assetPos = new Hex(sa.pos.q, sa.pos.r);
-                return pos.equals(assetPos);
+                const lastSeenPos = new Hex(p.lastSeenPos!.q, p.lastSeenPos!.r);
+                const sortedAssetPos = new Hex(sa.pos.q, sa.pos.r);
+                return lastSeenPos.equals(sortedAssetPos);
             });
 
             if (!player) return;
-            drawPlayerIsometric(
-                context,
-                player.pos!,
-                player.playerType,
-                player.isImmune,
-                hexSize,
-                lastSeenPlayerImage!,
-                canvasSize,
-                true,
-            );
+
+            if (player?.isDead && player.diedAtMove === gameState.moves - 1) {
+                if (!isMovingAnimationActive) {
+                    drawDeadPlayerIsometric(
+                        context,
+                        player.pos!,
+                        imgRef.current.skull!,
+                        canvasSize,
+                        hexSize,
+                        {
+                            globalAlpha: true,
+                        },
+                    );
+                }
+            } else {
+                if (!player?.isDead) {
+                    if (!isHistoryViewActive) {
+                        drawLastSeenPlayerIsometric(
+                            context,
+                            player!,
+                            hexSize,
+                            img!,
+                            canvasSize,
+                        );
+                    } else {
+                        drawPlayerIsometric(
+                            context,
+                            player.pos!,
+                            player.playerType,
+                            player.isImmune,
+                            hexSize,
+                            img!,
+                            canvasSize,
+                            true,
+                        );
+                    }
+                }
+            }
         }
     });
 }

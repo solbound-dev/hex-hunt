@@ -11,14 +11,12 @@ import { repaint, repaintAnimationLoop } from '../../utils/repaint';
 import { isNeighbor } from '../../utils/utils';
 import toast from 'react-hot-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useLocation } from 'wouter';
 import { useGame } from '../../providers/GameProvider';
 import { useInitializeGame } from '../../hooks/game';
 import Button from '../Button';
 import AnimatedPopup from '../AnimatedPopup';
 
 const Game = () => {
-    const [, navigate] = useLocation();
     const { publicKey: walletId } = useWallet();
 
     const {
@@ -43,12 +41,6 @@ const Game = () => {
         popupEvents,
     } = useGame();
 
-    // useEffect(() => {
-    //     if (!gameId || !gameState) {
-    //         navigate('/');
-    //     }
-    // }, [gameId, gameState, navigate]);
-
     const { imgRef, canvasRef } = useInitializeGame(canvasSize, hexSize);
 
     useEffect(() => {
@@ -58,7 +50,6 @@ const Game = () => {
         if (gameState?.draw) toast.success('Draw - all players died');
     }, [gameState]);
 
-    //canvas click
     useEffect(() => {
         const canvas = canvasRef.current!;
         const handleMouseMove = (event: MouseEvent) => {
@@ -89,23 +80,24 @@ const Game = () => {
                 hexSize,
                 canvasSize,
                 isMovingAnimationActive,
+                true,
+                walletId?.toString(),
+            );
+        } else {
+            repaintAnimationLoop(
+                canvasRef,
+                imgRef,
+                gameState,
+                isCanvasHovered,
+                isShooting,
+                hoveredHex,
+                clickedHex,
+                hexSize,
+                canvasSize,
+                isMovingAnimationActive,
                 walletId?.toString(),
             );
         }
-
-        repaintAnimationLoop(
-            canvasRef,
-            imgRef,
-            gameState,
-            isCanvasHovered,
-            isShooting,
-            hoveredHex,
-            clickedHex,
-            hexSize,
-            canvasSize,
-            isMovingAnimationActive,
-            walletId?.toString(),
-        );
 
         return () => {
             canvas.removeEventListener('mousemove', handleMouseMove);
@@ -198,7 +190,6 @@ const Game = () => {
             <div className={c.canvasContainer}>
                 <div className={c.rel}>
                     <canvas
-                        className={c.canvas}
                         ref={canvasRef}
                         onClick={handleCanvasClick}
                         onMouseEnter={() => {

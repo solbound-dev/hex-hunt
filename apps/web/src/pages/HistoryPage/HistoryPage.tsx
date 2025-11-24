@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useGetResolvedTurn } from '../../api/history/useGetResolvedTurn';
 import Game from '../../components/Game';
 import { useGame } from '../../providers/GameProvider';
+import { MOVE_ANIMATION_DURATION_IN_MS } from '../../utils/calculation-utils';
 
 const HistoryPage = () => {
     const [turnNumber, setTurnNumber] = useState(0);
@@ -9,14 +10,20 @@ const HistoryPage = () => {
         '335a54a9-8330-4791-85e8-ca289d3590f6',
     );
 
-    const { setGameState, setGameId, gameId } = useGame();
+    const { setGameState, setGameId, gameId, setIsMovingAnimationActive } =
+        useGame();
     const { data: turn } = useGetResolvedTurn(gameId, turnNumber);
 
     useEffect(() => {
         setGameState(turn);
-    }, [setGameId, setGameState, turn]);
-
-    console.log('turn', turn);
+        if (!(turnNumber === 0)) {
+            setIsMovingAnimationActive(true);
+        }
+        const timeoutId = setTimeout(() => {
+            setIsMovingAnimationActive(false);
+        }, MOVE_ANIMATION_DURATION_IN_MS);
+        return () => clearTimeout(timeoutId);
+    }, [setGameId, setGameState, turn, setIsMovingAnimationActive, turnNumber]);
 
     return (
         <div>
