@@ -3,6 +3,7 @@ import { useGetResolvedTurn } from '../../api/history/useGetResolvedTurn';
 import Game from '../../components/Game';
 import { useGame } from '../../providers/GameProvider';
 import { MOVE_ANIMATION_DURATION_IN_MS } from '../../utils/calculation-utils';
+import { useGetMaxTurnNumber } from '../../api/history/useGetMaxTurnNumber';
 
 const HistoryPage = () => {
     const [turnNumber, setTurnNumber] = useState(0);
@@ -17,6 +18,9 @@ const HistoryPage = () => {
         setIsMovingAnimationActive,
         setIsHistoryViewActive,
     } = useGame();
+
+    const { data: totalNumberOfTurns } = useGetMaxTurnNumber(gameId);
+
     const { data: turn } = useGetResolvedTurn(gameId, turnNumber);
 
     useEffect(() => {
@@ -41,17 +45,24 @@ const HistoryPage = () => {
                     onClick={() => {
                         setTurnNumber(turnNumber - 1);
                         setGameState(turn);
-                    }}>
+                    }}
+                    disabled={turnNumber === 0}>
                     -1
                 </button>
                 <button
                     onClick={() => {
                         setTurnNumber(turnNumber + 1);
                         setGameState(turn);
-                    }}>
+                    }}
+                    disabled={
+                        totalNumberOfTurns !== undefined &&
+                        turnNumber >= totalNumberOfTurns
+                    }>
                     +1
                 </button>
-                <span>{turnNumber}</span>
+                <span>
+                    {turnNumber} / {totalNumberOfTurns}
+                </span>
                 <input
                     type='text'
                     value={gameIdString}

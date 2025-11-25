@@ -238,12 +238,21 @@ export class HistoryService {
         return gameState;
     }
 
-    getNumberOfTurns(gameId: string) {
-        return this.prisma.turnResolved.count({
+    async getMaxTurnNumber(gameId: string) {
+        const { _max } = await this.prisma.turnResolved.aggregate({
             where: {
                 gameId: gameId,
             },
+            _max: {
+                turnNumber: true,
+            },
         });
+
+        if (_max.turnNumber === null) {
+            throw new Error(`No turns found for game ${gameId}`);
+        }
+
+        return _max.turnNumber;
     }
 
     //when a player leaves a game but the game hasn't started yet

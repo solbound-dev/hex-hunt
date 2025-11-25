@@ -18,8 +18,8 @@ export class HistoryController {
         return this.historyService.getResolvedTurnGameState(gameId, turnNumber);
     }
 
-    @Get(':gameId/turns/number-of-turns')
+    @Get(':gameId/max-turn-number')
     getNumberOfTurnsInGame(@Param('gameId') gameId: string) {
-        return this.historyService.getNumberOfTurnsInGame(gameId);
+        return this.historyService.getMaxTurnNumber(gameId);
     }
 }
