@@ -238,6 +238,14 @@ export class HistoryService {
         return gameState;
     }
 
+    getNumberOfTurns(gameId: string) {
+        return this.prisma.turnResolved.count({
+            where: {
+                gameId: gameId,
+            },
+        });
+    }
+
     //when a player leaves a game but the game hasn't started yet
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     removePlayerFromGame(gameId: string, playerId: string) {}

@@ -17,4 +17,9 @@ export class HistoryController {
     ) {
         return this.historyService.getResolvedTurnGameState(gameId, turnNumber);
     }
+
+    @Get(':gameId/turns/number-of-turns')
+    getNumberOfTurnsInGame(@Param('gameId') gameId: string) {
+        return this.historyService.getNumberOfTurnsInGame(gameId);
+    }
 }
