@@ -4,6 +4,7 @@ import Game from '../../components/Game';
 import { useGame } from '../../providers/GameProvider';
 import { MOVE_ANIMATION_DURATION_IN_MS } from '../../utils/calculation-utils';
 import { useGetMaxTurnNumber } from '../../api/history/useGetMaxTurnNumber';
+import toast from 'react-hot-toast';
 
 const HistoryPage = () => {
     const [turnNumber, setTurnNumber] = useState(0);
@@ -21,14 +22,22 @@ const HistoryPage = () => {
 
     const { data: totalNumberOfTurns } = useGetMaxTurnNumber(gameId);
 
-    const { data: turn } = useGetResolvedTurn(gameId, turnNumber);
+    const {
+        data: turn,
+        isError,
+        error,
+        isLoading,
+    } = useGetResolvedTurn(gameId, turnNumber);
 
     useEffect(() => {
         setIsHistoryViewActive(true);
     }, [setIsHistoryViewActive]);
 
     useEffect(() => {
+        if (!turn) return;
+
         setGameState(turn);
+
         if (!(turnNumber === 0)) {
             setIsMovingAnimationActive(true);
         }
@@ -38,13 +47,21 @@ const HistoryPage = () => {
         return () => clearTimeout(timeoutId);
     }, [setGameId, setGameState, turn, setIsMovingAnimationActive, turnNumber]);
 
+    useEffect(() => {
+        if (isError) {
+            toast.error(
+                error.response?.data?.message ?? 'Error fetching turn data',
+            );
+        }
+    }, [error, isError, isLoading]);
+
     return (
         <div>
             <div style={{ position: 'fixed', top: 10, left: 10, zIndex: 1000 }}>
                 <button
                     onClick={() => {
                         setTurnNumber(turnNumber - 1);
-                        setGameState(turn);
+                        // setGameState(turn);
                     }}
                     disabled={turnNumber === 0}>
                     -1
@@ -52,12 +69,13 @@ const HistoryPage = () => {
                 <button
                     onClick={() => {
                         setTurnNumber(turnNumber + 1);
-                        setGameState(turn);
+                        // setGameState(turn);
                     }}
-                    disabled={
-                        totalNumberOfTurns !== undefined &&
-                        turnNumber >= totalNumberOfTurns
-                    }>
+                    // disabled={
+                    //     totalNumberOfTurns !== undefined &&
+                    //     turnNumber >= totalNumberOfTurns
+                    // }
+                >
                     +1
                 </button>
                 <span>

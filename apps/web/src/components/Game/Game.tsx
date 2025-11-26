@@ -120,6 +120,7 @@ const Game = () => {
         canvasSize,
         hexSize,
         isMovingAnimationActive,
+        isHistoryViewActive,
     ]);
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HistoryPlayer, HistoryTurn } from './history.dto';
 import { Game } from 'src/game/Game';
@@ -187,9 +187,7 @@ export class HistoryService {
         });
 
         if (!turn) {
-            throw new Error(
-                `Resolved turn ${turnNumber} for game ${gameId} not found.`,
-            );
+            return new Error(`Turn ${turnNumber} not found`);
         }
 
         gameState.cardPos = new Hex(turn.cardPosQ, turn.cardPosR);
@@ -249,7 +247,10 @@ export class HistoryService {
         });
 
         if (_max.turnNumber === null) {
-            throw new Error(`No turns found for game ${gameId}`);
+            throw new HttpException(
+                `No turns found for game ${gameId}`,
+                HttpStatus.NOT_FOUND,
+            );
         }
 
         return _max.turnNumber;

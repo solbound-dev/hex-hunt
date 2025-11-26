@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+} from '@nestjs/common';
 import { HistoryService } from './history.service';
 
 @Controller('history')
@@ -11,10 +18,19 @@ export class HistoryController {
     }
 
     @Get(':gameId/turns/:turnNumber')
-    getResolvedTurnGameStateByNumber(
+    async getResolvedTurnGameStateByNumber(
         @Param('gameId') gameId: string,
         @Param('turnNumber', ParseIntPipe) turnNumber: number,
     ) {
+        const result = await this.historyService.getResolvedTurnGameState(
+            gameId,
+            turnNumber,
+        );
+
+        if (result instanceof Error) {
+            throw new HttpException(result.message, HttpStatus.NOT_FOUND);
+        }
+
         return this.historyService.getResolvedTurnGameState(gameId, turnNumber);
     }
 
