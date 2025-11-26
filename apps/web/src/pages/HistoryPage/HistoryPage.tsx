@@ -61,7 +61,6 @@ const HistoryPage = () => {
                 <button
                     onClick={() => {
                         setTurnNumber(turnNumber - 1);
-                        // setGameState(turn);
                     }}
                     disabled={turnNumber === 0}>
                     -1
@@ -69,13 +68,11 @@ const HistoryPage = () => {
                 <button
                     onClick={() => {
                         setTurnNumber(turnNumber + 1);
-                        // setGameState(turn);
                     }}
-                    // disabled={
-                    //     totalNumberOfTurns !== undefined &&
-                    //     turnNumber >= totalNumberOfTurns
-                    // }
-                >
+                    disabled={
+                        totalNumberOfTurns !== undefined &&
+                        turnNumber >= totalNumberOfTurns
+                    }>
                     +1
                 </button>
                 <span>
