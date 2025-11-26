@@ -42,7 +42,6 @@ export function repaintAnimationLoop(
     isHistoryViewActive: boolean,
     walletId?: string,
 ) {
-    console.log('repaintAnimationLoop started');
     if (!gameState) return;
     if (!walletId) return;
     if (!gameState.started) return;
